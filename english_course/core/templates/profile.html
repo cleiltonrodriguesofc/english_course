@@ -58,6 +58,25 @@
             href="{% url 'quiz' %}">Take a quiz now!</a></p>
     {% endif %}
 
+    <h2 style="margin-top: 40px; color: #000428;">🕵️ Recent Activity</h2>
+
+    {% if activities %}
+    <div
+        style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 15px;">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            {% for activity in activities %}
+            <li
+                style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #333;">
+                <span>{{ activity.action }}</span>
+                <span style="color: #999; font-size: 0.9em;">{{ activity.timestamp|date:"M j, H:i" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p style="margin-top: 20px; color: #666; font-style: italic;">No recent activity recorded.</p>
+    {% endif %}
+
     <div style="margin-top: 40px; text-align: center;">
         <a href="{% url 'logout' %}"
             style="display: inline-block; padding: 10px 20px; background: #e53935; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">

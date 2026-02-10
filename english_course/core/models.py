@@ -32,3 +32,12 @@ class QuizResult(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.quiz_name}: {self.score}/{self.total_questions}"
+
+class ActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action = models.CharField(max_length=255) # e.g., "Logged in", "Viewed Lesson 1"
+    timestamp = models.DateTimeField(auto_now_add=True)
+    details = models.TextField(blank=True, null=True) # Optional JSON or text details
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.timestamp}"

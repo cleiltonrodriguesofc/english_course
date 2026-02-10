@@ -5,7 +5,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import QuizResult
+import json
+from .models import QuizResult, ActivityLog
+
+def log_activity(user, action, details=None):
+    if user.is_authenticated:
+        ActivityLog.objects.create(user=user, action=action, details=details)
 
 
 def dashboard(request):
@@ -24,14 +29,17 @@ def dashboard(request):
 
 
 def lesson_1(request):
+    log_activity(request.user, "Viewed Lesson 1")
     return render(request, 'lesson_1.html')
 
 
 def lesson_2(request):
+    log_activity(request.user, "Viewed Lesson 2")
     return render(request, 'lesson_2.html')
 
 
 def lesson_3(request):
+    log_activity(request.user, "Viewed Lesson 3")
     return render(request, 'lesson_3.html')
 
 def quiz_view(request):
@@ -103,10 +111,17 @@ def profile_view(request):
         return redirect('login')
     
     quiz_results = QuizResult.objects.filter(user=request.user).order_by('-date_taken')
-    return render(request, 'profile.html', {'quiz_results': quiz_results})
+    activities = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')[:20]
+
+    return render(request, 'profile.html', {
+        'quiz_results': quiz_results,
+        'activities': activities
+    })
 
 def game_puzzle(request):
+    log_activity(request.user, "Played Puzzle Game")
     return render(request, 'game_puzzle.html')
 
 def game_memory(request):
+    log_activity(request.user, "Played Memory Game")
     return render(request, 'game_memory.html')
