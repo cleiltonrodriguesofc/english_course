@@ -240,7 +240,7 @@
 
     <div class="sidebar">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>English Course 🇬🇧</h2>
+            <h2>Full-Stack English Course</h2>
             <div class="mobile-nav-toggle" onclick="toggleNav()">☰</div>
         </div>
 
@@ -261,8 +261,12 @@
 
             {% if user.is_authenticated %}
             <div style="padding: 10px 20px; color: #81D4FA; font-size: 0.9em; margin-bottom: 5px;">
-                👤 {{ user.username }}
+                <a href="{% url 'profile' %}"
+                    style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                    <span style="margin-right: 5px;">👤</span> {{ user.username }}
+                </a>
             </div>
+            <a href="{% url 'profile' %}" class="nav-link">📊 My Progress</a>
             <a href="{% url 'logout' %}" class="nav-link">🚪 Logout</a>
             {% else %}
             <a href="{% url 'login' %}" class="nav-link">🔑 Login</a>

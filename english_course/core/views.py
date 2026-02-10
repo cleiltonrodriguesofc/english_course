@@ -11,13 +11,13 @@ from .models import QuizResult
 def dashboard(request):
     quiz_score = None
     if request.user.is_authenticated:
-        # Get latest quiz score
-        latest_result = QuizResult.objects.filter(user=request.user, quiz_name='Class 3 Review').order_by('-date_taken').first()
-        if latest_result:
+        # Get best quiz score
+        best_result = QuizResult.objects.filter(user=request.user, quiz_name='Class 3 Review').order_by('-score').first()
+        if best_result:
             quiz_score = {
-                'score': latest_result.score,
-                'total': latest_result.total_questions,
-                'percentage': int((latest_result.score / latest_result.total_questions) * 100)
+                'score': best_result.score,
+                'total': best_result.total_questions,
+                'percentage': int((best_result.score / best_result.total_questions) * 100)
             }
             
     return render(request, 'dashboard.html', {'quiz_score': quiz_score})
@@ -97,3 +97,10 @@ def save_quiz_result(request):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+def profile_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    quiz_results = QuizResult.objects.filter(user=request.user).order_by('-date_taken')
+    return render(request, 'profile.html', {'quiz_results': quiz_results})
