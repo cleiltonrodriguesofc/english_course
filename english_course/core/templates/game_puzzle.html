@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}English Puzzle Game 🧩{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 style="color: #000428; text-align: center; margin-bottom: 30px;">🧩 Sentence Builder Puzzle</h1>
+
+    <!-- Level Selection -->
+    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px;">
+        <button onclick="loadLevel(1)" class="level-btn active" id="btn-lvl-1">Level 1: Alphabet</button>
+        <button onclick="loadLevel(2)" class="level-btn" id="btn-lvl-2">Level 2: Introductions</button>
+        <button onclick="loadLevel(3)" class="level-btn" id="btn-lvl-3">Level 3: Family</button>
+        <button onclick="loadLevel(4)" class="level-btn" id="btn-lvl-4"
+            style="border-color: #FFD700; color: #FF8F00;">Level 4: Colors 🎨</button>
+    </div>
+
+    <!-- Game Area -->
+    <div id="game-area"
+        style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 300px;">
+
+        <h3 id="instruction-text" style="color: var(--secondary); text-align: center;">Arrange the letters to spell:
+            FATHER</h3>
+
+        <!-- Drop Zone (Answer) -->
+        <div id="drop-zone" class="drop-zone">
+            <!-- Slots will be generated here -->
+        </div>
+
+        <!-- Draggable Items (Source) -->
+        <div id="source-zone" class="source-zone">
+            <!-- Draggable items will be generated here -->
+        </div>
+
+        <!-- Check Button -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button onclick="checkAnswer()"
+                style="padding: 12px 30px; background: #00E676; color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 0 #00C853;">
+                Check Answer ✅
+            </button>
+            <p id="feedback" style="margin-top: 15px; font-weight: bold; height: 20px;"></p>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .level-btn {
+        padding: 10px 20px;
+        border: 2px solid var(--secondary);
+        background: white;
+        color: var(--secondary);
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .level-btn.active,
+    .level-btn:hover {
+        background: var(--secondary);
+        color: white;
+    }
+
+    #btn-lvl-4.active,
+    #btn-lvl-4:hover {
+        background: #FFD700 !important;
+        color: #000428 !important;
+        border-color: #FFD700 !important;
+    }
+
+    .drop-zone {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 30px 0;
+        min-height: 60px;
+        flex-wrap: wrap;
+    }
+
+    .word-slot {
+        width: 60px;
+        /* Adjust based on content */
+        height: 50px;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9f9f9;
+    }
+
+    .source-zone {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+    }
+
+    .draggable-item {
+        padding: 10px 20px;
+        background: var(--primary);
+        color: #000428;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: grab;
+        user-select: none;
+        box-shadow: 0 4px 0 #00B0D5;
+        font-size: 1.2rem;
+    }
+
+    .draggable-item.dragging {
+        opacity: 0.5;
+    }
+
+    /* Correct/Incorrect feedback styles */
+    .correct {
+        background: #00E676 !important;
+        color: white !important;
+    }
+
+    .incorrect {
+        background: #ef5350 !important;
+        color: white !important;
+    }
+</style>
+
+<script>
+    const levels = {
+        1: {
+            title: "Arrange the letters",
+            type: "letters",
+            items: ["A", "H", "T", "F", "R", "E", "B"], // Distractor B
+            correct: ["F", "A", "T", "H", "E", "R"]
+        },
+        2: {
+            title: "Form the sentence",
+            type: "words",
+            items: ["Sarah", "is", "my", "My", "name", "Your"], // Distractor Your
+            correct: ["My", "name", "is", "Sarah"]
+        },
+        3: {
+            title: "Form the sentence",
+            type: "words",
+            items: ["brother", "This", "my", "is", "He"], // Distractor He
+            correct: ["This", "is", "my", "brother"]
+        },
+        4: {
+            title: "Arrange the letters",
+            type: "letters",
+            items: ["L", "O", "Y", "W", "E", "L", "P"], // Distractor P
+            correct: ["Y", "E", "L", "L", "O", "W"]
+        }
+    };
+
+    let currentLevel = 1;
+    let draggedItem = null;
+
+    function loadLevel(lvl) {
+        currentLevel = lvl;
+        const data = levels[lvl];
+
+        // Update UI
+        document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-lvl-${lvl}`).classList.add('active');
+        document.getElementById('instruction-text').innerText = data.title;
+        document.getElementById('feedback').innerText = "";
+
+        // Render Slots (Drop Zone)
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.innerHTML = '';
+        data.correct.forEach(() => {
+            const slot = document.createElement('div');
+            slot.className = 'word-slot';
+            if (data.type === 'words') slot.style.width = '100px';
+            dropZone.appendChild(slot);
+        });
+
+        // Render Items (Source Zone)
+        const sourceZone = document.getElementById('source-zone');
+        sourceZone.innerHTML = '';
+        const shuffled = [...data.items].sort(() => Math.random() - 0.5); // Simple shuffle
+
+        shuffled.forEach(text => {
+            const item = document.createElement('div');
+            item.className = 'draggable-item';
+            item.draggable = true;
+            item.innerText = text;
+            item.id = 'item-' + text; // Unique ID helpful for logic
+
+            // Drag Events
+            item.addEventListener('dragstart', dragStart);
+            item.addEventListener('dragend', dragEnd);
+
+            sourceZone.appendChild(item);
+        });
+
+        // Drop Zone Events
+        document.querySelectorAll('.word-slot').forEach(slot => {
+            slot.addEventListener('dragover', dragOver);
+            slot.addEventListener('dragenter', dragEnter);
+            slot.addEventListener('dragleave', dragLeave);
+            slot.addEventListener('drop', dragDrop);
+        });
+
+        // Allow dragging back to source
+        sourceZone.addEventListener('dragover', dragOver);
+        sourceZone.addEventListener('drop', returnToSource);
+    }
+
+    // Drag Functions
+    function dragStart() {
+        draggedItem = this;
+        setTimeout(() => this.classList.add('dragging'), 0);
+    }
+
+    function dragEnd() {
+        this.classList.remove('dragging');
+        draggedItem = null;
+    }
+
+    function dragOver(e) { e.preventDefault(); }
+    function dragEnter(e) { e.preventDefault(); this.style.background = '#e3f2fd'; }
+    function dragLeave() { this.style.background = '#f9f9f9'; }
+
+    function dragDrop() {
+        this.style.background = '#f9f9f9';
+        // If slot is empty, append. If full, swap or ignore (simple version: only if empty)
+        if (this.classList.contains('word-slot') && this.children.length === 0) {
+            this.appendChild(draggedItem);
+        }
+    }
+
+    function returnToSource(e) {
+        e.preventDefault();
+        const sourceZone = document.getElementById('source-zone');
+        sourceZone.appendChild(draggedItem);
+    }
+
+    function checkAnswer() {
+        const data = levels[currentLevel];
+        const slots = document.querySelectorAll('.word-slot');
+        let isCorrect = true;
+        let userArr = [];
+
+        slots.forEach((slot, index) => {
+            if (slot.children.length === 0) {
+                isCorrect = false;
+                userArr.push(null);
+            } else {
+                const text = slot.children[0].innerText;
+                userArr.push(text);
+                if (text !== data.correct[index]) {
+                    isCorrect = false;
+                }
+            }
+        });
+
+        const feedback = document.getElementById('feedback');
+        if (isCorrect) {
+            feedback.innerHTML = "Correct! Great job! 🎉";
+            feedback.style.color = "#00E676";
+            // Confetti or sound effect could go here
+        } else {
+            feedback.innerHTML = "Not quite. Try again! 🤔";
+            feedback.style.color = "#FF1744";
+        }
+    }
+
+    // Init
+    loadLevel(1);
+</script>
+{% endblock %}

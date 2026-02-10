@@ -104,3 +104,9 @@ def profile_view(request):
     
     quiz_results = QuizResult.objects.filter(user=request.user).order_by('-date_taken')
     return render(request, 'profile.html', {'quiz_results': quiz_results})
+
+def game_puzzle(request):
+    return render(request, 'game_puzzle.html')
+
+def game_memory(request):
+    return render(request, 'game_memory.html')

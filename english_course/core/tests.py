@@ -87,3 +87,9 @@ class EnglishCourseTests(TestCase):
         response = self.client.get(reverse('profile'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'profile.html')
+
+    def test_puzzle_game_view(self):
+        """Test puzzle game page load."""
+        response = self.client.get(reverse('game_puzzle'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'game_puzzle.html')
