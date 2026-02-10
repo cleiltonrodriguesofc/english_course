@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Class 3: Family & Daily Life</title>
+    <style>
+        /* --- THEME: OCEANIC FUTURE --- */
+        :root {
+            --primary: #00D2FF;
+            /* Electric Blue */
+            --secondary: #3A7BD5;
+            /* Deep Blue */
+            --accent: #FFD700;
+            /* Gold */
+            --dark: #000428;
+            /* Midnight Blue */
+            --light: #E0F7FA;
+            /* Ice Blue */
+            --glass: rgba(0, 78, 146, 0.4);
+            /* Glassmorphism */
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: var(--light);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- SLIDE CONTAINER --- */
+        .slide-container {
+            width: 95%;
+            max-width: 1000px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px 40px 80px 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide-content-wrapper {
+            margin: auto 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+            z-index: 2;
+        }
+
+        /* Scrollbar */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            font-size: 3rem;
+            color: var(--primary);
+            margin: 0.5em 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: var(--secondary);
+            margin: 0.5em 0;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        h3 {
+            color: var(--light);
+            margin: 10px 0;
+        }
+
+        p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #b3e5fc;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .btn-nav {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 210, 255, 0.4);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 101;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- MODULE 2: FAMILY TREE --- */
+        .family-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .family-row {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            position: relative;
+        }
+
+        .member-card {
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 120px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .member-card:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .member-icon {
+            font-size: 3rem;
+        }
+
+        .member-name {
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .member-card:hover .member-name {
+            color: white;
+        }
+
+        /* --- MODULE 3: ACTION VERBS --- */
+        .verbs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .verb-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .verb-card:hover {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .verb-emoji {
+            font-size: 3rem;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        /* Animations */
+        @keyframes run {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+
+            75% {
+                transform: translateX(5px) rotate(5deg);
+            }
+        }
+
+        @keyframes jump {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes eat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes sleep {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes dance {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-10deg);
+            }
+
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px) translateX(5px);
+            }
+        }
+
+        .verb-card:hover .verb-emoji.run {
+            animation: run 0.5s infinite;
+        }
+
+        .verb-card:hover .verb-emoji.jump {
+            animation: jump 0.6s infinite;
+        }
+
+        .verb-card:hover .verb-emoji.eat {
+            animation: eat 1s infinite;
+        }
+
+        .verb-card:hover .verb-emoji.sleep {
+            animation: sleep 2s infinite;
+        }
+
+        .verb-card:hover .verb-emoji.dance {
+            animation: dance 0.5s infinite;
+        }
+
+        .verb-card:hover .verb-emoji.float {
+            animation: float 2s infinite linear;
+        }
+
+        /* --- MODULE 4: GRAMMAR --- */
+        .grammar-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 10px;
+            text-align: left;
+            border-left: 5px solid var(--accent);
+        }
+
+        .token-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .token {
+            background: var(--secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .token:hover {
+            background: var(--primary);
+        }
+
+        .sentence-display {
+            background: rgba(255, 255, 255, 0.1);
+            min-height: 50px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--accent);
+            padding: 10px;
+        }
+
+        /* --- MODULE 5: STORY --- */
+        .story-container {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 700px;
+            line-height: 2;
+            font-size: 1.2rem;
+        }
+
+        .story-sentence {
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .story-sentence:hover {
+            background: rgba(0, 210, 255, 0.2);
+            color: white;
+        }
+
+        /* --- MODULE 7: QUIZ --- */
+        .quiz-option {
+            background: var(--glass);
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .quiz-option:hover {
+            background: var(--secondary);
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h1 style="font-size: 4rem;">Class 3</h1>
+                <h2 style="border: none; color: var(--accent);">Family & Daily Life</h2>
+                <div style="font-size: 5rem; margin: 30px; animation: jump 2s infinite;">🌍</div>
+                <p>Welcome to the Future of Learning.<br>Turn up your volume.</p>
+                <button class="btn-nav" onclick="changeSlide(1)">Start Engine 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: FAMILY TREE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The Family Tree 🌳</h2>
+                <p>Click family members to hear their names.</p>
+
+                <div class="family-tree">
+                    <!-- Grandparents -->
+                    <div class="family-row">
+                        <div class="member-card" onclick="speak('Grandpa')">
+                            <div class="member-icon">👴</div>
+                            <div class="member-name">Grandpa</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Grandma')">
+                            <div class="member-icon">👵</div>
+                            <div class="member-name">Grandma</div>
+                        </div>
+                    </div>
+
+                    <!-- Parents & Relatives -->
+                    <div class="family-row parents" style="margin-top: 20px;">
+                        <div class="member-card" onclick="speak('Uncle')">
+                            <div class="member-icon">🧔</div>
+                            <div class="member-name">Uncle</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Aunt')">
+                            <div class="member-icon">👱‍♀️</div>
+                            <div class="member-name">Aunt</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Father')">
+                            <div class="member-icon">👨</div>
+                            <div class="member-name">Father</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Mother')">
+                            <div class="member-icon">👩</div>
+                            <div class="member-name">Mother</div>
+                        </div>
+                    </div>
+
+                    <!-- Children & Cousins -->
+                    <div class="family-row children" style="margin-top: 30px;">
+                        <div class="member-card" onclick="speak('Cousin')">
+                            <div class="member-icon">🧑</div>
+                            <div class="member-name">Cousin</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Brother')">
+                            <div class="member-icon">👦</div>
+                            <div class="member-name">Brother</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Me')">
+                            <div class="member-icon">🧒</div>
+                            <div class="member-name">Me</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Sister')">
+                            <div class="member-icon">👧</div>
+                            <div class="member-name">Sister</div>
+                        </div>
+                    </div>
+
+                    <!-- Pets & Baby -->
+                    <div class="family-row" style="margin-top: 30px;">
+                        <div class="member-card" onclick="speak('Baby')">
+                            <div class="member-icon">👶</div>
+                            <div class="member-name">Baby</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Dog')">
+                            <div class="member-icon">🐶</div>
+                            <div class="member-name">Dog</div>
+                        </div>
+                        <div class="member-card" onclick="speak('Cat')">
+                            <div class="member-icon">🐱</div>
+                            <div class="member-name">Cat</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: ACTION VERBS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Action Verbs ⚡</h2>
+                <p>These are things we do. Hover to see them move!</p>
+
+                <div class="verbs-grid">
+                    <div class="verb-card" onclick="speak('Run')">
+                        <div class="verb-emoji run">🏃</div>
+                        <h3>Run</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Jump')">
+                        <div class="verb-emoji jump">🦘</div>
+                        <h3>Jump</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Eat')">
+                        <div class="verb-emoji eat">🍕</div>
+                        <h3>Eat</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Sleep')">
+                        <div class="verb-emoji sleep">😴</div>
+                        <h3>Sleep</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Read')">
+                        <div class="verb-emoji">📖</div>
+                        <h3>Read</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Play')">
+                        <div class="verb-emoji">🎮</div>
+                        <h3>Play</h3>
+                    </div>
+                    <!-- NEW VERBS -->
+                    <div class="verb-card" onclick="speak('Dance')">
+                        <div class="verb-emoji dance">💃</div>
+                        <h3>Dance</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Swim')">
+                        <div class="verb-emoji float">🏊</div>
+                        <h3>Swim</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Sing')">
+                        <div class="verb-emoji jump">🎤</div>
+                        <h3>Sing</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Walk')">
+                        <div class="verb-emoji run">🚶</div>
+                        <h3>Walk</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Drink')">
+                        <div class="verb-emoji eat">🥤</div>
+                        <h3>Drink</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Cook')">
+                        <div class="verb-emoji run">🍳</div>
+                        <h3>Cook</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Write')">
+                        <div class="verb-emoji eat">✍️</div>
+                        <h3>Write</h3>
+                    </div>
+                    <div class="verb-card" onclick="speak('Wash')">
+                        <div class="verb-emoji dance">🧼</div>
+                        <h3>Wash</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: GRAMMAR (PRESENT CONTINUOUS) -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Doing Things Now (ING) ⏳</h2>
+                <p>When we do something <b>right now</b>, we add <b>-ING</b>.</p>
+
+                <div class="grammar-box">
+                    <p>I <b>am</b> play<b>ing</b>.</p>
+                    <p>She <b>is</b> runn<b>ing</b>.</p>
+                    <p>They <b>are</b> eat<b>ing</b>.</p>
+                    <p>It <b>is</b> rain<b>ing</b> 🌧️.</p>
+                    <p>You <b>are</b> learn<b>ing</b> 📚.</p>
+                    <p>We <b>are</b> cook<b>ing</b> 🍳.</p>
+                </div>
+
+                <h3>Build a Sentence:</h3>
+                <div class="sentence-display" id="sentenceBuilder">...</div>
+
+                <div class="token-container">
+                    <div class="token" onclick="addToSentence('I')">I</div>
+                    <div class="token" onclick="addToSentence('He')">He</div>
+                    <div class="token" onclick="addToSentence('We')">We</div>
+                    <div class="token" style="background:var(--accent); color:black;" onclick="addToSentence('am')">am
+                    </div>
+                    <div class="token" style="background:var(--accent); color:black;" onclick="addToSentence('is')">is
+                    </div>
+                    <div class="token" style="background:var(--accent); color:black;" onclick="addToSentence('are')">are
+                    </div>
+                    <div class="token" onclick="addToSentence('jumping')">jumping</div>
+                    <div class="token" onclick="addToSentence('sleeping')">sleeping</div>
+                    <div class="token" onclick="addToSentence('It')">It</div>
+                    <div class="token" onclick="addToSentence('You')">You</div>
+                    <div class="token" onclick="addToSentence('raining')">raining</div>
+                    <div class="token" onclick="addToSentence('cooking')">cooking</div>
+                    <div class="token" onclick="addToSentence('learning')">learning</div>
+                    <div class="token" style="background:#ff6b6b;" onclick="resetSentence()">Clear ❌</div>
+                    <div class="token" style="background:#51cf66;" onclick="speakSentence()">Speak 🔊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MINI STORY -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Review: A Day at the Park 🌳</h2>
+                <p>Click any sentence to listen.</p>
+
+                <div class="story-container">
+                    <div class="story-sentence" onclick="speak(this.innerText)">Hello! My name is Max.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">I am at the park with my family.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My father is reading a book.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My mother is eating an apple.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My sister is running fast.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">I am playing with my dog.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">We are very happy today!</div>
+
+                    <h3 style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                        Chapter 2: Lunch Time 🍎</h3>
+                    <div class="story-sentence" onclick="speak(this.innerText)">It is 12 o'clock.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My mother is cooking lunch.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My father is washing his hands.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">I am drinking juice.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">My sister is eating pasta.</div>
+                    <div class="story-sentence" onclick="speak(this.innerText)">The dog is sleeping.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: LISTENING CHALLENGE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Listening Challenge 🎧</h2>
+                <p>Click the button to hear a word, then click the correct emoji!</p>
+
+                <button class="btn-nav" id="listenBtn" onclick="playRandomWord()">Play Word 🔊</button>
+                <div id="listeningFeedback" style="height: 30px; margin: 10px; font-weight:bold; color: var(--accent);">
+                </div>
+
+                <div class="verbs-grid" style="margin-top: 20px;">
+                    <div class="verb-card" onclick="checkListening('Father')">👨</div>
+                    <div class="verb-card" onclick="checkListening('Sister')">👧</div>
+                    <div class="verb-card" onclick="checkListening('Run')">🏃</div>
+                    <div class="verb-card" onclick="checkListening('Read')">📖</div>
+                    <div class="verb-card" onclick="checkListening('Sleep')">😴</div>
+                    <!-- NEW LISTENING CARDS -->
+                    <div class="verb-card" onclick="checkListening('Mother')">👩</div>
+                    <div class="verb-card" onclick="checkListening('Brother')">👦</div>
+                    <div class="verb-card" onclick="checkListening('Jump')">🦘</div>
+                    <div class="verb-card" onclick="checkListening('Eat')">🍕</div>
+                    <div class="verb-card" onclick="checkListening('Play')">🎮</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: FINAL QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Final Quiz 🏆</h2>
+                <p id="quizQuestion">Question 1: "She _____ running."</p>
+
+                <div style="width: 100%; max-width: 500px;" id="quizOptions">
+                    <!-- Injected via JS -->
+                </div>
+
+                <div id="quizScore" style="margin-top: 20px; font-size: 1.5rem; color: var(--accent);">Score: 0</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: CONCLUSION -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Complete! 🎓</h1>
+                <div style="font-size: 5rem;">🌟🌟🌟</div>
+                <p>You are becoming a master of English!</p>
+                <button class="btn-nav" onclick="location.reload()">Replay Class ↺</button>
+            </div>
+        </div>
+
+
+        <!-- NAV CONTROLS -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="controls">
+            <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- CORE SYSTEM --- */
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function updateUI() {
+            slides.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i === currentSlide) s.classList.add('active');
+            });
+
+            const percent = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = percent + '%';
+
+            prevBtn.disabled = currentSlide === 0;
+            if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+            else { nextBtn.style.display = 'block'; nextBtn.disabled = false; }
+
+            // Trigger specific setups
+            if (currentSlide === 6) loadQuiz();
+        }
+
+        function changeSlide(dir) {
+            const next = currentSlide + dir;
+            if (next >= 0 && next < slides.length) {
+                currentSlide = next;
+                updateUI();
+            }
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* --- SENTENCE BUILDER --- */
+        let sentence = [];
+        function addToSentence(word) {
+            sentence.push(word);
+            document.getElementById('sentenceBuilder').innerText = sentence.join(' ');
+            speak(word);
+        }
+        function resetSentence() {
+            sentence = [];
+            document.getElementById('sentenceBuilder').innerText = '...';
+        }
+        function speakSentence() {
+            if (sentence.length > 0) speak(sentence.join(' '));
+            else speak("Please build a sentence first.");
+        }
+
+        /* --- LISTENING CHALLENGE --- */
+        let currentListeningTarget = "";
+        const listeningWords = ['Father', 'Sister', 'Run', 'Read', 'Sleep', 'Mother', 'Brother', 'Jump', 'Eat', 'Play'];
+
+        function playRandomWord() {
+            const rnd = Math.floor(Math.random() * listeningWords.length);
+            currentListeningTarget = listeningWords[rnd];
+            speak(currentListeningTarget);
+            document.getElementById('listeningFeedback').innerText = "Listen and Click...";
+        }
+
+        function checkListening(guess) {
+            if (!currentListeningTarget) {
+                document.getElementById('listeningFeedback').innerText = "Click 'Play Word' first!";
+                return;
+            }
+
+            if (guess === currentListeningTarget) {
+                document.getElementById('listeningFeedback').innerText = "CORRECT! 🎉";
+                document.getElementById('listeningFeedback').style.color = "#51cf66";
+                speak("Correct!");
+                currentListeningTarget = ""; // Reset
+            } else {
+                document.getElementById('listeningFeedback').innerText = "Try Again! ❌";
+                document.getElementById('listeningFeedback').style.color = "#ff6b6b";
+            }
+        }
+
+        /* --- QUIZ SYSTEM --- */
+        const quizData = [
+            { q: "She _____ running.", options: ["am", "is", "are"], ans: 1 },
+            { q: "We _____ playing.", options: ["is", "are", "am"], ans: 1 },
+            { q: "Who is 👵?", options: ["Sister", "Grandma", "Father"], ans: 1 },
+            { q: "What is this verb: 🍕?", options: ["Eat", "Sleep", "Run"], ans: 0 },
+            { q: "I am _____ a book.", options: ["reading", "read", "reads"], ans: 0 },
+            { q: "He _____ sleeping.", options: ["are", "am", "is"], ans: 2 },
+            { q: "What is 🏊?", options: ["Run", "Swim", "Fly"], ans: 1 },
+            { q: "They _____ cooking.", options: ["is", "am", "are"], ans: 2 },
+            { q: "Who is 👶?", options: ["Baby", "Grandpa", "Uncle"], ans: 0 },
+            { q: "I _____ happy.", options: ["is", "are", "am"], ans: 2 }
+        ];
+        let quizIdx = 0;
+        let score = 0;
+
+        function loadQuiz() {
+            if (quizIdx >= quizData.length) {
+                // Done
+                document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+                document.getElementById('quizOptions').innerHTML = "";
+                return;
+            }
+
+            const q = quizData[quizIdx];
+            document.getElementById('quizQuestion').innerText = (quizIdx + 1) + ". " + q.q;
+            const optsDiv = document.getElementById('quizOptions');
+            optsDiv.innerHTML = "";
+
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'quiz-option';
+                div.innerText = opt;
+                div.onclick = () => checkQuiz(i);
+                optsDiv.appendChild(div);
+            });
+        }
+
+        function checkQuiz(selectedIdx) {
+            const q = quizData[quizIdx];
+            if (selectedIdx === q.ans) {
+                score++;
+                speak("Correct");
+            } else {
+                speak("Incorrect");
+            }
+            document.getElementById('quizScore').innerText = "Score: " + score + " / " + quizData.length;
+            quizIdx++;
+            loadQuiz();
+        }
+
+        // Init
+        updateUI();
+
+    </script>
+</body>
+
+</html>

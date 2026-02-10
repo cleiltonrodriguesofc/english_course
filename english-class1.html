@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack English | Prof. Cleilton</title>
+    <style>
+        /* --- THEME: DARK IDE / CYBERPUNK --- */
+        :root {
+            --bg: #1e1e1e;
+            --sidebar: #252526;
+            --text: #d4d4d4;
+            --keyword: #569cd6; /* Blue for "keywords" */
+            --string: #ce9178; /* Orange for "strings" */
+            --function: #dcdcaa; /* Yellow for functions */
+            --comment: #6a9955; /* Green for comments */
+            --accent: #c586c0; /* Purple for control flow */
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Consolas', 'Courier New', monospace; /* Monospace for coding feel */
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR (Progress) */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            color: var(--text);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .nav-item {
+            padding: 10px;
+            cursor: pointer;
+            color: #888;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item.active {
+            color: var(--keyword);
+            background: rgba(86, 156, 214, 0.1);
+            border-left: 3px solid var(--keyword);
+        }
+
+        .nav-item:hover {
+            color: var(--light);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        /* SLIDES */
+        .slide {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* TYPOGRAPHY & ELEMENTS */
+        h1 { font-size: 3rem; color: var(--keyword); margin-bottom: 10px; }
+        h2 { font-size: 2rem; color: var(--function); margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        p { font-size: 1.2rem; line-height: 1.6; color: #ccc; }
+        
+        .code-block {
+            background: #000;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-family: 'Consolas', monospace;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .comment { color: var(--comment); }
+        .string { color: var(--string); }
+        .keyword { color: var(--keyword); }
+
+        /* MULTIMEDIA */
+        .video-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--keyword);
+            margin: 20px 0;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* INTERACTIVE QUIZ */
+        .quiz-container {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid var(--accent);
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .quiz-btn {
+            background: #3c3c3c;
+            border: 1px solid #555;
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            transition: 0.2s;
+            text-align: left;
+        }
+
+        .quiz-btn:hover {
+            background: #505050;
+        }
+
+        .quiz-btn.correct { background: var(--success); border-color: var(--success); }
+        .quiz-btn.wrong { background: var(--error); border-color: var(--error); }
+
+        /* NAVIGATION BUTTONS */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: var(--keyword);
+            border: none;
+            padding: 12px 24px;
+            color: white;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover { background: #4a8cc7; }
+        .nav-btn:disabled { background: #444; cursor: not-allowed; }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #252526;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th { color: var(--keyword); }
+        td { color: var(--string); }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>Course Explorer</h3>
+        <div class="nav-item active" onclick="goToSlide(0)">01. Start.init()</div>
+        <div class="nav-item" onclick="goToSlide(1)">02. Why_English?</div>
+        <div class="nav-item" onclick="goToSlide(2)">03. The_Alphabet</div>
+        <div class="nav-item" onclick="goToSlide(3)">04. Greetings</div>
+        <div class="nav-item" onclick="goToSlide(4)">05. Chat_Sim</div>
+        <div class="nav-item" onclick="goToSlide(5)">06. Pronouns</div>
+        <div class="nav-item" onclick="goToSlide(6)">07. Possessives</div>
+        <div class="nav-item" onclick="goToSlide(7)">08. Demonstratives</div>
+        <div class="nav-item" onclick="goToSlide(8)">09. Final_Quiz</div>
+    </div>
+
+    <div class="main-stage">
+
+        <div class="slide active">
+            <h1>&lt;Full-Stack English /&gt;</h1>
+            <h2>Welcome to Module 1</h2>
+            
+            <div class="code-block">
+                <span class="keyword">class</span> <span class="function">EnglishClass</span> {<br>
+                &nbsp;&nbsp;<span class="keyword">constructor</span>() {<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span>.professor = <span class="string">"Cleilton"</span>;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span>.student = <span class="string">"You"</span>;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">this</span>.level = <span class="string">"Beginner"</span>;<br>
+                &nbsp;&nbsp;}<br>
+                }
+            </div>
+            
+            <p>Welcome to your journey to fluency! Today we build the foundation.</p>
+        </div>
+
+        <div class="slide">
+            <h2>Why learn English? 🌍</h2>
+            <ul>
+                <li><span class="keyword">Universal Language:</span> Speak to people anywhere.</li>
+                <li><span class="keyword">Internet:</span> 2/3 of the web is in English.</li>
+                <li><span class="keyword">Career:</span> Essential for big companies (and coding!).</li>
+                <li><span class="keyword">Media:</span> Understand movies and music without subtitles.</li>
+            </ul>
+            <div class="code-block">
+                <span class="comment">// Result of learning English:</span><br>
+                <span class="keyword">return</span> <span class="string">"Global Opportunities"</span>;
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>The Alphabet (Pronunciation) 🔡</h2>
+            <p>Watch the video and repeat the sounds!</p>
+            
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/hq3yfQnllfQ" title="ABC Song" allowfullscreen></iframe>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; font-size: 0.9rem;">
+                <div>A = êi</div>
+                <div>B = bi</div>
+                <div>C = cí</div>
+                <div>E = i</div>
+                <div>I = ái</div>
+                <div>R = ár</div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Greetings & Salutations 👋</h2>
+            <p>Essential functions to start a conversation.</p>
+            
+            <table>
+                <tr><th>English</th><th>Pronunciation</th><th>Portuguese</th></tr>
+                <tr><td>Good Morning</td><td>/gud morning/</td><td>Bom dia</td></tr>
+                <tr><td>Good Afternoon</td><td>/gud after-nun/</td><td>Boa tarde</td></tr>
+                <tr><td>Good Night</td><td>/gud nait/</td><td>Boa noite</td></tr>
+                <tr><td>How are you?</td><td>/hau ar iu/</td><td>Como vai?</td></tr>
+            </table>
+
+            <div class="quiz-container">
+                <p><strong>Mini-Quiz:</strong> How do you say "Com licença"?</p>
+                <div class="quiz-options">
+                    <button class="quiz-btn" onclick="checkAnswer(this, false)">Sorry</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, true)">Excuse me</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Dialogue Simulation 💬</h2>
+            <div class="code-block">
+                <span class="comment">// A conversation between John and Pedro</span><br><br>
+                <span class="function">John</span>: "Hello! My name is John. What is your name?"<br>
+                <span class="function">Pedro</span>: "Hi John! My name is Pedro. How are you?"<br>
+                <span class="function">John</span>: "Very well, thank you. And you?"<br>
+                <span class="function">Pedro</span>: "I am fine. Where are you from?"<br>
+                <span class="function">John</span>: "I am Australian."
+            </div>
+            
+            <div class="video-container" style="height: 200px;">
+                <iframe src="https://www.youtube.com/embed/FwBdGVN1Fjs" title="Greetings Video" allowfullscreen></iframe>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Subject Pronouns 👤</h2>
+            <p>They replace the name of the person/object.</p>
+            
+            <div style="display: flex; justify-content: space-around;">
+                <div class="code-block" style="width: 40%">
+                    <h3 style="color: var(--string)">Singular</h3>
+                    <p><span class="keyword">I</span> = Eu</p>
+                    <p><span class="keyword">You</span> = Você</p>
+                    <p><span class="keyword">He</span> = Ele</p>
+                    <p><span class="keyword">She</span> = Ela</p>
+                    <p><span class="keyword">It</span> = Ele/Ela (Coisa)</p>
+                </div>
+                <div class="code-block" style="width: 40%">
+                    <h3 style="color: var(--string)">Plural</h3>
+                    <p><span class="keyword">We</span> = Nós</p>
+                    <p><span class="keyword">You</span> = Vocês</p>
+                    <p><span class="keyword">They</span> = Eles/Elas</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Possessive Adjectives 🎒</h2>
+            <p>Showing who owns what.</p>
+            
+            <table>
+                <tr><th>Pronoun</th><th>Possessive</th><th>Example</th></tr>
+                <tr><td>I</td><td><span class="string">My</span></td><td>This is <strong>my</strong> computer.</td></tr>
+                <tr><td>You</td><td><span class="string">Your</span></td><td>Is this <strong>your</strong> phone?</td></tr>
+                <tr><td>He</td><td><span class="string">His</span></td><td>That is <strong>his</strong> car.</td></tr>
+                <tr><td>She</td><td><span class="string">Her</span></td><td>It is <strong>her</strong> book.</td></tr>
+            </table>
+        </div>
+
+        <div class="slide">
+            <h2>Demonstratives 👇</h2>
+            <p>Pointing at things based on distance.</p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="code-block">
+                    <h3>Near (Aqui)</h3>
+                    <p><span class="keyword">This</span> (Singular)</p>
+                    <p><span class="keyword">These</span> (Plural)</p>
+                    <span class="comment">// "This is my mouse."</span>
+                </div>
+                <div class="code-block">
+                    <h3>Far (Lá)</h3>
+                    <p><span class="keyword">That</span> (Singular)</p>
+                    <p><span class="keyword">Those</span> (Plural)</p>
+                    <span class="comment">// "That is the server."</span>
+                </div>
+            </div>
+            
+             <div class="quiz-container">
+                <p><strong>Mini-Quiz:</strong> What do you use for MANY things that are FAR away?</p>
+                <div class="quiz-options">
+                    <button class="quiz-btn" onclick="checkAnswer(this, false)">This</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, true)">Those</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2>Final Knowledge Check ✅</h2>
+            <p>Let's test what you learned in this module.</p>
+            
+            <div id="finalQuizArea">
+                <div class="quiz-container">
+                    <p>1. How do you say "Até logo"?</p>
+                    <div class="quiz-options">
+                        <button class="quiz-btn" onclick="checkAnswer(this, false)">Good Morning</button>
+                        <button class="quiz-btn" onclick="checkAnswer(this, true)">See you soon</button>
+                    </div>
+                </div>
+
+                <div class="quiz-container">
+                    <p>2. Complete: "_____ is my sister."</p>
+                    <div class="quiz-options">
+                        <button class="quiz-btn" onclick="checkAnswer(this, true)">She</button>
+                        <button class="quiz-btn" onclick="checkAnswer(this, false)">He</button>
+                    </div>
+                </div>
+
+                <div class="quiz-container">
+                    <p>3. What is the possessive for "I"?</p>
+                    <div class="quiz-options">
+                        <button class="quiz-btn" onclick="checkAnswer(this, false)">Mine</button>
+                        <button class="quiz-btn" onclick="checkAnswer(this, true)">My</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px; color: var(--success);">Class Completed! Great job!</h3>
+        </div>
+
+        <div class="controls">
+            <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">❮ Back</button>
+            <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next ❯</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const navItems = document.querySelectorAll('.nav-item');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function goToSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            navItems[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            navItems[currentSlide].classList.add('active');
+            
+            updateButtons();
+        }
+
+        function changeSlide(direction) {
+            let newIndex = currentSlide + direction;
+            if (newIndex >= 0 && newIndex < slides.length) {
+                goToSlide(newIndex);
+            }
+        }
+
+        function updateButtons() {
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        // QUIZ LOGIC
+        function checkAnswer(btn, isCorrect) {
+            // Reset buttons in this specific container
+            const parent = btn.parentElement;
+            const buttons = parent.getElementsByClassName('quiz-btn');
+            
+            for (let b of buttons) {
+                b.classList.remove('correct', 'wrong');
+                b.disabled = true; // Disable after choice
+            }
+
+            if (isCorrect) {
+                btn.classList.add('correct');
+                btn.innerHTML += " ✅";
+            } else {
+                btn.classList.add('wrong');
+                btn.innerHTML += " ❌";
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+
+        // Initialize
+        updateButtons();
+    </script>
+</body>
+</html>
