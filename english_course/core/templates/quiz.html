@@ -305,6 +305,33 @@
                 </div>
                 <div class="feedback"></div>
             </div>
+
+            <div class="question" data-correct="She">
+                <div class="question-text">6. ______ is my sister.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_6" value="Her"> Her</label>
+                    <label class="radio-option"><input type="radio" name="q1_6" value="She"> She</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="ours">
+                <div class="question-text">7. This classroom is ______.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_7" value="our"> our</label>
+                    <label class="radio-option"><input type="radio" name="q1_7" value="ours"> ours</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="them">
+                <div class="question-text">8. I will call ______ later.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_8" value="they"> they</label>
+                    <label class="radio-option"><input type="radio" name="q1_8" value="them"> them</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
         </div>
 
         <!-- PART 2 -->
@@ -329,6 +356,23 @@
                     data-answer="they are not intelligent">
                 <input type="text" class="q-input" placeholder="Interrogative" name="q2_2_int" style="margin-top: 10px;"
                     data-answer="are they intelligent?">
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">3. It is a pen.</div>
+                <input type="text" class="q-input" placeholder="Negative" name="q2_3_neg" data-answer="it is not a pen">
+                <input type="text" class="q-input" placeholder="Interrogative" name="q2_3_int" style="margin-top: 10px;"
+                    data-answer="is it a pen?">
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">4. We are happy.</div>
+                <input type="text" class="q-input" placeholder="Negative" name="q2_4_neg"
+                    data-answer="we are not happy">
+                <input type="text" class="q-input" placeholder="Interrogative" name="q2_4_int" style="margin-top: 10px;"
+                    data-answer="are we happy?">
                 <div class="feedback"></div>
             </div>
         </div>
@@ -370,6 +414,28 @@
                 </select>
                 <div class="feedback"></div>
             </div>
+
+            <div class="question" data-correct="How">
+                <div class="question-text">4. __________ are you? (Answer: I am fine)</div>
+                <select class="q-select" name="q3_4">
+                    <option value="">Select...</option>
+                    <option value="Who">Who</option>
+                    <option value="How">How</option>
+                    <option value="What">What</option>
+                </select>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="When">
+                <div class="question-text">5. __________ did you talk to him? (Answer: Yesterday)</div>
+                <select class="q-select" name="q3_5">
+                    <option value="">Select...</option>
+                    <option value="Where">Where</option>
+                    <option value="When">When</option>
+                    <option value="What">What</option>
+                </select>
+                <div class="feedback"></div>
+            </div>
         </div>
 
         <!-- PART 4 -->
@@ -400,6 +466,24 @@
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio3')">🎤</button>
                     <audio id="audio3" controls style="display:none; width: 100%;"></audio>
+                    <span class="status-text">Click mic to record</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">4. "Where are you from?"</div>
+                <div class="recorder-box">
+                    <button class="record-btn" onclick="toggleRecord(this, 'audio4')">🎤</button>
+                    <audio id="audio4" controls style="display:none; width: 100%;"></audio>
+                    <span class="status-text">Click mic to record</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">5. "It is a pleasure to meet you."</div>
+                <div class="recorder-box">
+                    <button class="record-btn" onclick="toggleRecord(this, 'audio5')">🎤</button>
+                    <audio id="audio5" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
             </div>
