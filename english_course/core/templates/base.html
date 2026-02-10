@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}English Course{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* --- GLOBAL LAYOUT --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            /* background: #f0f2f5; REMOVED to allow lessons to set background */
+        }
+
+        /* --- SIDEBAR (BLUE THEME) --- */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #000428, #004e92);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 20px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .module-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        /* --- CONTENT AREA --- */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            background: #eef2f3;
+        }
+
+        /* --- DASHBOARD STYLES --- */
+        .dashboard-container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #004e92;
+            color: #333;
+            /* Dark text for white background */
+        }
+
+        .lesson-btn {
+            display: inline-block;
+            background: #004e92;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .lesson-btn:hover {
+            background: #000428;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <h2>English Course 🇬🇧</h2>
+        <a href="{% url 'dashboard' %}"
+            class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
+
+        <div class="module-title">Module 1: The Basics</div>
+        <a href="{% url 'lesson_1' %}" class="nav-link">Lesson 1: Alphabet</a>
+        <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
+        <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
+    </div>
+
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

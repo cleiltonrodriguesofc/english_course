@@ -1,0 +1,795 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 2: Introductions - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- UNIFIED BLUE THEME (Adopts Lesson 3 Palette) --- */
+    :root {
+        /* Mapping to Blue Theme */
+        --c2-primary: #00D2FF;
+        /* Cyan Blue */
+        --c2-secondary: #3A7BD5;
+        /* Royal Blue */
+        --c2-accent: #FFD700;
+        /* Gold */
+        --c2-dark: #000428;
+        /* Dark Navy */
+        --c2-light: #E0F7FA;
+        /* Ice Blue */
+
+        /* Retain formal/informal specific colors for semantic meaning, but tweaked */
+        --c2-formal: #3A7BD5;
+        --c2-informal: #FFD700;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, #000428, #004e92);
+        color: var(--c2-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1000px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 210, 255, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px 40px 80px 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.5s ease-in-out;
+        pointer-events: none;
+        overflow-y: auto;
+        justify-content: flex-start;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* Scrollbar styling */
+    .slide::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .slide::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .slide::-webkit-scrollbar-thumb {
+        background: var(--c2-secondary);
+        border-radius: 4px;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    .lesson-wrapper h1 {
+        font-size: 2.5rem;
+        color: var(--c2-primary);
+        margin: 0.5em 0;
+        text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+    }
+
+    .lesson-wrapper h2 {
+        font-size: 2rem;
+        color: var(--c2-secondary);
+        margin: 0.5em 0;
+        border-bottom: 2px solid var(--c2-primary);
+        display: inline-block;
+        padding-bottom: 5px;
+    }
+
+    .lesson-wrapper p {
+        font-size: 1.3rem;
+        line-height: 1.5;
+        color: #b3e5fc;
+        max-width: 800px;
+        margin-bottom: 20px;
+    }
+
+    .highlight {
+        color: var(--c2-primary);
+        font-weight: bold;
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+        background: rgba(0, 4, 40, 0.8);
+        padding: 10px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-nav-c2 {
+        background: linear-gradient(90deg, var(--c2-secondary), var(--c2-primary));
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-nav-c2:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+
+    .btn-nav-c2:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .progress-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 6px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 101;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--c2-primary);
+        width: 0%;
+        transition: width 0.5s ease;
+        box-shadow: 0 0 10px var(--c2-primary);
+    }
+
+    /* --- SLIDE 4: ALPHABET --- */
+    .alphabet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .letter-card {
+        background: rgba(255, 255, 255, 0.1);
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 10px;
+    }
+
+    .letter-card:hover {
+        background: var(--c2-secondary);
+        color: white;
+        transform: scale(1.15);
+        z-index: 10;
+        box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+        border-color: var(--c2-primary);
+    }
+
+    .letter-main {
+        font-size: 2.5rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .letter-emoji {
+        font-size: 2.5rem;
+        margin-top: 5px;
+    }
+
+    .letter-word {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+
+    /* --- SLIDE 5: NUMBERS & COLORS --- */
+    .numbers-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .num-card {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 2.5rem;
+        cursor: pointer;
+        transition: 0.2s;
+        font-weight: bold;
+        border: 1px solid transparent;
+    }
+
+    .num-card:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--c2-accent);
+        transform: scale(1.2);
+        border-color: var(--c2-accent);
+    }
+
+    .colors-grid {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .color-blob {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        transition: transform 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+        font-weight: bold;
+    }
+
+    .color-blob:hover {
+        transform: scale(1.2);
+        border-color: white;
+    }
+
+    /* --- SLIDE 6: VERB TO BE --- */
+    .verb-table {
+        width: 100%;
+        max-width: 800px;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        overflow: hidden;
+        font-size: 1.2rem;
+    }
+
+    .verb-table th,
+    .verb-table td {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .verb-table tr:hover {
+        background: rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+    }
+
+    .verb-pron {
+        color: var(--c2-secondary);
+        font-weight: bold;
+    }
+
+    .verb-be {
+        color: var(--c2-accent);
+        font-weight: bold;
+    }
+
+    /* --- SLIDE 7: PRONOUNS MATCH --- */
+    .pronoun-match {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 90%;
+        max-width: 600px;
+    }
+
+    .p-btn {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .p-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: var(--c2-primary);
+    }
+
+    .p-btn.selected {
+        border-color: var(--c2-accent);
+        background: rgba(255, 215, 0, 0.2);
+    }
+
+    .p-btn.matched {
+        border-color: var(--c2-secondary);
+        background: rgba(0, 210, 255, 0.2);
+        opacity: 0.5;
+    }
+
+    /* --- SLIDE 8: DIALOGUE --- */
+    .dialogue-area {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .d-option {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: left;
+        border: 1px solid transparent;
+        transition: 0.3s;
+    }
+
+    .d-option:hover {
+        border-color: var(--c2-secondary);
+        background: rgba(255, 255, 255, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- 1. WELCOME -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h1>Class 2: All About You! 🌟</h1>
+                <p>Welcome back! Today we have audio! 🔊<br>Turn up your volume.</p>
+                <div style="font-size: 5rem; cursor: pointer;" onclick="speak('Welcome to Class 2')">👋</div>
+                <button class="btn-nav-c2"
+                    style="margin-top: 30px; background: var(--c2-accent); color: var(--c2-dark);"
+                    onclick="changeSlide(1)">Start Class 🚀</button>
+            </div>
+        </div>
+
+        <!-- 2. INTRODUCTIONS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Let's Introduce Ourselves! 🎤</h2>
+                <div
+                    style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; width: 100%; max-width: 500px;">
+                    <p>What is your name?</p>
+                    <input type="text" id="nameInput" placeholder="Name..." oninput="updateGreeting()"
+                        style="padding: 10px; width: 80%; border-radius: 5px; border: none;">
+
+                    <p style="margin-top: 20px;">How old are you?</p>
+                    <input type="number" id="ageInput" placeholder="Age..." oninput="updateGreeting()"
+                        style="padding: 10px; width: 80%; border-radius: 5px; border: none;">
+
+                    <div id="greetingResult"
+                        style="margin-top: 20px; font-size: 1.5rem; color: var(--c2-accent); min-height: 1.5em; cursor: pointer;"
+                        onclick="speak(this.innerText)">
+                        ...
+                    </div>
+                    <small>Click the text above to hear it!</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. FORMAL VS INFORMAL -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Formal vs. Informal 👔🧢</h2>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%;">
+                    <!-- Formal -->
+                    <div style="flex: 1; min-width: 250px; background: rgba(106, 5, 114, 0.3); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('Good morning. How are you?')">
+                        <div style="font-size: 3rem;">👩‍🏫</div>
+                        <h3>Teacher (Formal)</h3>
+                        <p>"Good Morning"</p>
+                        <p>"How are you?"</p>
+                        <p>"It is nice to meet you."</p>
+                    </div>
+                    <!-- Informal -->
+                    <div style="flex: 1; min-width: 250px; background: rgba(255, 159, 28, 0.3); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('Hi! What\'s up?')">
+                        <div style="font-size: 3rem;">🤸</div>
+                        <h3>Friend (Informal)</h3>
+                        <p>"Hi!"</p>
+                        <p>"What's up?"</p>
+                        <p>"Nice to meet ya!"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. ALPHABET -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The Alphabet 🔤</h2>
+                <p>Click a letter to hear it!</p>
+                <div class="alphabet-grid" id="alphabetGrid"></div>
+            </div>
+        </div>
+
+        <!-- 5. NUMBERS & COLORS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Numbers & Colors 🎨</h2>
+
+                <h3>Numbers (1-10)</h3>
+                <div class="numbers-grid" id="numbersGrid">
+                    <!-- JS Injected -->
+                </div>
+
+                <h3>Colors</h3>
+                <div class="colors-grid">
+                    <div class="color-blob" style="background: red;" onclick="speak('Red')">Red</div>
+                    <div class="color-blob" style="background: blue;" onclick="speak('Blue')">Blue</div>
+                    <div class="color-blob" style="background: yellow; color: black;" onclick="speak('Yellow')">Yellow
+                    </div>
+                    <div class="color-blob" style="background: green;" onclick="speak('Green')">Green</div>
+                    <div class="color-blob" style="background: purple;" onclick="speak('Purple')">Purple</div>
+                    <div class="color-blob" style="background: pink; color: black;" onclick="speak('Pink')">Pink</div>
+                    <div class="color-blob" style="background: orange;" onclick="speak('Orange')">Orange</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. VERB TO BE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The Verb "To Be" ✨</h2>
+                <p>Use this to describe people and feelings.</p>
+
+                <table class="verb-table">
+                    <tr>
+                        <th colspan="2">Singular</th>
+                        <th colspan="2">Plural</th>
+                    </tr>
+                    <tr onclick="speak('I am happy')">
+                        <td><span class="verb-pron">I</span> <span class="verb-be">am</span></td>
+                        <td>Eu sou / estou</td>
+                        <td><span class="verb-pron">We</span> <span class="verb-be">are</span></td>
+                        <td>Nós somos</td>
+                    </tr>
+                    <tr onclick="speak('You are smart')">
+                        <td><span class="verb-pron">You</span> <span class="verb-be">are</span></td>
+                        <td>Você é / está</td>
+                        <td><span class="verb-pron">You</span> <span class="verb-be">are</span></td>
+                        <td>Vocês são</td>
+                    </tr>
+                    <tr onclick="speak('He is tall. She is nice.')">
+                        <td><span class="verb-pron">He/She/It</span> <span class="verb-be">is</span></td>
+                        <td>Ele/Ela é</td>
+                        <td><span class="verb-pron">They</span> <span class="verb-be">are</span></td>
+                        <td>Eles são</td>
+                    </tr>
+                </table>
+                <p><em>Click rows to hear examples!</em></p>
+            </div>
+        </div>
+
+        <!-- 7. PRONOUNS GAME -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Pronouns Match 🧩</h2>
+                <div class="pronoun-match">
+                    <div style="display:flex; flex-direction:column; gap:10px;" id="colEnglish"></div>
+                    <div style="display:flex; flex-direction:column; gap:10px;" id="colPortuguese"></div>
+                </div>
+                <p id="matchFeedback" style="height: 20px; color: var(--c2-accent); margin-top: 20px;"></p>
+            </div>
+        </div>
+
+        <!-- 8. DIALOGUE CHALLENGE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Dialogue Challenge 💬</h2>
+                <p>Complete the conversation.</p>
+
+                <div class="dialogue-area" id="quizArea">
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left;">
+                        <strong>Mike:</strong> "Hello! ___________?"
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div class="d-option" onclick="checkDialogue(this, false, 'Nice try, but that is a greeting!')">
+                            A) I am fine.</div>
+                        <div class="d-option" onclick="checkDialogue(this, true, 'Correct! How are you?')">B) How are
+                            you?</div>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                        <strong>Sarah:</strong> "I am fine, thanks. And you?"
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                        <strong>Mike:</strong> "I am _______."
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div class="d-option" onclick="checkDialogue(this, true, 'Correct! I am magnificent!')">A)
+                            magnificent</div>
+                        <div class="d-option"
+                            onclick="checkDialogue(this, false, 'Oops! Am is for I, Are is for You.')">B) are happy
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 30px 0; width: 100%;">
+
+                <h3>Dialogue 2: New Student 🎒</h3>
+                <div class="dialogue-area">
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left;">
+                        <strong>Teacher:</strong> "Welcome! What is your name?"
+                    </div>
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                        <strong>Student:</strong> "My name is Alex."
+                    </div>
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                        <strong>Teacher:</strong> "Nice to meet you. How old are you?"
+                    </div>
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; text-align: left; margin-top: 20px;">
+                        <strong>Student:</strong> "I _________ 12 years old."
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                        <div class="d-option"
+                            onclick="checkDialogue(this, false, 'No! In English we represent age with TO BE (I am), not HAVE.')">
+                            A) have</div>
+                        <div class="d-option" onclick="checkDialogue(this, true, 'Correct! I am 12.')">B) am</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Amazing Job! 🎉</h1>
+                <p>You learned:</p>
+                <ul style="text-align: left; font-size: 1.2rem; line-height: 1.8;">
+                    <li>✅ The Alphabet sounds</li>
+                    <li>✅ Numbers & Colors</li>
+                    <li>✅ "I am", "You are"</li>
+                    <li>✅ How to introduce yourself</li>
+                </ul>
+                <button class="btn-nav-c2" onclick="location.reload()">Start Over ↺</button>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="controls">
+            <button class="btn-nav-c2" id="prevBtn" onclick="changeSlide(-1)">❮ Back</button>
+            <button class="btn-nav-c2" id="nextBtn" onclick="changeSlide(1)">Next ❯</button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- AUDIO SYSTEM --- */
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- NAVIGATION --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'block'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    /* --- CONTENT GENERATORS --- */
+    const alphabet = [
+        { l: 'A', w: 'Apple', e: '🍎' }, { l: 'B', w: 'Ball', e: '⚽' }, { l: 'C', w: 'Cat', e: '🐱' },
+        { l: 'D', w: 'Dog', e: '🐶' }, { l: 'E', w: 'Elephant', e: '🐘' }, { l: 'F', w: 'Fish', e: '🐟' },
+        { l: 'G', w: 'Giraffe', e: '🦒' }, { l: 'H', w: 'House', e: '🏠' }, { l: 'I', w: 'Ice Cream', e: '🍦' },
+        { l: 'J', w: 'Juice', e: '🧃' }, { l: 'K', w: 'Kite', e: '🪁' }, { l: 'L', w: 'Lion', e: '🦁' },
+        { l: 'M', w: 'Monkey', e: '🐵' }, { l: 'N', w: 'Nose', e: '👃' }, { l: 'O', w: 'Orange', e: '🍊' },
+        { l: 'P', w: 'Pizza', e: '🍕' }, { l: 'Q', w: 'Queen', e: '👑' }, { l: 'R', w: 'Robot', e: '🤖' },
+        { l: 'S', w: 'Sun', e: '☀️' }, { l: 'T', w: 'Tiger', e: '🐯' }, { l: 'U', w: 'Umbrella', e: '☂️' },
+        { l: 'V', w: 'Van', e: '🚐' }, { l: 'W', w: 'Water', e: '💧' }, { l: 'X', w: 'Xylophone', e: '🎹' },
+        { l: 'Y', w: 'Yoyo', e: '🪀' }, { l: 'Z', w: 'Zebra', e: '🦓' }
+    ];
+    const alphaGrid = document.getElementById('alphabetGrid');
+    alphabet.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'letter-card';
+        div.innerHTML = `
+            <div class="letter-main">${item.l}</div>
+            <div class="letter-emoji">${item.e}</div>
+            <div class="letter-word">${item.w}</div>
+        `;
+        div.onclick = () => {
+            window.speechSynthesis.cancel();
+            const u1 = new SpeechSynthesisUtterance(item.l);
+            u1.lang = 'en-US'; u1.rate = 0.8; u1.pitch = 1.1;
+            const u2 = new SpeechSynthesisUtterance(item.w);
+            u2.lang = 'en-US'; u2.rate = 0.6; u2.pitch = 1.1;
+            window.speechSynthesis.speak(u1);
+            window.speechSynthesis.speak(u2);
+            div.style.background = 'var(--c2-accent)';
+            div.style.color = 'var(--c2-dark)';
+            setTimeout(() => { div.style.background = ''; div.style.color = ''; }, 1000);
+        };
+        alphaGrid.appendChild(div);
+    });
+
+    const numGrid = document.getElementById('numbersGrid');
+    for (let i = 1; i <= 20; i++) {
+        const div = document.createElement('div');
+        div.className = 'num-card';
+        div.innerText = i;
+        div.onclick = () => speak(i.toString());
+        numGrid.appendChild(div);
+    }
+
+    /* --- PRONOUNS GAME --- */
+    const pronouns = [
+        { en: 'I', pt: 'Eu' }, { en: 'You', pt: 'Você' },
+        { en: 'He', pt: 'Ele' }, { en: 'She', pt: 'Ela' }, { en: 'We', pt: 'Nós' }
+    ];
+
+    function renderPronounGame() {
+        const colEn = document.getElementById('colEnglish');
+        const colPt = document.getElementById('colPortuguese');
+        colEn.innerHTML = ''; colPt.innerHTML = '';
+        const shuffledPt = [...pronouns].sort(() => Math.random() - 0.5);
+
+        pronouns.forEach(p => {
+            const btn = document.createElement('div');
+            btn.className = 'p-btn';
+            btn.innerText = p.en;
+            btn.onclick = () => { speak(p.en); selectItem('en', btn, p.en); };
+            colEn.appendChild(btn);
+        });
+
+        shuffledPt.forEach(p => {
+            const btn = document.createElement('div');
+            btn.className = 'p-btn';
+            btn.innerText = p.pt;
+            btn.onclick = () => selectItem('pt', btn, p.en);
+            colPt.appendChild(btn);
+        });
+    }
+
+    let currentSel = { en: null, pt: null, enBtn: null, ptBtn: null };
+
+    function selectItem(type, btn, value) {
+        if (btn.classList.contains('matched')) return;
+        if (currentSel[type + 'Btn']) currentSel[type + 'Btn'].classList.remove('selected');
+        btn.classList.add('selected');
+        currentSel[type] = value;
+        currentSel[type + 'Btn'] = btn;
+
+        if (currentSel.en && currentSel.pt) {
+            const feedback = document.getElementById('matchFeedback');
+            if (currentSel.en === currentSel.pt) {
+                currentSel.enBtn.classList.add('matched');
+                currentSel.ptBtn.classList.add('matched');
+                currentSel.enBtn.classList.remove('selected');
+                currentSel.ptBtn.classList.remove('selected');
+                speak("Correct!");
+                feedback.innerText = "Correct! ✨";
+                currentSel = { en: null, pt: null, enBtn: null, ptBtn: null };
+            } else {
+                speak("Try again");
+                feedback.innerText = "Try again... ❌";
+                setTimeout(() => {
+                    if (currentSel.enBtn) currentSel.enBtn.classList.remove('selected');
+                    if (currentSel.ptBtn) currentSel.ptBtn.classList.remove('selected');
+                    currentSel = { en: null, pt: null, enBtn: null, ptBtn: null };
+                    feedback.innerText = "";
+                }, 1000);
+            }
+        }
+    }
+
+    function checkDialogue(btn, isCorrect, text) {
+        speak(text);
+        if (isCorrect) {
+            btn.style.background = 'var(--c2-secondary)';
+            btn.innerText += " ✅";
+        } else {
+            btn.style.background = 'var(--c2-primary)';
+        }
+    }
+
+    function updateGreeting() {
+        const name = document.getElementById('nameInput').value;
+        const age = document.getElementById('ageInput').value;
+        const output = document.getElementById('greetingResult');
+        if (name && age) output.innerHTML = `"Hello! My name is <span class='highlight'>${name}</span> and I am <span class='highlight'>${age}</span>."`;
+        else if (name) output.innerHTML = `"Hello! My name is <span class='highlight'>${name}</span>..."`;
+        else output.innerText = "...";
+    }
+
+    renderPronounGame();
+    updateUI();
+</script>
+{% endblock %}
