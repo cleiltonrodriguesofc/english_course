@@ -15,3 +15,6 @@ def lesson_2(request):
 
 def lesson_3(request):
     return render(request, 'lesson_3.html')
+
+def quiz_view(request):
+    return render(request, 'quiz.html')

@@ -1,0 +1,530 @@
+{% extends 'base.html' %}
+{% block title %}Quiz: Class 3 - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --q-primary: #00D2FF;
+        --q-secondary: #3A7BD5;
+        --q-dark: #000428;
+        --q-light: #E0F7FA;
+        --q-success: #00E676;
+        --q-error: #FF1744;
+    }
+
+    .quiz-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .quiz-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: var(--q-dark);
+    }
+
+    .quiz-section {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid var(--q-secondary);
+    }
+
+    .quiz-section h2 {
+        color: var(--q-secondary);
+        margin-top: 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .question {
+        margin-bottom: 25px;
+    }
+
+    .question-text {
+        font-weight: bold;
+        color: #000;
+        /* FORCE BLACK */
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    /* Input Styles */
+    .q-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ccc;
+        /* Darker border */
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: 0.3s;
+        box-sizing: border-box;
+        color: #000;
+        /* FORCE BLACK */
+        background: #fff;
+    }
+
+    .q-input:focus {
+        border-color: var(--q-primary);
+        outline: none;
+    }
+
+    .q-select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        color: #000;
+        /* FORCE BLACK */
+    }
+
+    /* Radio Options */
+    .radio-group {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        background: #fff;
+        /* White background */
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 2px solid #d0d0d0;
+        /* Visible border */
+        transition: 0.2s;
+        color: #000;
+        /* FORCE BLACK */
+        font-weight: 500;
+    }
+
+    .radio-option:hover {
+        background: var(--q-light);
+        border-color: var(--q-primary);
+    }
+
+    input[type="radio"] {
+        accent-color: var(--q-secondary);
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Voice Recorder Styles */
+    .recorder-box {
+        background: #f0f4f8;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border: 1px dashed #ccc;
+    }
+
+    .record-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--q-error);
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s;
+        box-shadow: 0 4px 10px rgba(255, 23, 68, 0.3);
+    }
+
+    .record-btn.recording {
+        animation: pulse 1.5s infinite;
+        background: darkred;
+    }
+
+    .record-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7);
+        }
+
+        70% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 10px rgba(255, 23, 68, 0);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
+        }
+    }
+
+    /* Submit Button */
+    .submit-container {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+
+    .submit-btn {
+        background: linear-gradient(90deg, var(--q-secondary), var(--q-primary));
+        color: white;
+        border: none;
+        padding: 15px 50px;
+        font-size: 1.5rem;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 10px 25px rgba(58, 123, 213, 0.4);
+        transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(58, 123, 213, 0.5);
+    }
+
+    /* Feedback */
+    .feedback {
+        margin-top: 5px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        display: none;
+    }
+
+    .feedback.correct {
+        color: var(--q-success);
+        display: block;
+    }
+
+    .feedback.incorrect {
+        color: var(--q-error);
+        display: block;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .quiz-container {
+            padding: 0 10px;
+            margin-top: 20px;
+        }
+
+        .quiz-section {
+            padding: 20px;
+        }
+
+        .radio-group {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .recorder-box {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+        }
+
+        .record-btn {
+            margin: 0 auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>Class 3 Review Activity 📝</h1>
+        <p>Test your knowledge on Pronouns, Verb To Be, and Wh- Questions!</p>
+    </div>
+
+    <form id="quizForm" onsubmit="return false;">
+
+        <!-- PART 1 -->
+        <div class="quiz-section">
+            <h2>Part 1: Pronoun Challenge</h2>
+            <p style="margin-bottom: 20px; color: #666;">Select the correct pronoun for each sentence.</p>
+
+            <div class="question" data-correct="I">
+                <div class="question-text">1. ______ am a student, but she is the teacher.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_1" value="I"> I (Subject)</label>
+                    <label class="radio-option"><input type="radio" name="q1_1" value="Me"> Me (Object)</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="him">
+                <div class="question-text">2. Do you like ______?</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_2" value="he"> he</label>
+                    <label class="radio-option"><input type="radio" name="q1_2" value="him"> him</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="my">
+                <div class="question-text">3. This is ______ house.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_3" value="my"> my</label>
+                    <label class="radio-option"><input type="radio" name="q1_3" value="mine"> mine</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="yours">
+                <div class="question-text">4. That car is not ______.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_4" value="your"> your</label>
+                    <label class="radio-option"><input type="radio" name="q1_4" value="yours"> yours</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="us">
+                <div class="question-text">5. She talks to ______ every day.</div>
+                <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="q1_5" value="we"> we</label>
+                    <label class="radio-option"><input type="radio" name="q1_5" value="us"> us</label>
+                </div>
+                <div class="feedback"></div>
+            </div>
+        </div>
+
+        <!-- PART 2 -->
+        <div class="quiz-section">
+            <h2>Part 2: Sentence Transformation</h2>
+            <p style="margin-bottom: 20px; color: #666;">Rewrite the sentences in <strong>Negative</strong> and
+                <strong>Interrogative</strong> forms.
+            </p>
+
+            <div class="question">
+                <div class="question-text">1. You are a student.</div>
+                <input type="text" class="q-input" placeholder="Negative (e.g., You are not...)" name="q2_1_neg"
+                    data-answer="you are not a student">
+                <input type="text" class="q-input" placeholder="Interrogative (e.g., Are you...?)" name="q2_1_int"
+                    style="margin-top: 10px;" data-answer="are you a student?">
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">2. They are intelligent.</div>
+                <input type="text" class="q-input" placeholder="Negative" name="q2_2_neg"
+                    data-answer="they are not intelligent">
+                <input type="text" class="q-input" placeholder="Interrogative" name="q2_2_int" style="margin-top: 10px;"
+                    data-answer="are they intelligent?">
+                <div class="feedback"></div>
+            </div>
+        </div>
+
+        <!-- PART 3 -->
+        <div class="quiz-section">
+            <h2>Part 3: Wh- Questions</h2>
+            <p style="margin-bottom: 20px; color: #666;">Choose the correct word: Where, What, Who, How, When.</p>
+
+            <div class="question" data-correct="Where">
+                <div class="question-text">1. __________ are you from? (Answer: I am from Brazil)</div>
+                <select class="q-select" name="q3_1">
+                    <option value="">Select...</option>
+                    <option value="What">What</option>
+                    <option value="Where">Where</option>
+                    <option value="Who">Who</option>
+                </select>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="What">
+                <div class="question-text">2. __________ is your name? (Answer: My name is John)</div>
+                <select class="q-select" name="q3_2">
+                    <option value="">Select...</option>
+                    <option value="What">What</option>
+                    <option value="Where">Where</option>
+                    <option value="When">When</option>
+                </select>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="question" data-correct="Who">
+                <div class="question-text">3. __________ is that man? (Answer: That is the teacher)</div>
+                <select class="q-select" name="q3_3">
+                    <option value="">Select...</option>
+                    <option value="Who">Who</option>
+                    <option value="How">How</option>
+                    <option value="Where">Where</option>
+                </select>
+                <div class="feedback"></div>
+            </div>
+        </div>
+
+        <!-- PART 4 -->
+        <div class="quiz-section">
+            <h2>Part 4: Speaking Challenge 🎤</h2>
+            <p style="margin-bottom: 20px; color: #666;">Read the sentences aloud. Record your voice to practice!</p>
+
+            <div class="question">
+                <div class="question-text">1. "Excuse me, but I have to go."</div>
+                <div class="recorder-box">
+                    <button class="record-btn" onclick="toggleRecord(this, 'audio1')">🎤</button>
+                    <audio id="audio1" controls style="display:none; width: 100%;"></audio>
+                    <span class="status-text">Click mic to record</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">2. "What is your name? Nice to meet you."</div>
+                <div class="recorder-box">
+                    <button class="record-btn" onclick="toggleRecord(this, 'audio2')">🎤</button>
+                    <audio id="audio2" controls style="display:none; width: 100%;"></audio>
+                    <span class="status-text">Click mic to record</span>
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-text">3. "I am Brazilian. And you?"</div>
+                <div class="recorder-box">
+                    <button class="record-btn" onclick="toggleRecord(this, 'audio3')">🎤</button>
+                    <audio id="audio3" controls style="display:none; width: 100%;"></audio>
+                    <span class="status-text">Click mic to record</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-container">
+            <button class="submit-btn" onclick="checkAnswers()">Submit Answers ✅</button>
+            <div id="finalScore" style="margin-top: 20px; font-size: 1.5rem; font-weight: bold;"></div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- RECORDING LOGIC ---
+    let mediaRecorders = {};
+    let audioChunks = {};
+
+    async function toggleRecord(btn, audioId) {
+        if (!mediaRecorders[audioId] || mediaRecorders[audioId].state === "inactive") {
+            // Start Recording
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                mediaRecorders[audioId] = mediaRecorder;
+                audioChunks[audioId] = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks[audioId].push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks[audioId], { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audioEl = document.getElementById(audioId);
+                    audioEl.src = audioUrl;
+                    audioEl.style.display = 'block';
+                };
+
+                mediaRecorder.start();
+                btn.classList.add('recording');
+                btn.nextElementSibling.nextElementSibling.innerText = "Recording... (Click to stop)";
+            } catch (err) {
+                alert("Error accessing microphone: " + err.message);
+            }
+        } else {
+            // Stop Recording
+            mediaRecorders[audioId].stop();
+            btn.classList.remove('recording');
+            btn.nextElementSibling.nextElementSibling.innerText = "Recorded! ▶ Play to listen";
+        }
+    }
+
+    // --- CHECK ANSWERS LOGIC ---
+    function checkAnswers() {
+        let score = 0;
+        let total = 0;
+
+        // Part 1: Radios
+        document.querySelectorAll('.quiz-section:nth-child(1) .question').forEach(q => {
+            total++;
+            const correct = q.dataset.correct;
+            const feedback = q.querySelector('.feedback');
+            const selected = q.querySelector('input:checked');
+
+            if (selected && selected.value === correct) {
+                score++;
+                feedback.innerHTML = "Correct! ✅";
+                feedback.className = "feedback correct";
+            } else {
+                feedback.innerHTML = `Incorrect. The answer is <strong>${correct}</strong>.`;
+                feedback.className = "feedback incorrect";
+            }
+        });
+
+        // Part 2: Inputs
+        document.querySelectorAll('.quiz-section:nth-child(2) .question input').forEach(inp => {
+            total++;
+            const correct = inp.dataset.answer.toLowerCase();
+            const userAns = inp.value.trim().toLowerCase().replace(/[.,!]/g, ''); // Basic cleaning
+            const feedback = inp.parentNode.querySelector('.feedback');
+
+            // Check if user answer roughly matches (allowing for punctuation diffs)
+            if (userAns === correct.replace(/[.,!]/g, '')) {
+                score++;
+                // feedback handled per line? Ideally unique feedback per input, but grouped here
+                // For simplicity, we just count score.
+                inp.style.borderColor = "var(--q-success)";
+            } else {
+                inp.style.borderColor = "var(--q-error)";
+            }
+        });
+
+        // Show feedback for Part 2 separately as specific text
+        // (Simplified for this demo to just color the border)
+
+        // Part 3: Selects
+        document.querySelectorAll('.quiz-section:nth-child(3) .question').forEach(q => {
+            total++;
+            const correct = q.dataset.correct;
+            const feedback = q.querySelector('.feedback');
+            const selected = q.querySelector('select').value;
+
+            if (selected === correct) {
+                score++;
+                feedback.innerHTML = "Correct! ✅";
+                feedback.className = "feedback correct";
+            } else {
+                feedback.innerHTML = `Incorrect. The answer is <strong>${correct}</strong>.`;
+                feedback.className = "feedback incorrect";
+            }
+        });
+
+        // Display Score
+        const finalDiv = document.getElementById('finalScore');
+        const percentage = Math.round((score / total) * 100);
+        finalDiv.innerText = `You scored ${score} / ${total} (${percentage}%)`;
+
+        if (percentage >= 80) finalDiv.style.color = "var(--q-success)";
+        else finalDiv.style.color = "var(--q-dark)";
+
+        // Scroll to bottom
+        finalDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}
