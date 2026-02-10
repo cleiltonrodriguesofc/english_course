@@ -1,10 +1,14 @@
 from django.urls import path
-from . import views
+from .views import dashboard, lesson_1, lesson_2, lesson_3, quiz_view, register, login_view, logout_view, save_quiz_result
 
 urlpatterns = [
-    path('', views.dashboard, name='dashboard'),
-    path('lesson/1/', views.lesson_1, name='lesson_1'),
-    path('lesson/2/', views.lesson_2, name='lesson_2'),
-    path('lesson-3/', views.lesson_3, name='lesson_3'),
-    path('quiz/', views.quiz_view, name='quiz'),
+    path('', dashboard, name='dashboard'),
+    path('lesson/1/', lesson_1, name='lesson_1'),
+    path('lesson/2/', lesson_2, name='lesson_2'),
+    path('lesson/3/', lesson_3, name='lesson_3'),
+    path('quiz/', quiz_view, name='quiz'),
+    path('register/', register, name='register'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('api/save-quiz/', save_quiz_result, name='save_quiz_result'),
 ]

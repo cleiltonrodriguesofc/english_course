@@ -720,6 +720,58 @@
 
         // Scroll to bottom
         finalDiv.scrollIntoView({ behavior: 'smooth' });
+
+        // --- SAVE TO DATABASE ---
+        saveDataToBackend(score, total);
+    }
+
+    function saveDataToBackend(score, total) {
+        fetch('/api/save-quiz/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add CSRF token for Django
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                score: score,
+                total: total,
+                quiz_name: 'Class 3 Review'
+            })
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    // User not logged in
+                    const finalDiv = document.getElementById('finalScore');
+                    finalDiv.innerHTML += `<br><small style="color:orange; font-size:0.8em;">(Login to save your progress)</small>`;
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.status === 'success') {
+                    console.log('Score saved!');
+                    const finalDiv = document.getElementById('finalScore');
+                    finalDiv.innerHTML += `<br><small style="color:green; font-size:0.8em;">(Progress Saved! ✅)</small>`;
+                }
+            })
+            .catch(error => console.error('Error saving score:', error));
+    }
+
+    // Helper to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
 </script>
 {% endblock %}

@@ -1,8 +1,26 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import QuizResult
 
 
 def dashboard(request):
-    return render(request, 'dashboard.html')
+    quiz_score = None
+    if request.user.is_authenticated:
+        # Get latest quiz score
+        latest_result = QuizResult.objects.filter(user=request.user, quiz_name='Class 3 Review').order_by('-date_taken').first()
+        if latest_result:
+            quiz_score = {
+                'score': latest_result.score,
+                'total': latest_result.total_questions,
+                'percentage': int((latest_result.score / latest_result.total_questions) * 100)
+            }
+            
+    return render(request, 'dashboard.html', {'quiz_score': quiz_score})
 
 
 def lesson_1(request):
@@ -18,3 +36,64 @@ def lesson_3(request):
 
 def quiz_view(request):
     return render(request, 'quiz.html')
+
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Registration successful!")
+            return redirect('dashboard')
+        else:
+            messages.error(request, "Unsuccessful registration. Invalid information.")
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"You are now logged in as {username}.")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, "You have successfully logged out.")
+    return redirect('login')
+
+@csrf_exempt
+def save_quiz_result(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            score = data.get('score')
+            total = data.get('total')
+            quiz_name = data.get('quiz_name', 'General')
+            
+            if request.user.is_authenticated:
+                QuizResult.objects.create(
+                    user=request.user,
+                    score=score,
+                    total_questions=total,
+                    quiz_name=quiz_name
+                )
+                return JsonResponse({'status': 'success', 'message': 'Score saved!'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)

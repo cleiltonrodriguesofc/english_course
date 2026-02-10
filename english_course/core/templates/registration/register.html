@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - English Course{% endblock %}
+
+{% block content %}
+<div
+    style="max-width: 450px; margin: 50px auto; padding: 30px; background: white; color: #333; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    <h2 style="text-align: center; color: var(--primary); margin-bottom: 30px;">Create Account ✨</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div style="margin-bottom: 20px;">
+            <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 5px; font-weight: bold;">
+                {{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+            <small style="color: #666; display: block; margin-top: 5px;">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <div style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit"
+            style="width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-weight: bold;">
+            Sign Up
+        </button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px;">
+        Already have an account? <a href="{% url 'login' %}" style="color: var(--secondary); font-weight: bold;">Login
+            here</a>
+    </p>
+</div>
+
+<style>
+    /* Form inputs styling override */
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="email"]:focus {
+        border-color: var(--secondary);
+        outline: none;
+    }
+
+    ul.errorlist {
+        list-style: none;
+        padding: 0;
+        color: red;
+    }
+</style>
+{% endblock %}
