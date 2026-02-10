@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}English Course{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -105,6 +105,90 @@
         .lesson-btn:hover {
             background: #000428;
         }
+
+        /* --- RESPONSIVE LAYOUT --- */
+        .mobile-nav-toggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+                position: relative;
+                z-index: 1000;
+                box-sizing: border-box;
+            }
+
+            .sidebar h2 {
+                font-size: 1.2rem;
+                margin: 0;
+                border: none;
+                padding: 0;
+            }
+
+            /* Toggle Button */
+            .mobile-nav-toggle {
+                display: block;
+                font-size: 1.8rem;
+                cursor: pointer;
+                color: white;
+            }
+
+            /* Navigation Links Container */
+            .nav-links-container {
+                display: none;
+                width: 100%;
+                margin-top: 15px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding-top: 10px;
+            }
+
+            .nav-links-container.active {
+                display: block;
+                animation: slideDown 0.3s ease-out;
+            }
+
+            .nav-link {
+                display: block;
+                /* Make sure they are visible when container is active */
+                padding: 12px;
+                margin-bottom: 5px;
+            }
+
+            .content {
+                height: calc(100vh - 70px);
+                /* Adjust for header height */
+            }
+
+            /* Dashboard Grid on Mobile */
+            .dashboard-container {
+                padding: 20px;
+            }
+
+            .module-card {
+                padding: 15px;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -112,15 +196,29 @@
 <body>
 
     <div class="sidebar">
-        <h2>English Course 🇬🇧</h2>
-        <a href="{% url 'dashboard' %}"
-            class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠 Dashboard</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2>English Course 🇬🇧</h2>
+            <div class="mobile-nav-toggle" onclick="toggleNav()">☰</div>
+        </div>
 
-        <div class="module-title">Module 1: The Basics</div>
-        <a href="{% url 'lesson_1' %}" class="nav-link">Lesson 1: Alphabet</a>
-        <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
-        <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
+        <div id="navLinks" class="nav-links-container">
+            <a href="{% url 'dashboard' %}"
+                class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠
+                Dashboard</a>
+
+            <div class="module-title">Module 1: The Basics</div>
+            <a href="{% url 'lesson_1' %}" class="nav-link">Lesson 1: Alphabet</a>
+            <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
+            <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
+        </div>
     </div>
+
+    <script>
+        function toggleNav() {
+            const nav = document.getElementById('navLinks');
+            nav.classList.toggle('active');
+        }
+    </script>
 
     <div class="content">
         {% block content %}{% endblock %}
