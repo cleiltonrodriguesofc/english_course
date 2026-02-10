@@ -443,49 +443,54 @@
             <h2>Part 4: Speaking Challenge 🎤</h2>
             <p style="margin-bottom: 20px; color: #666;">Read the sentences aloud. Record your voice to practice!</p>
 
-            <div class="question">
+            <div class="question" data-target="Excuse me but I have to go">
                 <div class="question-text">1. "Excuse me, but I have to go."</div>
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio1')">🎤</button>
                     <audio id="audio1" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
+                <div class="feedback"></div>
             </div>
 
-            <div class="question">
+            <div class="question" data-target="What is your name Nice to meet you">
                 <div class="question-text">2. "What is your name? Nice to meet you."</div>
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio2')">🎤</button>
                     <audio id="audio2" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
+                <div class="feedback"></div>
             </div>
 
-            <div class="question">
+            <div class="question" data-target="I am Brazilian And you">
                 <div class="question-text">3. "I am Brazilian. And you?"</div>
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio3')">🎤</button>
                     <audio id="audio3" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
+                <div class="feedback"></div>
             </div>
 
-            <div class="question">
+            <div class="question" data-target="Where are you from">
                 <div class="question-text">4. "Where are you from?"</div>
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio4')">🎤</button>
                     <audio id="audio4" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
+                <div class="feedback"></div>
             </div>
 
-            <div class="question">
+            <div class="question" data-target="It is a pleasure to meet you">
                 <div class="question-text">5. "It is a pleasure to meet you."</div>
                 <div class="recorder-box">
                     <button class="record-btn" onclick="toggleRecord(this, 'audio5')">🎤</button>
                     <audio id="audio5" controls style="display:none; width: 100%;"></audio>
                     <span class="status-text">Click mic to record</span>
                 </div>
+                <div class="feedback"></div>
             </div>
         </div>
 
@@ -500,14 +505,19 @@
 
 {% block extra_js %}
 <script>
-    // --- RECORDING LOGIC ---
+    // --- RECORDING & FEEDBACK LOGIC ---
     let mediaRecorders = {};
     let audioChunks = {};
 
     async function toggleRecord(btn, audioId) {
+        const statusSpan = btn.nextElementSibling.nextElementSibling;
+        const feedbackDiv = btn.parentNode.nextElementSibling; // Get feedback div
+        const targetText = btn.closest('.question').dataset.target; // Get target text
+
         if (!mediaRecorders[audioId] || mediaRecorders[audioId].state === "inactive") {
-            // Start Recording
+            // --- START RECORDING ---
             try {
+                // 1. Audio Recording (MediaRecorder)
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 const mediaRecorder = new MediaRecorder(stream);
                 mediaRecorders[audioId] = mediaRecorder;
@@ -526,17 +536,118 @@
                 };
 
                 mediaRecorder.start();
+
+                // 2. Speech Recognition (Web Speech API)
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRecognition();
+                    recognition.lang = 'en-US';
+                    recognition.interimResults = false;
+                    recognition.maxAlternatives = 1;
+
+                    recognition.onstart = () => {
+                        console.log('Voice recognition started...');
+                    };
+
+                    recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        console.log('Heard:', transcript);
+
+                        // Compare transcript with target
+                        checkPronunciation(transcript, targetText, feedbackDiv);
+                    };
+
+                    recognition.onerror = (event) => {
+                        console.error('Recognition error:', event.error);
+                        feedbackDiv.innerHTML = `<span style="color:orange">⚠️ Could not hear clearly. Try again!</span>`;
+                    };
+
+                    recognition.start();
+                    // Store recognition instance to stop it later if needed, 
+                    // though it usually stops automatically on silence
+                    btn.dataset.recognition = recognition;
+                } else {
+                    feedbackDiv.innerHTML = "⚠️ Speech recognition not supported in this browser.";
+                }
+
+                // UI Updates
                 btn.classList.add('recording');
-                btn.nextElementSibling.nextElementSibling.innerText = "Recording... (Click to stop)";
+                statusSpan.innerText = "Listening... 🛑 Click to stop";
+                feedbackDiv.innerHTML = "Listening...";
+                feedbackDiv.className = "feedback";
+                feedbackDiv.style.display = "block";
+
             } catch (err) {
                 alert("Error accessing microphone: " + err.message);
             }
         } else {
-            // Stop Recording
+            // --- STOP RECORDING ---
             mediaRecorders[audioId].stop();
             btn.classList.remove('recording');
-            btn.nextElementSibling.nextElementSibling.innerText = "Recorded! ▶ Play to listen";
+            statusSpan.innerText = "Recorded! ▶ Play to listen";
         }
+    }
+
+    function checkPronunciation(spoken, target, feedbackInfo) {
+        // Clean strings: remove punctuation, extra spaces, lowercase
+        const cleanSpoken = spoken.toLowerCase().replace(/[.,!?'"]/g, '').trim();
+        const cleanTarget = target.toLowerCase().replace(/[.,!?'"]/g, '').trim();
+
+        const similarity = calculateSimilarity(cleanSpoken, cleanTarget);
+
+        console.log(`Spoken: "${cleanSpoken}" vs Target: "${cleanTarget}" (Sim: ${similarity})`);
+
+        if (similarity >= 0.8 || cleanSpoken.includes(cleanTarget)) {
+            feedbackInfo.innerHTML = `✅ <strong>Perfect!</strong> You said: "<em>${spoken}</em>"`;
+            feedbackInfo.className = "feedback correct";
+        } else if (similarity >= 0.5) {
+            feedbackInfo.innerHTML = `⚠️ <strong>Close!</strong> You said: "<em>${spoken}</em>"`;
+            feedbackInfo.className = "feedback incorrect"; // Use incorrect style for warning
+            feedbackInfo.style.color = "orange";
+        } else {
+            feedbackInfo.innerHTML = `❌ <strong>Try again.</strong> You said: "<em>${spoken}</em>"`;
+            feedbackInfo.className = "feedback incorrect";
+        }
+    }
+
+    // Levenshtein Distance for Similarity
+    function calculateSimilarity(s1, s2) {
+        let longer = s1;
+        let shorter = s2;
+        if (s1.length < s2.length) {
+            longer = s2;
+            shorter = s1;
+        }
+        const longerLength = longer.length;
+        if (longerLength === 0) {
+            return 1.0;
+        }
+        return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+    }
+
+    function editDistance(s1, s2) {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+        const costs = new Array();
+        for (let i = 0; i <= s1.length; i++) {
+            let lastValue = i;
+            for (let j = 0; j <= s2.length; j++) {
+                if (i == 0)
+                    costs[j] = j;
+                else {
+                    if (j > 0) {
+                        let newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0)
+                costs[s2.length] = lastValue;
+        }
+        return costs[s2.length];
     }
 
     // --- CHECK ANSWERS LOGIC ---
