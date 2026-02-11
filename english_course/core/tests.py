@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import QuizResult
+from .models import QuizResult, ActivityLog
 import json
 
 class EnglishCourseTests(TestCase):
@@ -93,3 +93,37 @@ class EnglishCourseTests(TestCase):
         response = self.client.get(reverse('game_puzzle'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'game_puzzle.html')
+
+class ActivityLogTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='password123')
+
+    def test_activity_log_creation(self):
+        """Test creating an ActivityLog entry."""
+        log = ActivityLog.objects.create(user=self.user, action="Test Action")
+        self.assertEqual(str(log), f"testuser - Test Action - {log.timestamp}")
+
+    def test_login_signal(self):
+        """Test that login triggers an ActivityLog entry."""
+        self.client.login(username='testuser', password='password123')
+        # Check if log exists
+        self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Logged In").exists())
+
+    def test_logout_signal(self):
+        """Test that logout triggers an ActivityLog entry."""
+        self.client.login(username='testuser', password='password123')
+        self.client.logout()
+        self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Logged Out").exists())
+
+    def test_view_logging(self):
+        """Test that accessing views creates log entries."""
+        self.client.login(username='testuser', password='password123')
+        
+        # Access Lesson 1
+        self.client.get(reverse('lesson_1'))
+        self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Viewed Lesson 1").exists())
+
+        # Access Puzzle Game
+        self.client.get(reverse('game_puzzle'))
+        self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Played Puzzle Game").exists())
