@@ -18,6 +18,7 @@ jobs:
     env:
       SECRET_KEY: 'test-secret-key-for-ci'
       DEBUG: 'True'
+      ALLOWED_HOSTS: '127.0.0.1,localhost'
 
     steps:
     - uses: actions/checkout@v4
