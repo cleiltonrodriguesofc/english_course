@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 4: Hobbies & Free Time - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Hobbies (Purple/Pink/Blue) --- */
+    :root {
+        --c4-primary: #8E2DE2;
+        --c4-secondary: #4A00E0;
+        --c4-accent: #00e676;
+        --c4-dark: #120136;
+        --c4-light: #F3E5F5;
+        --c4-glass: rgba(74, 0, 224, 0.3);
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, #120136, #4A00E0);
+        color: var(--c4-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1000px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(138, 45, 226, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(138, 45, 226, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px 40px 80px 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* Scrollbar */
+    .slide::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .slide::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .slide::-webkit-scrollbar-thumb {
+        background: var(--c4-primary);
+        border-radius: 4px;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    .lesson-wrapper h1 {
+        font-size: 3rem;
+        color: var(--c4-accent);
+        margin: 0.5em 0;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 20px rgba(0, 230, 118, 0.5);
+    }
+
+    .lesson-wrapper h2 {
+        font-size: 2.2rem;
+        color: #EA80FC;
+        margin: 0.5em 0;
+        border-bottom: 2px solid var(--c4-primary);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    .lesson-wrapper p {
+        font-size: 1.3rem;
+        line-height: 1.6;
+        color: #E1BEE7;
+        max-width: 800px;
+        margin-bottom: 20px;
+    }
+
+    /* --- INTERACTIVE ELEMENTS --- */
+    .btn-nav-c4 {
+        background: linear-gradient(90deg, var(--c4-secondary), var(--c4-primary));
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-nav-c4:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(138, 45, 226, 0.4);
+    }
+
+    .btn-nav-c4:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Controls */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .progress-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        z-index: 101;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: var(--c4-accent);
+        width: 0%;
+        transition: width 0.5s ease;
+        box-shadow: 0 0 10px var(--c4-accent);
+    }
+
+    /* --- MODULE 1: HOBBIES GRID --- */
+    .hobbies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .hobby-card {
+        background: var(--c4-glass);
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .hobby-card:hover {
+        background: var(--c4-secondary);
+        transform: translateY(-5px) scale(1.05);
+        border-color: var(--c4-accent);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .hobby-icon {
+        font-size: 3rem;
+    }
+
+    .hobby-name {
+        font-weight: bold;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    /* --- MODULE 2: LIKES & DISLIKES --- */
+    .preference-container {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .pref-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 30px;
+        border-radius: 20px;
+        width: 300px;
+        text-align: center;
+        border-top: 5px solid;
+    }
+
+    .pref-like { border-color: #00e676; }
+    .pref-dislike { border-color: #ff1744; }
+
+    .sentence-strip {
+        background: rgba(255, 255, 255, 0.1);
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .sentence-strip:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+
+    /* --- MODULE 3: DIALOGUE --- */
+    .dialogue-box {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 30px;
+        border-radius: 20px;
+        max-width: 700px;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .speech-bubble {
+        padding: 15px 20px;
+        border-radius: 20px;
+        position: relative;
+        max-width: 80%;
+        cursor: pointer;
+    }
+
+    .bubble-left {
+        background: var(--c4-secondary);
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
+
+    .bubble-right {
+        background: #009688;
+        align-self: flex-end;
+        border-bottom-right-radius: 5px;
+        text-align: right;
+    }
+
+    /* --- QUIZ STYLES --- */
+    .quiz-option {
+        background: var(--c4-glass);
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: 0.2s;
+        font-size: 1.2rem;
+    }
+
+    .quiz-option:hover {
+        background: var(--c4-secondary);
+        border-color: var(--c4-accent);
+    }
+
+    /* Animations */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h1>Class 4</h1>
+                <h2>Hobbies & Free Time 🎨</h2>
+                <div style="font-size: 6rem; margin: 30px; animation: float 3s infinite ease-in-out;">🎮</div>
+                <p>What do you like to do for fun?<br>Let's talk about hobbies!</p>
+                <button class="btn-nav-c4" onclick="changeSlide(1)">Let's Go! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: COMMON HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Common Hobbies 🎸</h2>
+                <p>Click to listen and learn.</p>
+                
+                <div class="hobbies-grid">
+                    <div class="hobby-card" onclick="speak('Playing Video Games')">
+                        <div class="hobby-icon">🎮</div>
+                        <div class="hobby-name">Video Games</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Listening to Music')">
+                        <div class="hobby-icon">🎧</div>
+                        <div class="hobby-name">Music</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Reading Books')">
+                        <div class="hobby-icon">📚</div>
+                        <div class="hobby-name">Reading</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Watching Movies')">
+                        <div class="hobby-icon">🎬</div>
+                        <div class="hobby-name">Movies</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Playing Soccer')">
+                        <div class="hobby-icon">⚽</div>
+                        <div class="hobby-name">Soccer</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Painting')">
+                        <div class="hobby-icon">🎨</div>
+                        <div class="hobby-name">Painting</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Travelling')">
+                        <div class="hobby-icon">✈️</div>
+                        <div class="hobby-name">Travelling</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Cooking')">
+                        <div class="hobby-icon">🍳</div>
+                        <div class="hobby-name">Cooking</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: EXPRESSING PREFERENCES (LIKE / DON'T LIKE) -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>I Like / I Don't Like 👍👎</h2>
+                <p>How to say what you enjoy (or hate).</p>
+
+                <div class="preference-container">
+                    <div class="pref-box pref-like">
+                        <div style="font-size: 3rem;">😍</div>
+                        <h3>I Like...</h3>
+                        <div class="sentence-strip" onclick="speak('I like playing soccer')">I like playing soccer ⚽</div>
+                        <div class="sentence-strip" onclick="speak('I love reading books')">I love reading books 📚</div>
+                        <div class="sentence-strip" onclick="speak('I enjoy cooking')">I enjoy cooking 🍳</div>
+                    </div>
+
+                    <div class="pref-box pref-dislike">
+                        <div style="font-size: 3rem;">🤢</div>
+                        <h3>I Don't Like...</h3>
+                        <div class="sentence-strip" onclick="speak('I do not like dancing')">I don't like dancing 💃</div>
+                        <div class="sentence-strip" onclick="speak('I hate washing dishes')">I hate washing dishes 🧼</div>
+                        <div class="sentence-strip" onclick="speak('I dislike running')">I dislike running 🏃</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: TWO FRIENDS TALKING -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Conversation Practice 🗣️</h2>
+                <p>Click the bubbles to hear the conversation.</p>
+
+                <div class="dialogue-box">
+                    <div class="speech-bubble bubble-left" onclick="speak('Hi Sarah! What do you do in your free time?')">
+                        <b>Tom:</b> Hi Sarah! What do you do in your free time?
+                    </div>
+                    <div class="speech-bubble bubble-right" onclick="speak('I love painting and reading. What about you?')">
+                        <b>Sarah:</b> I love painting and reading. What about you?
+                    </div>
+                    <div class="speech-bubble bubble-left" onclick="speak('I like playing video games and watching movies.')">
+                        <b>Tom:</b> I like playing video games and watching movies.
+                    </div>
+                    <div class="speech-bubble bubble-right" onclick="speak('Do you like cooking?')">
+                        <b>Sarah:</b> Do you like cooking?
+                    </div>
+                    <div class="speech-bubble bubble-left" onclick="speak('No, I hate cooking! I prefer eating!')">
+                        <b>Tom:</b> No, I hate cooking! I prefer eating! 😂
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Pop Quiz 🧠</h2>
+                <p id="quizQuestion">Question 1</p>
+                <div style="width: 100%; max-width: 500px;" id="quizOptions"></div>
+                <div id="quizScore" style="margin-top: 20px; font-size: 1.5rem; color: var(--c4-accent);">Score: 0</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: FINISH -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Well Done! 🎉</h1>
+                <div style="font-size: 5rem;">🏆</div>
+                <p>You can now talk about your hobbies!</p>
+                <button class="btn-nav-c4" onclick="location.reload()">Replay Class ↺</button>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="controls">
+            <button class="btn-nav-c4" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav-c4" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'block'; nextBtn.disabled = false; }
+
+        if (currentSlide === 4) loadQuiz();
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- MINI QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "I _____ playing video games. (Enjoy)", options: ["like", "hate", "sad"], a: 0 },
+        { q: "He _____ like cooking.", options: ["don't", "doesn't", "isn't"], a: 1 },
+        { q: "What is this? ⚽", options: ["Reading", "Soccer", "Cooking"], a: 1 },
+        { q: "She loves _____ books.", options: ["read", "reading", "reads"], a: 1 }
+    ];
+
+    let quizScore = 0;
+    let currentQ = 0;
+
+    function loadQuiz() {
+        if (currentQ >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            return;
+        }
+
+        const q = quizData[currentQ];
+        document.getElementById('quizQuestion').innerText = q.q;
+        const optsDiv = document.getElementById('quizOptions');
+        optsDiv.innerHTML = "";
+
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(idx);
+            optsDiv.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(idx) {
+        if (idx === quizData[currentQ].a) {
+            quizScore++;
+            speak("Correct!");
+        } else {
+            speak("Try again next time.");
+        }
+        document.getElementById('quizScore').innerText = "Score: " + quizScore + "/" + quizData.length;
+        currentQ++;
+        loadQuiz();
+    }
+</script>
+{% endblock %}

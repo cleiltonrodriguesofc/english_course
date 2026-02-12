@@ -29,13 +29,35 @@
             padding: 20px;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
             z-index: 100;
+            overflow: hidden;
+            /* Prevent sidebar itself from scroll */
         }
 
         .sidebar h2 {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             padding-bottom: 20px;
+            flex-shrink: 0;
+            /* Keep header visible */
+        }
+
+        /* Container for links to allow scrolling */
+        .nav-links-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            /* For scrollbar space */
+        }
+
+        /* Custom Scrollbar for Nav */
+        .nav-links-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .nav-links-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
         }
 
         .nav-link {
@@ -253,6 +275,7 @@
             <a href="{% url 'lesson_1' %}" class="nav-link">Lesson 1: Alphabet</a>
             <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
             <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
+            <a href="{% url 'lesson_4' %}" class="nav-link">Lesson 4: Hobbies</a>
             <a href="{% url 'game_puzzle' %}" class="nav-link" style="color: #FFD700;">🧩 Puzzle Game</a>
             <a href="{% url 'game_memory' %}" class="nav-link" style="color: #FF4081;">🧠 Memory Game</a>
             {% if user.is_authenticated %}
