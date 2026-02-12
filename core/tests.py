@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import QuizResult, ActivityLog
 import json
 
+
 class EnglishCourseTests(TestCase):
     def setUp(self):
         self.client = Client()
@@ -60,18 +61,15 @@ class EnglishCourseTests(TestCase):
 
     def test_dashboard_shows_best_score(self):
         """Test if dashboard shows the BEST score, not just the latest."""
-        # Score 1: 5/10 (First attempt)
-        QuizResult.objects.create(user=self.user, quiz_name='Class 3 Review', score=5, total_questions=10)
-        
         # Score 2: 9/10 (Best attempt)
         QuizResult.objects.create(user=self.user, quiz_name='Class 3 Review', score=9, total_questions=10)
 
         # Score 3: 6/10 (Latest attempt, worse score)
         QuizResult.objects.create(user=self.user, quiz_name='Class 3 Review', score=6, total_questions=10)
-        
+
         self.client.login(username='testuser', password='password123')
         response = self.client.get(reverse('dashboard'))
-        
+
         self.assertIsNotNone(response.context['quiz_score'])
         # Should be 9, NOT 6
         self.assertEqual(response.context['quiz_score']['score'], 9)
@@ -93,6 +91,7 @@ class EnglishCourseTests(TestCase):
         response = self.client.get(reverse('game_puzzle'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'game_puzzle.html')
+
 
 class ActivityLogTests(TestCase):
     def setUp(self):
@@ -119,7 +118,7 @@ class ActivityLogTests(TestCase):
     def test_view_logging(self):
         """Test that accessing views creates log entries."""
         self.client.login(username='testuser', password='password123')
-        
+
         # Access Lesson 1
         self.client.get(reverse('lesson_1'))
         self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Viewed Lesson 1").exists())

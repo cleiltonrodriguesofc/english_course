@@ -1,0 +1,27 @@
+.\core\models.py:17:1: E302 expected 2 blank lines, found 1
+.\core\models.py:29:1: E302 expected 2 blank lines, found 1
+.\core\models.py:31:49: E261 at least two spaces before inline comment
+.\core\models.py:39:1: E302 expected 2 blank lines, found 1
+.\core\models.py:41:46: E261 at least two spaces before inline comment
+.\core\models.py:43:54: E261 at least two spaces before inline comment
+.\core\signals.py:5:1: E302 expected 2 blank lines, found 1
+.\core\signals.py:9:1: E302 expected 2 blank lines, found 1
+.\core\tests.py:7:1: E302 expected 2 blank lines, found 1
+.\core\tests.py:65:1: W293 blank line contains whitespace
+.\core\tests.py:71:1: W293 blank line contains whitespace
+.\core\tests.py:74:1: W293 blank line contains whitespace
+.\core\tests.py:97:1: E302 expected 2 blank lines, found 1
+.\core\tests.py:122:1: W293 blank line contains whitespace
+.\core\urls.py:2:121: E501 line too long (162 > 120 characters)
+.\core\views.py:10:1: E302 expected 2 blank lines, found 1
+.\core\views.py:29:1: W293 blank line contains whitespace
+.\core\views.py:47:1: E302 expected 2 blank lines, found 1
+.\core\views.py:50:1: E302 expected 2 blank lines, found 1
+.\core\views.py:64:1: E302 expected 2 blank lines, found 1
+.\core\views.py:83:1: E302 expected 2 blank lines, found 1
+.\core\views.py:88:1: E302 expected 2 blank lines, found 1
+.\core\views.py:96:1: W293 blank line contains whitespace
+.\core\views.py:111:1: E302 expected 2 blank lines, found 1
+.\core\views.py:114:1: W293 blank line contains whitespace
+.\core\views.py:123:1: E302 expected 2 blank lines, found 1
+.\core\views.py:127:1: E302 expected 2 blank lines, found 1
