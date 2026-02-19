@@ -50,6 +50,11 @@ def lesson_4(request):
     return render(request, 'lesson_4.html')
 
 
+def lesson_5(request):
+    log_activity(request.user, "Viewed Lesson 5")
+    return render(request, 'lesson_5.html')
+
+
 def quiz_view(request):
     return render(request, 'quiz.html')
 

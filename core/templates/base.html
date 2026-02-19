@@ -262,7 +262,7 @@
 
     <div class="sidebar">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>Full-Stack English Course</h2>
+            <h2>Full-Stack<br>English Course</h2>
             <div class="mobile-nav-toggle" onclick="toggleNav()">☰</div>
         </div>
 
@@ -276,6 +276,7 @@
             <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
             <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
             <a href="{% url 'lesson_4' %}" class="nav-link">Lesson 4: Hobbies</a>
+            <a href="{% url 'lesson_5' %}" class="nav-link">Lesson 5: Daily Routine</a>
             <a href="{% url 'game_puzzle' %}" class="nav-link" style="color: #FFD700;">🧩 Puzzle Game</a>
             <a href="{% url 'game_memory' %}" class="nav-link" style="color: #FF4081;">🧠 Memory Game</a>
             {% if user.is_authenticated %}
@@ -304,6 +305,21 @@
         function toggleNav() {
             const nav = document.getElementById('navLinks');
             nav.classList.toggle('active');
+        }
+
+        function toggleFullScreen() {
+            const lessonWrapper = document.querySelector('.lesson-wrapper');
+            const target = lessonWrapper || document.documentElement;
+
+            if (!document.fullscreenElement) {
+                target.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
         }
     </script>
 

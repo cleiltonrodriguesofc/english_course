@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 5: Daily Routine - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Sunrise (Energy & Routine) --- */
+    :root {
+        --c5-bg: #2c003e;
+        --c5-card: rgba(255, 255, 255, 0.1);
+        --c5-accent: #ff9a9e;
+        --c5-text: #ffffff;
+        --c5-secondary: #fecfef;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+        background: linear-gradient(to right, #ff512f, #dd2476);
+        /* Sunrise Orange/Pink */
+        color: var(--c5-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--c5-secondary);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.3rem;
+        color: #ffe0e0;
+        max-width: 800px;
+        margin-bottom: 30px;
+    }
+
+    /* --- ROUTINE CARDS --- */
+    .routine-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .routine-card {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 25px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .routine-card:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px);
+    }
+
+    .routine-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    .routine-text {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* --- CLOCK --- */
+    .clock-display {
+        font-family: 'Courier New', Courier, monospace;
+        background: #000;
+        color: #0f0;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 2rem;
+        margin: 10px;
+        border: 2px solid #333;
+    }
+
+    /* --- MATCHING GAME --- */
+    .matching-game {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 700px;
+        gap: 50px;
+    }
+
+    .match-col {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 45%;
+    }
+
+    .match-item {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: 0.2s;
+        border: 2px solid transparent;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .match-item.selected {
+        border-color: #fff;
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .match-item.matched {
+        background: #00e676;
+        color: #000;
+        pointer-events: none;
+        border-color: #00e676;
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 30px;
+        right: 40px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-control:hover {
+        background: #fff;
+        color: #dd2476;
+    }
+
+    .btn-word {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: 0.2s;
+        margin: 5px;
+    }
+
+    .btn-word:hover {
+        background: #fff;
+        color: #dd2476;
+        transform: scale(1.05);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: #fff;
+        width: 0%;
+        transition: width 0.3s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 5</h3>
+                <h1>My Daily Routine ☀️</h1>
+                <div style="font-size: 6rem; margin: 30px;">⏰</div>
+                <p>Learn to talk about your day, from morning to night!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">START DAY! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: MORNING -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Good Morning! 🌅</h2>
+                <div class="routine-grid">
+                    <div class="routine-card" onclick="speak('I wake up')">
+                        <div class="routine-icon">🛌</div>
+                        <div class="routine-text">I wake up</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I brush my teeth')">
+                        <div class="routine-icon">🪥</div>
+                        <div class="routine-text">I brush my teeth</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I take a shower')">
+                        <div class="routine-icon">🚿</div>
+                        <div class="routine-text">I take a shower</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I get dressed')">
+                        <div class="routine-icon">👕</div>
+                        <div class="routine-text">I get dressed</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I have breakfast')">
+                        <div class="routine-icon">🥣</div>
+                        <div class="routine-text">I have breakfast</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I go to work')">
+                        <div class="routine-icon">💼</div>
+                        <div class="routine-text">I go to work</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: TIME -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>What time is it? ⌚</h2>
+                <p>We use <b>AT</b> for time.</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 30px; border-radius: 15px;">
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px;">
+                        <span class="clock-display">07:00</span>
+                        <span style="font-size: 1.5rem;">➡ "I wake up <b>at</b> 7 o'clock."</span>
+                        <button class="btn-control"
+                            style="width: auto; padding: 5px 15px; height: auto; font-size: 1rem;"
+                            onclick="speak('I wake up at seven o\'clock')">🔊</button>
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px;">
+                        <span class="clock-display">08:30</span>
+                        <span style="font-size: 1.5rem;">➡ "I start work <b>at</b> 8:30."</span>
+                        <button class="btn-control"
+                            style="width: auto; padding: 5px 15px; height: auto; font-size: 1rem;"
+                            onclick="speak('I start work at eight thirty')">🔊</button>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                        <span class="clock-display">12:00</span>
+                        <span style="font-size: 1.5rem;">➡ "I have lunch <b>at</b> noon."</span>
+                        <button class="btn-control"
+                            style="width: auto; padding: 5px 15px; height: auto; font-size: 1rem;"
+                            onclick="speak('I have lunch at noon')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: AFTERNOON & EVENING -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Afternoon & Evening 🌙</h2>
+                <div class="routine-grid">
+                    <div class="routine-card" onclick="speak('I finish work')">
+                        <div class="routine-icon">🔚</div>
+                        <div class="routine-text">I finish work</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I go home')">
+                        <div class="routine-icon">🏠</div>
+                        <div class="routine-text">I go home</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I cook dinner')">
+                        <div class="routine-icon">🍳</div>
+                        <div class="routine-text">I cook dinner</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I watch TV')">
+                        <div class="routine-icon">📺</div>
+                        <div class="routine-text">I watch TV</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I read a book')">
+                        <div class="routine-icon">📖</div>
+                        <div class="routine-text">I read a book</div>
+                    </div>
+                    <div class="routine-card" onclick="speak('I go to sleep')">
+                        <div class="routine-icon">💤</div>
+                        <div class="routine-text">I go to sleep</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: BUILD ROUTINE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Describe Your Day ✍️</h2>
+                <div
+                    style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; width: 100%; max-width: 800px; min-height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                    <h3 id="storyResult" style="margin:0;">...</h3>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 800px;">
+                    <button class="btn-word" onclick="addToStory('I')">I</button>
+                    <button class="btn-word" onclick="addToStory('usually')">usually</button>
+                    <button class="btn-word" onclick="addToStory('wake up')">wake up</button>
+                    <button class="btn-word" onclick="addToStory('at')">at</button>
+                    <button class="btn-word" onclick="addToStory('7:00')">7:00</button>
+                    <button class="btn-word" onclick="addToStory('and')">and</button>
+                    <button class="btn-word" onclick="addToStory('have')">have</button>
+                    <button class="btn-word" onclick="addToStory('breakfast')">breakfast</button>
+                    <button class="btn-word" onclick="addToStory('then')">then</button>
+                    <button class="btn-word" onclick="addToStory('go to work')">go to work</button>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 20px; border-radius: 10px; background: #ff5252;"
+                        onclick="clearStory()">Clear ✖</button>
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 20px; border-radius: 10px; background: #00e676;"
+                        onclick="speak(document.getElementById('storyResult').innerText)">Speak 🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: MATCHING -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Match the Action 🧩</h2>
+                <div class="matching-game" id="matchGame">
+                    <div class="match-col" id="colEn"></div>
+                    <div class="match-col" id="colPt"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: ADVERBS OF FREQUENCY -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Adverbs of Frequency 📊</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 800px;">
+                    <div style="background: rgba(0, 230, 118, 0.2); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('I always brush my teeth')">
+                        <h3>100% Always</h3>
+                        <p>I <b>always</b> brush my teeth.</p>
+                    </div>
+                    <div style="background: rgba(41, 121, 255, 0.2); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('I usually have coffee')">
+                        <h3>80% Usually</h3>
+                        <p>I <b>usually</b> have coffee.</p>
+                    </div>
+                    <div style="background: rgba(255, 234, 0, 0.2); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('I sometimes watch TV')">
+                        <h3>50% Sometimes</h3>
+                        <p>I <b>sometimes</b> watch TV.</p>
+                    </div>
+                    <div style="background: rgba(255, 23, 68, 0.2); padding: 20px; border-radius: 15px; cursor: pointer;"
+                        onclick="speak('I never fly to work')">
+                        <h3>0% Never</h3>
+                        <p>I <b>never</b> fly to work.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: MORE EXAMPLES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Sentences Practice 🗣️</h2>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 700px;">
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.2);">
+                        <span style="font-size: 1.2rem;">I <b>never</b> wake up late. ⏰</span>
+                        <button class="btn-control" style="width: 40px; height: 40px; font-size: 1rem;"
+                            onclick="speak('I never wake up late.')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.2);">
+                        <span style="font-size: 1.2rem;">She <b>always</b> drinks water. 💧</span>
+                        <button class="btn-control" style="width: 40px; height: 40px; font-size: 1rem;"
+                            onclick="speak('She always drinks water.')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.2);">
+                        <span style="font-size: 1.2rem;">We <b>sometimes</b> eat pizza. 🍕</span>
+                        <button class="btn-control" style="width: 40px; height: 40px; font-size: 1rem;"
+                            onclick="speak('We sometimes eat pizza.')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.2);">
+                        <span style="font-size: 1.2rem;">He <b>usually</b> goes to work at 8:00. 💼</span>
+                        <button class="btn-control" style="width: 40px; height: 40px; font-size: 1rem;"
+                            onclick="speak('He usually goes to work at eight.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: DIALOGUE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Routine Chat 🗣️</h2>
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 600px; text-align: left;">
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #ff9a9e;">
+                        <strong>Sarah:</strong> "What time do you get up?"
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem; float: right;"
+                            onclick="speak('What time do you get up?')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #fecfef;">
+                        <strong>Tom:</strong> "I usually get up at 6:00."
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem; float: right;"
+                            onclick="speak('I usually get up at six.')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #ff9a9e;">
+                        <strong>Sarah:</strong> "Do you have breakfast?"
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem; float: right;"
+                            onclick="speak('Do you have breakfast?')">🔊</button>
+                    </div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #fecfef;">
+                        <strong>Tom:</strong> "Yes, I <b>always</b> have coffee and eggs."
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem; float: right;"
+                            onclick="speak('Yes, I always have coffee and eggs.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Final Quiz 🧠</h2>
+                <h3 id="quizQuestion" style="min-height: 60px;">Question 1...</h3>
+                <div id="quizOptions"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 600px;">
+                    <!-- Options injected via JS -->
+                </div>
+                <p id="quizScore" style="margin-top: 20px; font-weight: bold; color: #ff9a9e;"></p>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Day Completed! 🌙</h1>
+                <div style="font-size: 5rem;">🏆</div>
+                <p>Have a good night!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    /* --- MATCHING GAME --- */
+    const matchData = [
+        { en: "Wake up", pt: "Acordar" },
+        { en: "Brush teeth", pt: "Escovar os dentes" },
+        { en: "Have breakfast", pt: "Tomar café" },
+        { en: "Go to work", pt: "Ir trabalhar" },
+        { en: "Sleep", pt: "Dormir" }
+    ];
+
+    let selectedEn = null;
+    let selectedPt = null;
+
+    function initGame() {
+        const colEn = document.getElementById('colEn');
+        const colPt = document.getElementById('colPt');
+
+        const enItems = [...matchData].sort(() => Math.random() - 0.5);
+        const ptItems = [...matchData].sort(() => Math.random() - 0.5);
+
+        enItems.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerText = item.en;
+            div.dataset.val = item.en;
+            div.onclick = () => selectEn(div);
+            colEn.appendChild(div);
+        });
+
+        ptItems.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerText = item.pt;
+            div.dataset.val = item.en;
+            div.onclick = () => selectPt(div);
+            colPt.appendChild(div);
+        });
+    }
+
+    function selectEn(el) {
+        if (el.classList.contains('matched')) return;
+        if (selectedEn) selectedEn.classList.remove('selected');
+        selectedEn = el;
+        el.classList.add('selected');
+        checkMatch();
+    }
+
+    function selectPt(el) {
+        if (el.classList.contains('matched')) return;
+        if (selectedPt) selectedPt.classList.remove('selected');
+        selectedPt = el;
+        el.classList.add('selected');
+        checkMatch();
+    }
+
+    function checkMatch() {
+        if (selectedEn && selectedPt) {
+            if (selectedEn.dataset.val === selectedPt.dataset.val) {
+                selectedEn.classList.add('matched');
+                selectedPt.classList.add('matched');
+                selectedEn.classList.remove('selected');
+                selectedPt.classList.remove('selected');
+                speak("Correct!");
+                selectedEn = null;
+                selectedPt = null;
+            } else {
+                speak("Try again");
+                setTimeout(() => {
+                    if (selectedEn) selectedEn.classList.remove('selected');
+                    if (selectedPt) selectedPt.classList.remove('selected');
+                    selectedEn = null;
+                    selectedPt = null;
+                }, 500);
+            }
+        }
+    }
+
+    initGame();
+
+    /* --- STORY BUILDER --- */
+    let story = [];
+    function addToStory(word) {
+        story.push(word);
+        document.getElementById('storyResult').innerText = story.join(' ') + ".";
+        speak(word);
+    }
+    function clearStory() {
+        story = [];
+        document.getElementById('storyResult').innerText = "...";
+    }
+    /* --- QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "I _____ up at 7:00.", options: ["wake", "wakes", "waking"], ans: 0 },
+        { q: "She _____ to work.", options: ["go", "goes", "going"], ans: 1 },
+        { q: "We _____ lunch at noon.", options: ["has", "have", "having"], ans: 1 },
+        { q: "I _____ brush my teeth. (100%)", options: ["never", "sometimes", "always"], ans: 2 },
+        { q: "He _____ watches TV. (0%)", options: ["never", "always", "usually"], ans: 0 },
+        { q: "_____ time is it?", options: ["When", "Who", "What"], ans: 2 }
+    ];
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Quiz Complete! Great job.");
+            return;
+        }
+
+        const q = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = (quizIdx + 1) + ". " + q.q;
+        const optsDiv = document.getElementById('quizOptions');
+        optsDiv.innerHTML = "";
+
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-word';
+            btn.style.width = '100%';
+            btn.innerText = opt;
+            btn.onclick = () => checkQuiz(i);
+            optsDiv.appendChild(btn);
+        });
+    }
+
+    function checkQuiz(selectedIdx) {
+        const q = quizData[quizIdx];
+        if (selectedIdx === q.ans) {
+            score++;
+            speak("Correct");
+        } else {
+            speak("Incorrect");
+        }
+        document.getElementById('quizScore').innerText = "Score: " + score + " / " + quizData.length;
+        quizIdx++;
+        loadQuiz();
+    }
+</script>
+{% endblock %}
