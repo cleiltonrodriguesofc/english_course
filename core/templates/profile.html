@@ -6,48 +6,52 @@
 <div class="dashboard-container">
     <h1 style="color: #000428; margin-bottom: 20px;">👤 My Profile</h1>
 
-    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-        <h2 style="color: var(--secondary);">Student Info</h2>
-        <p><strong>Username:</strong> {{ user.username }}</p>
-        <p><strong>Joined:</strong> {{ user.date_joined|date:"F j, Y" }}</p>
+    <div
+        style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-left: 5px solid #004e92;">
+        <h2 style="color: #004e92; margin-top: 0;">Student Info</h2>
+        <p style="color: #333; font-size: 1.1em; margin-bottom: 10px;"><strong
+                style="color: #000428;">Username:</strong> {{ user.username }}</p>
+        <p style="color: #666; font-size: 1.1em;"><strong style="color: #000428;">Joined:</strong> {{
+            user.date_joined|date:"F j, Y" }}</p>
     </div>
 
     <h2 style="margin-top: 40px; color: #000428;">📝 Quiz History</h2>
 
     {% if quiz_results %}
-    <div style="overflow-x: auto;">
-        <table
-            style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-            <thead style="background: var(--sidebar-bg); color: white;">
+    <div
+        style="overflow-x: auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-top: 20px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background: #f8f9fa; border-bottom: 2px solid #eee;">
                 <tr>
-                    <th style="padding: 15px; text-align: left;">Quiz Name</th>
-                    <th style="padding: 15px; text-align: left;">Score</th>
-                    <th style="padding: 15px; text-align: left;">Result</th>
-                    <th style="padding: 15px; text-align: left;">Date</th>
+                    <th style="padding: 18px 20px; color: #004e92;">Quiz Name</th>
+                    <th style="padding: 18px 20px; color: #004e92;">Score</th>
+                    <th style="padding: 18px 20px; color: #004e92;">Result</th>
+                    <th style="padding: 18px 20px; color: #004e92;">Date</th>
                 </tr>
             </thead>
             <tbody>
                 {% for result in quiz_results %}
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 15px; color: #333;">{{ result.quiz_name }}</td>
-                    <td style="padding: 15px; font-weight: bold; color: #004e92;">
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                    <td style="padding: 18px 20px; color: #333; font-weight: 500;">{{ result.quiz_name }}</td>
+                    <td style="padding: 18px 20px; font-weight: bold; color: #004e92;">
                         {{ result.score }} / {{ result.total_questions }}
                     </td>
-                    <td style="padding: 15px;">
+                    <td style="padding: 18px 20px;">
                         {% widthratio result.score result.total_questions 100 as percent %}
                         {% if percent|add:"0" >= 80 %}
                         <span
-                            style="background: #e8f5e9; color: #2e7d32; padding: 5px 10px; border-radius: 15px; font-weight: bold;">
+                            style="background: #e8f5e9; color: #2e7d32; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
                             Excellent ({{ percent }}%)
                         </span>
                         {% else %}
                         <span
-                            style="background: #fff3e0; color: #ef6c00; padding: 5px 10px; border-radius: 15px; font-weight: bold;">
+                            style="background: #fff3e0; color: #ef6c00; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
                             Keep Practicing ({{ percent }}%)
                         </span>
                         {% endif %}
                     </td>
-                    <td style="padding: 15px; color: #666;">{{ result.date_taken|date:"M j, Y H:i" }}</td>
+                    <td style="padding: 18px 20px; color: #888; font-size: 0.9em;">{{ result.date_taken|date:"M j, Y" }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -60,15 +64,14 @@
 
     <h2 style="margin-top: 40px; color: #000428;">🕵️ Recent Activity</h2>
 
-    {% if activities %}
     <div
-        style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-top: 15px;">
+        style="background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-top: 20px; overflow: hidden;">
         <ul style="list-style: none; padding: 0; margin: 0;">
             {% for activity in activities %}
             <li
-                style="padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; color: #333;">
-                <span>{{ activity.action }}</span>
-                <span style="color: #999; font-size: 0.9em;">{{ activity.timestamp|date:"M j, H:i" }}</span>
+                style="padding: 18px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #333; font-weight: 500;">{{ activity.action }}</span>
+                <span style="color: #999; font-size: 0.85em;">{{ activity.timestamp|timesince }} ago</span>
             </li>
             {% endfor %}
         </ul>

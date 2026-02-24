@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     dashboard, lesson_1, lesson_2, lesson_3, lesson_4, lesson_5, quiz_view,
     register, login_view, logout_view, save_quiz_result,
-    profile_view, game_puzzle, game_memory
+    profile_view, game_puzzle, game_memory,
+    staff_dashboard, staff_student_detail
 )
 
 urlpatterns = [
@@ -20,4 +21,6 @@ urlpatterns = [
     path('profile/', profile_view, name='profile'),
     path('game/puzzle/', game_puzzle, name='game_puzzle'),
     path('game/memory/', game_memory, name='game_memory'),
+    path('staff/dashboard/', staff_dashboard, name='staff_dashboard'),
+    path('staff/student/<int:user_id>/', staff_student_detail, name='staff_student_detail'),
 ]

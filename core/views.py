@@ -5,7 +5,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import QuizResult, ActivityLog
+from .models import QuizResult, ActivityLog, Lesson, LessonProgress
+from django.contrib.auth.models import User
+from django.db.models import Avg, Count
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 def log_activity(user, action, details=None):
@@ -145,3 +148,57 @@ def game_puzzle(request):
 def game_memory(request):
     log_activity(request.user, "Played Memory Game")
     return render(request, 'game_memory.html')
+
+
+@staff_member_required
+def staff_dashboard(request):
+    students = User.objects.filter(is_staff=False).annotate(
+        quiz_count=Count('quizresult'),
+        avg_score=Avg('quizresult__score')
+    )
+    
+    total_students = students.count()
+    lessons_count = Lesson.objects.count()
+    
+    student_data = []
+    for student in students:
+        completed_lessons = LessonProgress.objects.filter(user=student, completed=True).count()
+        progress_pct = int((completed_lessons / lessons_count * 100)) if lessons_count > 0 else 0
+        
+        student_data.append({
+            'user': student,
+            'progress': progress_pct,
+            'avg_score': student.avg_score or 0,
+            'quiz_count': student.quiz_count,
+            'last_login': student.last_login
+        })
+
+    context = {
+        'total_students': total_students,
+        'student_data': student_data,
+    }
+    return render(request, 'staff_dashboard.html', context)
+
+
+@staff_member_required
+def staff_student_detail(request, user_id):
+    student = User.objects.get(id=user_id)
+    quiz_results = QuizResult.objects.filter(user=student).order_by('-date_taken')
+    activities = ActivityLog.objects.filter(user=student).order_by('-timestamp')[:50]
+    
+    lessons = Lesson.objects.all().order_by('order')
+    progress_data = []
+    for lesson in lessons:
+        is_completed = LessonProgress.objects.filter(user=student, lesson=lesson, completed=True).exists()
+        progress_data.append({
+            'lesson': lesson,
+            'completed': is_completed
+        })
+    
+    context = {
+        'student': student,
+        'quiz_results': quiz_results,
+        'activities': activities,
+        'progress_data': progress_data
+    }
+    return render(request, 'staff_student_detail.html', context)

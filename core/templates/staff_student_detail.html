@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Student Details: {{ student.username }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'staff_dashboard' %}" style="color: #666; text-decoration: none; font-size: 0.9em;">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+        <!-- Left Column: Student Info & Lesson Progress -->
+        <div>
+            <div class="module-card">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div
+                        style="width: 80px; height: 80px; background: #e3f2fd; color: #1976d2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 2em; margin: 0 auto 15px;">
+                        {{ student.username|slice:":1"|upper }}
+                    </div>
+                    <h2 style="margin: 0;">{{ student.username }}</h2>
+                    <p style="color: #888; margin: 5px 0;">Joined: {{ student.date_joined|date:"M Y" }}</p>
+                </div>
+            </div>
+
+            <div class="module-card" style="padding: 0;">
+                <div style="padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: 600;">
+                    📚 Lesson Progress
+                </div>
+                <div style="padding: 15px 20px;">
+                    {% for item in progress_data %}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9em;">
+                        <span style="color: #333;">{{ item.lesson.title }}</span>
+                        {% if item.completed %}
+                        <span style="color: #4caf50; display: flex; align-items: center;">
+                            <span style="margin-right: 5px;">✓</span> Done
+                        </span>
+                        {% else %}
+                        <span style="color: #ccc;">Pending</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Quiz Scores & Activity -->
+        <div>
+            <div class="module-card" style="padding: 0; margin-bottom: 30px;">
+                <div style="padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: 600;">
+                    📝 Quiz History
+                </div>
+                <div style="padding: 15px 20px;">
+                    {% for result in quiz_results %}
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9;">
+                        <div>
+                            <div style="font-weight: 600; color: #333;">{{ result.quiz_name }}</div>
+                            <div style="font-size: 0.8em; color: #999;">{{ result.date_taken|date:"M d, Y H:i" }}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div
+                                style="font-weight: bold; color: {% if result.score >= 70 %}#4caf50{% else %}#f44336{% endif %};">
+                                {{ result.score }}/{{ result.total_questions }}
+                            </div>
+                            <div style="font-size: 0.7em; color: #888;">
+                                {% widthratio result.score result.total_questions 100 %}%
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p style="text-align: center; color: #999; padding: 20px;">No quizzes taken yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="module-card" style="padding: 0;">
+                <div style="padding: 15px 20px; border-bottom: 1px solid #eee; font-weight: 600;">
+                    ⏱️ Recent Activity
+                </div>
+                <div style="max-height: 400px; overflow-y: auto; padding: 15px 20px;">
+                    {% for log in activities %}
+                    <div
+                        style="padding: 8px 0; border-left: 2px solid #e3f2fd; padding-left: 15px; margin-bottom: 10px; position: relative;">
+                        <div
+                            style="width: 8px; height: 8px; background: #1976d2; border-radius: 50%; position: absolute; left: -5px; top: 12px;">
+                        </div>
+                        <div style="font-size: 0.9em; color: #444;">{{ log.action }}</div>
+                        <div style="font-size: 0.75em; color: #aaa;">{{ log.timestamp|timesince }} ago</div>
+                    </div>
+                    {% empty %}
+                    <p style="text-align: center; color: #999; padding: 20px;">No activity logged.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

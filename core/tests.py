@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import QuizResult, ActivityLog
+from .models import QuizResult, ActivityLog, Lesson, LessonProgress
 import json
 
 
@@ -126,3 +126,35 @@ class ActivityLogTests(TestCase):
         # Access Puzzle Game
         self.client.get(reverse('game_puzzle'))
         self.assertTrue(ActivityLog.objects.filter(user=self.user, action="Played Puzzle Game").exists())
+
+
+class StaffAdminTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.staff_user = User.objects.create_user(username='staff', password='password123', is_staff=True)
+        self.student_user = User.objects.create_user(username='student', password='password123', is_staff=False)
+        # Create a lesson for progress tracking
+        self.lesson = Lesson.objects.create(title="Lesson 1", slug="lesson-1", order=1)
+
+    def test_staff_dashboard_access_denied_for_student(self):
+        """Test that a regular student cannot access the staff dashboard."""
+        self.client.login(username='student', password='password123')
+        response = self.client.get(reverse('staff_dashboard'))
+        # Should redirect to login (default behavior of staff_member_required)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue('login' in response.url)
+
+    def test_staff_dashboard_access_allowed_for_staff(self):
+        """Test that a staff user can access the staff dashboard."""
+        self.client.login(username='staff', password='password123')
+        response = self.client.get(reverse('staff_dashboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'staff_dashboard.html')
+
+    def test_student_detail_access(self):
+        """Test staff can view specific student details."""
+        self.client.login(username='staff', password='password123')
+        response = self.client.get(reverse('staff_student_detail', kwargs={'user_id': self.student_user.id}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'staff_student_detail.html')
+        self.assertEqual(response.context['student'], self.student_user)
