@@ -22,7 +22,7 @@ class LessonProgress(models.Model):
     completed_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
-        unique_together = ('user', 'lesson')
+        unique_together = ("user", "lesson")
 
     def __str__(self):
         return f"{self.user.username} - {self.lesson.title}"
