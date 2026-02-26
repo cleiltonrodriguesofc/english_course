@@ -278,6 +278,7 @@
             <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
             <a href="{% url 'lesson_4' %}" class="nav-link">Lesson 4: Hobbies</a>
             <a href="{% url 'lesson_5' %}" class="nav-link">Lesson 5: Daily Routine</a>
+            <a href="{% url 'lesson_6' %}" class="nav-link {% if request.resolver_match.url_name == 'lesson_6' %}active{% endif %}" style="color: #20e3b2;">🗣️ Lesson 6: Review</a>
             <a href="{% url 'game_puzzle' %}" class="nav-link" style="color: #FFD700;">🧩 Puzzle Game</a>
             <a href="{% url 'game_memory' %}" class="nav-link" style="color: #FF4081;">🧠 Memory Game</a>
             {% if user.is_authenticated %}

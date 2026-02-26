@@ -98,6 +98,12 @@ class EnglishCourseTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "game_puzzle.html")
 
+    def test_lesson_6_view(self):
+        """Test if Lesson 6 page loads."""
+        response = self.client.get(reverse("lesson_6"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "lesson_6.html")
+
 
 class ActivityLogTests(TestCase):
     def setUp(self):
@@ -136,6 +142,14 @@ class ActivityLogTests(TestCase):
         self.assertTrue(
             ActivityLog.objects.filter(
                 user=self.user, action="Viewed Lesson 1"
+            ).exists()
+        )
+
+        # Access Lesson 6
+        self.client.get(reverse("lesson_6"))
+        self.assertTrue(
+            ActivityLog.objects.filter(
+                user=self.user, action="Viewed Lesson 6 (Conversational Review)"
             ).exists()
         )
 
