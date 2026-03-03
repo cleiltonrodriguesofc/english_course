@@ -66,6 +66,11 @@ def lesson_6(request):
     return render(request, "lesson_6.html")
 
 
+def lesson_7(request):
+    log_activity(request.user, "Viewed Lesson 7 (Time, Calendar & Dates)")
+    return render(request, "lesson_7.html")
+
+
 def quiz_view(request):
     return render(request, "quiz.html")
 
