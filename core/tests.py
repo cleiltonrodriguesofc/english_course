@@ -104,6 +104,12 @@ class EnglishCourseTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "lesson_6.html")
 
+    def test_lesson_7_view(self):
+        """Test if Lesson 7 page loads."""
+        response = self.client.get(reverse("lesson_7"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "lesson_7.html")
+
 
 class ActivityLogTests(TestCase):
     def setUp(self):
