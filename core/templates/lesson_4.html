@@ -1,0 +1,877 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 4: Hobbies & Free Time - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Deep Blue (Matching Screenshots) --- */
+    :root {
+        --c4-bg: #001e3c;
+        --c4-card: rgba(255, 255, 255, 0.1);
+        --c4-accent: #00d2ff;
+        --c4-text: #ffffff;
+        --c4-secondary: #004e92;
+    }
+
+    .lesson-wrapper {
+        background: radial-gradient(circle at center, #004e92, #000428);
+        color: var(--c4-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3.5rem;
+        color: var(--c4-accent);
+        margin: 0;
+        text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: white;
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--c4-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    h3 {
+        color: #ddd;
+    }
+
+    p {
+        font-size: 1.3rem;
+        color: #b0bec5;
+        max-width: 800px;
+        margin-bottom: 30px;
+    }
+
+    /* --- HOBBY CARDS --- */
+    .hobby-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        width: 100%;
+        max-width: 1000px;
+        margin-top: 20px;
+    }
+
+    .hobby-card {
+        background: var(--c4-card);
+        padding: 30px 10px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .hobby-card:hover {
+        background: var(--c4-accent);
+        color: #000;
+        transform: translateY(-10px);
+    }
+
+    .hobby-icon {
+        font-size: 3.5rem;
+        margin-bottom: 15px;
+    }
+
+    .hobby-name {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* --- GRAMMAR BOX --- */
+    .grammar-box {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: left;
+        max-width: 800px;
+        width: 100%;
+        border-left: 5px solid #FFD700;
+        font-size: 1.4rem;
+        line-height: 1.8;
+    }
+
+    .info-note {
+        font-size: 1rem;
+        color: #aaa;
+        margin-top: 20px;
+        font-style: italic;
+    }
+
+    .highlight {
+        color: #FFD700;
+        font-weight: bold;
+    }
+
+    .love {
+        color: #ff4081;
+    }
+
+    .hate {
+        color: #ff5252;
+    }
+
+    .dont-mind {
+        color: #b2ebf2;
+    }
+
+    /* --- CHAT BOX --- */
+    .chat-container {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 30px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 700px;
+        text-align: left;
+    }
+
+    .chat-line {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+
+    .chat-line:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .speaker-a {
+        color: var(--c4-accent);
+        font-weight: bold;
+    }
+
+    .speaker-b {
+        color: #ffab40;
+        font-weight: bold;
+    }
+
+    /* --- MATCHING GAME --- */
+    .matching-game {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 600px;
+        gap: 50px;
+    }
+
+    .match-col {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 45%;
+    }
+
+    .match-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .match-item.selected {
+        border-color: var(--c4-accent);
+        background: rgba(0, 210, 255, 0.2);
+    }
+
+    .match-item.matched {
+        background: #00e676;
+        color: #000;
+        pointer-events: none;
+        border-color: #00e676;
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 30px;
+        right: 40px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-control:hover {
+        background: var(--c4-accent);
+        color: #000;
+    }
+
+    .btn-word {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: 0.2s;
+    }
+
+    .btn-word:hover {
+        background: var(--c4-accent);
+        color: #000;
+        transform: scale(1.05);
+    }
+
+    .quiz-option {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid transparent;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: 0.2s;
+        text-align: left;
+    }
+
+    .quiz-option:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: var(--c4-accent);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c4-accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 4</h3>
+                <h1>Hobbies & Free Time</h1>
+                <div style="font-size: 5rem; margin: 40px; display: flex; gap: 20px; justify-content: center;">
+                    <span>🎮</span><span>🎨</span><span>🎸</span>
+                </div>
+                <p>Welcome to the coolest class yet!<br>Let's talk about what we love to do.</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">LET'S GO! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: HOME HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Hobbies at Home 🏠</h2>
+                <p>Click to hear and see them move!</p>
+                <div class="hobby-grid">
+                    <div class="hobby-card" onclick="speak('Reading')">
+                        <div class="hobby-icon">📚</div>
+                        <div class="hobby-name">Reading</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Watching TV')">
+                        <div class="hobby-icon">📺</div>
+                        <div class="hobby-name">Watching TV</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Cooking')">
+                        <div class="hobby-icon">🍳</div>
+                        <div class="hobby-name">Cooking</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Video Games')">
+                        <div class="hobby-icon">🎮</div>
+                        <div class="hobby-name">Video Games</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: OUTDOOR HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Outdoor Hobbies 🌳</h2>
+                <p>Activities we do outside.</p>
+                <div class="hobby-grid">
+                    <div class="hobby-card" onclick="speak('Running')">
+                        <div class="hobby-icon">🏃</div>
+                        <div class="hobby-name">Running</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Swimming')">
+                        <div class="hobby-icon">🏊</div>
+                        <div class="hobby-name">Swimming</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Hiking')">
+                        <div class="hobby-icon">🥾</div>
+                        <div class="hobby-name">Hiking</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Cycling')">
+                        <div class="hobby-icon">🚴</div>
+                        <div class="hobby-name">Cycling</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: CREATIVE HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Creative Hobbies 🎨</h2>
+                <p>Show your talent!</p>
+                <div class="hobby-grid">
+                    <div class="hobby-card" onclick="speak('Painting')">
+                        <div class="hobby-icon">🎨</div>
+                        <div class="hobby-name">Painting</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Photography')">
+                        <div class="hobby-icon">📷</div>
+                        <div class="hobby-name">Photography</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Guitar')">
+                        <div class="hobby-icon">🎸</div>
+                        <div class="hobby-name">Guitar</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Dancing')">
+                        <div class="hobby-icon">💃</div>
+                        <div class="hobby-name">Dancing</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: SOCIAL HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Social Hobbies 👯</h2>
+                <p>Doing things with friends.</p>
+                <div class="hobby-grid">
+                    <div class="hobby-card" onclick="speak('Traveling')">
+                        <div class="hobby-icon">✈️</div>
+                        <div class="hobby-name">Traveling</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Shopping')">
+                        <div class="hobby-icon">🛍️</div>
+                        <div class="hobby-name">Shopping</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Cinema')">
+                        <div class="hobby-icon">🍿</div>
+                        <div class="hobby-name">Cinema</div>
+                    </div>
+                    <div class="hobby-card" onclick="speak('Hanging out')">
+                        <div class="hobby-icon">🤝</div>
+                        <div class="hobby-name">Hanging out</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: EXPRESSING LIKES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Expressing Likes ❤️</h2>
+                <p>When we talk about hobbies, we use <b style="color:yellow">-ING</b> after LIKE.</p>
+                <div class="grammar-box">
+                    <p>I like read<span class="highlight">ing</span>.</p>
+                    <p>She loves danc<span class="highlight">ing</span>.</p>
+                    <p>They enjoy swimm<span class="highlight">ing</span>.</p>
+                    <div class="info-note">Note: We use the gerund (-ing) because the verb acts like a noun!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: LOVE AND HATE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Love and Hate ❤️ 😡</h2>
+                <div class="grammar-box" style="font-size: 1.2rem;">
+                    <p><b class="love">Love (++++):</b><br> "I <b>love</b> playing video games."</p>
+                    <p><b class="dont-mind">Don't mind (+/-):</b><br> "I <b>don't mind</b> cooking." (É ok)</p>
+                    <p><b class="hate">Hate (----):</b><br> "I <b>hate</b> running in the rain."</p>
+                </div>
+                <p style="margin-top:20px;">Try to say your own preference out loud!</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: PRACTICE TIME -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Practice Time! 🗣️</h2>
+                <p>Click to listen and repeat.</p>
+                <div class="grammar-box" style="background: rgba(0,0,0,0.6);">
+                    <p onclick="speak('My brother likes playing tennis')" style="cursor:pointer">🎾 My brother
+                        <b>likes</b> playing tennis.
+                    </p>
+                    <p onclick="speak('We hate waiting for the bus')" style="cursor:pointer">🚌 We <b>hate</b> waiting
+                        for the bus.</p>
+                    <p onclick="speak('Do you like watching movies?')" style="cursor:pointer">❓ Do you <b>like</b>
+                        watching movies?</p>
+                    <p onclick="speak('I enjoy learning English')" style="cursor:pointer">🇺🇸 I <b>enjoy</b> learning
+                        English.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: CHAT -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The "What do you do?" Chat 💬</h2>
+                <div class="chat-container">
+                    <div class="chat-line" onclick="speak('Hi! What do you like doing in your free time?')">
+                        <span class="speaker-a">A:</span> Hi! What do you like doing in your free time?
+                    </div>
+                    <div class="chat-line" onclick="speak('I love painting and reading.')">
+                        <span class="speaker-b">B:</span> I love <b>painting</b> and <b>reading</b>.
+                    </div>
+                    <div class="chat-line" onclick="speak('Thats cool! Do you like sports?')">
+                        <span class="speaker-a">A:</span> That's cool! Do you like sports?
+                    </div>
+                    <div class="chat-line" onclick="speak('Not really. I prefer indoor activities.')">
+                        <span class="speaker-b">B:</span> Not really. I prefer indoor activities.
+                    </div>
+                </div>
+                <p>Click sentences to listen.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: MATCHING GAME -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Hobby Matching 🧩</h2>
+                <p>Match the English word to the Portuguese translation.</p>
+
+                <div class="matching-game" id="matchGame">
+                    <div class="match-col" id="colEn">
+                        <!-- Filled by JS -->
+                    </div>
+                    <div class="match-col" id="colPt">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: BUILD YOUR STORY -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Build Your Story ✍️</h2>
+                <div
+                    style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; width: 100%; max-width: 800px; min-height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border: 2px dashed rgba(255,255,255,0.3);">
+                    <h3 id="storyResult" style="margin:0; color: #fff;">...</h3>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 800px;">
+                    <button class="btn-word" onclick="addToStory('I')">I</button>
+                    <button class="btn-word" onclick="addToStory('love')">love</button>
+                    <button class="btn-word" onclick="addToStory('like')">like</button>
+                    <button class="btn-word" onclick="addToStory('hate')">hate</button>
+                    <button class="btn-word" onclick="addToStory('playing')">playing</button>
+                    <button class="btn-word" onclick="addToStory('the guitar')">the guitar</button>
+                    <button class="btn-word" onclick="addToStory('traveling')">traveling</button>
+                    <button class="btn-word" onclick="addToStory('with')">with</button>
+                    <button class="btn-word" onclick="addToStory('friends')">friends</button>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 20px; border-radius: 10px; background: #ff5252;"
+                        onclick="clearStory()">Clear ✖</button>
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 20px; border-radius: 10px; background: #00e676;"
+                        onclick="speak(document.getElementById('storyResult').innerText)">Speak 🔊</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: MEGA LISTENING CHALLENGE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Listening Challenge 🎧</h2>
+                <p>Listen closely! What hobby did I say?</p>
+                <button class="btn-control"
+                    style="width: auto; padding: 15px 40px; border-radius: 30px; font-size: 1.5rem; margin-bottom: 30px; background: var(--c4-accent);"
+                    onclick="playListeningChallenge()">PLAY SOUND 🔊</button>
+                <div class="hobby-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="hobby-card" onclick="checkListening('Photography')">
+                        <div class="hobby-name">Photography</div>
+                    </div>
+                    <div class="hobby-card" onclick="checkListening('Hiking')">
+                        <div class="hobby-name">Hiking</div>
+                    </div>
+                    <div class="hobby-card" onclick="checkListening('Cooking')">
+                        <div class="hobby-name">Cooking</div>
+                    </div>
+                    <div class="hobby-card" onclick="checkListening('Traveling')">
+                        <div class="hobby-name">Traveling</div>
+                    </div>
+                    <div class="hobby-card" onclick="checkListening('Dancing')">
+                        <div class="hobby-name">Dancing</div>
+                    </div>
+                    <div class="hobby-card" onclick="checkListening('Reading')">
+                        <div class="hobby-name">Reading</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: FINAL QUIZ Q1 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">I like _____ books.</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">reading</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">read</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">reads</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: FINAL QUIZ Q2 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">I _____ hiking. (+++)</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">hate</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">don't mind</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">love</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: FINAL QUIZ Q3 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">My brother _____ video games.</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">likes</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">liking</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">like</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: FINAL QUIZ Q4 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">We _____ mind cooking.</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">doesn't</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">don't</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">not</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: FINAL QUIZ Q5 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">She loves _____ to the cinema.</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">go</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">going</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">goes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: FINAL QUIZ Q6 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Class 4 Final Quiz 🏆</h2>
+                <div style="font-size: 2rem; margin-bottom: 30px;">They enjoy _____ in the pool.</div>
+                <div style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 500px;">
+                    <button class="quiz-option" onclick="checkQuiz(this, true)">swimming</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">swim</button>
+                    <button class="quiz-option" onclick="checkQuiz(this, false)">swims</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Complete! 🎓</h1>
+                <div style="font-size: 5rem;">🏆</div>
+                <p>You destroyed this class! Good job.</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="location.reload()">RESTART ↺</button>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    /* --- MATCHING GAME LOGIC --- */
+    const matchData = [
+        { en: "Hiking", pt: "Trilha" },
+        { en: "Cooking", pt: "Cozinhar" },
+        { en: "Cycling", pt: "Andar de bike" },
+        { en: "Traveling", pt: "Viajar" },
+        { en: "Painting", pt: "Pintar" }
+    ];
+
+    let selectedEn = null;
+    let selectedPt = null;
+
+    function initGame() {
+        const colEn = document.getElementById('colEn');
+        const colPt = document.getElementById('colPt');
+
+        // Shuffle arrays
+        const enItems = [...matchData].sort(() => Math.random() - 0.5);
+        const ptItems = [...matchData].sort(() => Math.random() - 0.5);
+
+        enItems.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerText = item.en;
+            div.dataset.val = item.en;
+            div.onclick = () => selectEn(div);
+            colEn.appendChild(div);
+        });
+
+        ptItems.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'match-item';
+            div.innerText = item.pt;
+            div.dataset.val = item.en; // Store English key to match
+            div.onclick = () => selectPt(div);
+            colPt.appendChild(div);
+        });
+    }
+
+    function selectEn(el) {
+        if (el.classList.contains('matched')) return;
+        if (selectedEn) selectedEn.classList.remove('selected');
+        selectedEn = el;
+        el.classList.add('selected');
+        checkMatch();
+    }
+
+    function selectPt(el) {
+        if (el.classList.contains('matched')) return;
+        if (selectedPt) selectedPt.classList.remove('selected');
+        selectedPt = el;
+        el.classList.add('selected');
+        checkMatch();
+    }
+
+    function checkMatch() {
+        if (selectedEn && selectedPt) {
+            if (selectedEn.dataset.val === selectedPt.dataset.val) {
+                // Match!
+                selectedEn.classList.add('matched');
+                selectedPt.classList.add('matched');
+                selectedEn.classList.remove('selected');
+                selectedPt.classList.remove('selected');
+                speak("Correct!");
+                selectedEn = null;
+                selectedPt = null;
+            } else {
+                // No match
+                speak("Try again");
+                setTimeout(() => {
+                    selectedEn.classList.remove('selected');
+                    selectedPt.classList.remove('selected');
+                    selectedEn = null;
+                    selectedPt = null;
+                }, 500);
+            }
+        }
+    }
+
+    initGame();
+
+    /* --- STORY BUILDER --- */
+    let story = [];
+    function addToStory(word) {
+        story.push(word);
+        document.getElementById('storyResult').innerText = story.join(' ') + ".";
+        speak(word);
+    }
+    function clearStory() {
+        story = [];
+        document.getElementById('storyResult').innerText = "...";
+    }
+
+    /* --- LISTENING CHALLENGE --- */
+    let currentChallenge = "";
+    function playListeningChallenge() {
+        const options = ['Photography', 'Hiking', 'Cooking', 'Traveling', 'Dancing', 'Reading'];
+        currentChallenge = options[Math.floor(Math.random() * options.length)];
+        speak(currentChallenge);
+    }
+
+    function checkListening(guess) {
+        if (!currentChallenge) {
+            speak("Click play sound first!");
+            return;
+        }
+        if (guess === currentChallenge) {
+            speak("Correct! It was " + currentChallenge);
+            // Visual feedback
+            setTimeout(() => {
+                changeSlide(1);
+                currentChallenge = ""; // Reset
+            }, 1500);
+        } else {
+            speak("Not quite. Listen again.");
+            playListeningChallenge();
+        }
+    }
+
+    /* --- QUIZ LOGIC --- */
+    function checkQuiz(btn, isCorrect) {
+        const options = btn.parentElement.children;
+        for (let opt of options) opt.disabled = true;
+
+        if (isCorrect) {
+            btn.style.background = '#00e676';
+            btn.style.color = '#000';
+            speak("Correct!");
+            setTimeout(() => changeSlide(1), 1500);
+        } else {
+            btn.style.background = '#ff5252';
+            speak("Incorrect. Try again next time.");
+            setTimeout(() => changeSlide(1), 1500);
+        }
+    }
+</script>
+{% endblock %}

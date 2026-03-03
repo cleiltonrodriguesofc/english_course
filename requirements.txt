@@ -1,0 +1,7 @@
+Django>=5.0
+gunicorn==21.2.0
+flake8==7.0.0
+python-decouple
+dj-database-url
+psycopg2-binary
+whitenoise

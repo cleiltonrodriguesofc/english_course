@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - English Course{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 style="color: #000428; margin-bottom: 30px;">Your Learning Path</h1>
+
+    <div class="module-card">
+        <h2>Module 1: The Basics</h2>
+        <p>Start your journey here! Learn the alphabet, greetings, and how to introduce yourself.</p>
+        <div>
+            <a href="{% url 'lesson_1' %}" class="lesson-btn">Lesson 1: Alphabet</a>
+            <a href="{% url 'lesson_2' %}" class="lesson-btn">Lesson 2: Introductions</a>
+            <a href="{% url 'lesson_3' %}" class="lesson-btn">Lesson 3: Family & Verbs</a>
+            <a href="{% url 'lesson_4' %}" class="lesson-btn">Lesson 4: Hobbies</a>
+            <a href="{% url 'lesson_5' %}" class="lesson-btn">Lesson 5: Daily Routine</a>
+            <a href="{% url 'lesson_6' %}" class="lesson-btn" style="background: #20e3b2; color: #000428;">Lesson 6:
+                Conversational Review</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'quiz' %}" class="lesson-btn" style="background: #00D2FF; color: #000428;">📝 Quiz:
+                Review</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="module-card" style="opacity: 0.6;">
+        <h2>Module 2: Grammar Foundations (Coming Soon)</h2>
+        <p>Master pronouns, the verb 'to be', and sentence structures.</p>
+    </div>
+
+    <div class="module-card" style="opacity: 0.6;">
+        <h2>Module 3: Vocabulary Expansion (Coming Soon)</h2>
+        <p>Learn numbers, colors, dates, and professions.</p>
+    </div>
+</div>
+{% endblock %}
