@@ -1,0 +1,736 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 9: Daily Routine - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Sunrise to Sunset (Daily Routine) --- */
+    :root {
+        --c9-bg: #ff9966;
+        --c9-accent: #ff5e62;
+        --c9-text: #ffffff;
+        --c9-secondary: #ffeb3b;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c9-bg) 0%, var(--c9-accent) 100%);
+        color: var(--c9-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c9-secondary);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #fffde7;
+        max-width: 800px;
+        margin-bottom: 20px;
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .item-card {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+
+    .item-subtitle {
+        font-size: 1rem;
+        color: #fff9c4;
+    }
+
+    .item-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    /* --- INFO BOX --- */
+    .info-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border-left: 5px solid var(--c9-secondary);
+        max-width: 800px;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .info-box span {
+        font-size: 1.1rem;
+    }
+
+    .info-box b {
+        color: var(--c9-secondary);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-control:hover {
+        background: #fff;
+        color: var(--c9-accent);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c9-secondary);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    table {
+        width: 100%;
+        max-width: 850px;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: left;
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--c9-secondary);
+    }
+
+    .input-select {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 8px;
+        border-radius: 5px;
+        color: white;
+        font-size: 1.1rem;
+        outline: none;
+    }
+
+    .input-select option {
+        background: var(--c9-accent);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 9</h3>
+                <h1>My Daily Routine 🌅🌃</h1>
+                <div style="font-size: 6rem; margin: 30px;">🛌🏫🎮</div>
+                <p>Are you ready to describe your entire day? From waking up to sleeping, let's learn how to say
+                    everything we do every day!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">LET'S START! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: MORNING -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>In the Morning 🌅</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Wake up')">
+                        <div class="item-icon">🥱</div>
+                        <div class="item-title">Wake up</div>
+                        <div class="item-subtitle">Acordar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Get up')">
+                        <div class="item-icon">🛏️</div>
+                        <div class="item-title">Get up</div>
+                        <div class="item-subtitle">Levantar (da cama)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Brush teeth')">
+                        <div class="item-icon">🪥</div>
+                        <div class="item-title">Brush my teeth</div>
+                        <div class="item-subtitle">Escovar os dentes</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Have breakfast')">
+                        <div class="item-icon">🥞</div>
+                        <div class="item-title">Have breakfast</div>
+                        <div class="item-subtitle">Tomar café da manhã</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Get dressed')">
+                        <div class="item-icon">👕</div>
+                        <div class="item-title">Get dressed</div>
+                        <div class="item-subtitle">Se vestir</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Go to school')">
+                        <div class="item-icon">🎒</div>
+                        <div class="item-title">Go to school</div>
+                        <div class="item-subtitle">Ir para a escola</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: AFTERNOON -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>In the Afternoon ☀️</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Have lunch')">
+                        <div class="item-icon">🍲</div>
+                        <div class="item-title">Have lunch</div>
+                        <div class="item-subtitle">Almoçar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Do homework')">
+                        <div class="item-icon">📓</div>
+                        <div class="item-title">Do my homework</div>
+                        <div class="item-subtitle">Fazer a lição de casa</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Play video games')">
+                        <div class="item-icon">🎮</div>
+                        <div class="item-title">Play video games</div>
+                        <div class="item-subtitle">Jogar vídeo game</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Ride a bike')">
+                        <div class="item-icon">🚲</div>
+                        <div class="item-title">Ride a bike</div>
+                        <div class="item-subtitle">Andar de bicicleta</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Play with friends')">
+                        <div class="item-icon">⚽</div>
+                        <div class="item-title">Play with friends</div>
+                        <div class="item-subtitle">Brincar com os amigos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: EVENING / NIGHT -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>In the Evening / At Night 🌙</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Have dinner')">
+                        <div class="item-icon">🍕</div>
+                        <div class="item-title">Have dinner</div>
+                        <div class="item-subtitle">Jantar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Take a shower')">
+                        <div class="item-icon">🚿</div>
+                        <div class="item-title">Take a shower</div>
+                        <div class="item-subtitle">Tomar banho</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Watch TV')">
+                        <div class="item-icon">📺</div>
+                        <div class="item-title">Watch TV</div>
+                        <div class="item-subtitle">Assistir TV</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Read a book')">
+                        <div class="item-icon">📖</div>
+                        <div class="item-title">Read a book</div>
+                        <div class="item-subtitle">Ler um livro</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Go to bed')">
+                        <div class="item-icon">💤</div>
+                        <div class="item-title">Go to bed / sleep</div>
+                        <div class="item-subtitle">Ir dormir</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: ADVERBS REVISION -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Adverbs of Frequency ⏱️</h2>
+                <div class="info-box">
+                    <span>We use these words to say <b>HOW OFTEN</b> we do something.<br>They usually go <b>BEFORE</b>
+                        the action verb.</span>
+                </div>
+
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 800px; text-align:left;">
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; width: 150px; color: #00e676;">ALWAYS</div>
+                        <div style="flex-grow: 1;">(Sempre) - 100% of the time.<br><i>I <b>always</b> brush my
+                                teeth.</i></div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I always brush my teeth.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; width: 150px; color: #2196f3;">USUALLY</div>
+                        <div style="flex-grow: 1;">(Geralmente) - 80% of the time.<br><i>I <b>usually</b> do my homework
+                                in the afternoon.</i></div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I usually do my homework in the afternoon.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; width: 150px; color: #ffeb3b;">SOMETIMES</div>
+                        <div style="flex-grow: 1;">(Às vezes) - 50% of the time.<br><i>I <b>sometimes</b> play soccer on
+                                Sundays.</i></div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I sometimes play soccer on Sundays.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; width: 150px; color: #f44336;">NEVER</div>
+                        <div style="flex-grow: 1;">(Nunca) - 0% of the time.<br><i>I <b>never</b> drink coffee.</i>
+                        </div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I never drink coffee.')">🔊</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SLIDE 6: SENTENCES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Putting It Together! 🧩</h2>
+                <div class="info-box">
+                    <span>Let's combine <b>Routine</b> + <b>Time</b> + <b>Frequency</b>!</span>
+                </div>
+                <table>
+                    <tr>
+                        <th>English</th>
+                        <th>Portuguese</th>
+                        <th>Listen</th>
+                    </tr>
+                    <tr>
+                        <td>I <b>always wake up at 7 AM</b>.</td>
+                        <td>Eu sempre acordo às 7 da manhã.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('I always wake up at 7 AM.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>I <b>usually have lunch at noon</b>.</td>
+                        <td>Eu geralmente almoço ao meio-dia.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('I usually have lunch at noon.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>I <b>sometimes play games at night</b>.</td>
+                        <td>Eu às vezes jogo na parte da noite.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('I sometimes play games at night.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>I <b>never go to bed late</b>.</td>
+                        <td>Eu nunca vou dormir tarde.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('I never go to bed late.')">🔊</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: PRACTICE EXERCISE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Choose the Verb ✍️</h2>
+                <p>Complete the sentences with the correct verb:</p>
+
+                <div
+                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; width: 100%; max-width: 700px; text-align: left; font-size: 1.2rem; display: flex; flex-direction: column; gap: 15px;">
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>1. Every morning, I <select id="ex1" class="input-select">
+                                <option value="?">?</option>
+                                <option value="go">go</option>
+                                <option value="brush">brush</option>
+                                <option value="have">have</option>
+                            </select> my teeth.</span>
+                        <span id="res1"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>2. I <select id="ex2" class="input-select">
+                                <option value="?">?</option>
+                                <option value="take">take</option>
+                                <option value="have">have</option>
+                                <option value="do">do</option>
+                            </select> breakfast at 8:00 AM.</span>
+                        <span id="res2"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>3. In the afternoon, I <select id="ex3" class="input-select">
+                                <option value="?">?</option>
+                                <option value="take">take</option>
+                                <option value="do">do</option>
+                                <option value="play">play</option>
+                            </select> my homework.</span>
+                        <span id="res3"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>4. I <select id="ex4" class="input-select">
+                                <option value="?">?</option>
+                                <option value="take">take</option>
+                                <option value="go">go</option>
+                                <option value="have">have</option>
+                            </select> a shower at night.</span>
+                        <span id="res4"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>5. I <select id="ex5" class="input-select">
+                                <option value="?">?</option>
+                                <option value="read">read</option>
+                                <option value="go">go</option>
+                                <option value="play">play</option>
+                            </select> to bed at 10 PM.</span>
+                        <span id="res5"></span>
+                    </div>
+
+                </div>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: #00e676; color: #000; font-weight: bold;"
+                    onclick="checkRoutineEx()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem;">Can you
+                        beat the Daily Routine Quiz?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c9-secondary);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #ff512f; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆💯</div>
+                <p>You successfully mastered the Daily Routine!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- EXERCISE --- */
+    function checkRoutineEx() {
+        let correct = 0;
+        const answers = [
+            { id: 'ex1', ans: 'brush' },
+            { id: 'ex2', ans: 'have' },
+            { id: 'ex3', ans: 'do' },
+            { id: 'ex4', ans: 'take' },
+            { id: 'ex5', ans: 'go' },
+        ];
+
+        answers.forEach((item, idx) => {
+            const val = document.getElementById(item.id).value;
+            const res = document.getElementById('res' + (idx + 1));
+            if (val === item.ans) {
+                res.innerHTML = '✅';
+                correct++;
+            } else {
+                res.innerHTML = '❌';
+            }
+        });
+
+        if (correct === 5) speak("Good job! You are correct.");
+        else speak("Try again.");
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "What do you do when you open your eyes in the morning?", options: ["Go to bed", "Wake up", "Have lunch"], ans: 1 },
+        { q: "Which verb goes with 'breakfast'?", options: ["Have", "Make", "Do"], ans: 0 },
+        { q: "Which word means 'Sempre'?", options: ["Sometimes", "Never", "Always"], ans: 2 },
+        { q: "What do you do with a bike?", options: ["Play", "Ride", "Take"], ans: 1 },
+        { q: "Which verb goes with 'my homework'?", options: ["Take", "Do", "Have"], ans: 1 },
+        { q: "Which verb goes with 'a shower'?", options: ["Take", "Have", "Both are correct"], ans: 2 },
+        { q: "What does 'Usually' mean?", options: ["Nunca", "Geralmente", "Às vezes"], ans: 1 },
+        { q: "You ____ TV.", options: ["Watch", "Look", "See"], ans: 0 },
+        { q: "What is the correct sentence?", options: ["I always brush my teeth.", "Always I brush my teeth.", "I brush always my teeth."], ans: 0 },
+        { q: "When do you 'go to bed'?", options: ["In the morning", "In the afternoon", "At night"], ans: 2 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 9 (Daily Routine)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = `${quizIdx + 1}. ${currentQ.q}`;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: 60px;" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

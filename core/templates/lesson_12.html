@@ -1,0 +1,790 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 12: Family & Appearance - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Warm Family (Orange/Yellow) --- */
+    :root {
+        --c12-bg: #e65c00;
+        --c12-mid: #F9D423;
+        --c12-accent: #FF4E50;
+        --c12-text: #ffffff;
+        --c12-secondary: #000;
+        --c12-card: rgba(255, 255, 255, 0.2);
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c12-bg) 0%, var(--c12-mid) 100%);
+        color: var(--c12-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c12-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #fff;
+        max-width: 800px;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .item-card {
+        background: var(--c12-card);
+        padding: 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid #fff;
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .item-subtitle {
+        font-size: 1rem;
+        color: #fffde7;
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .item-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* --- INFO BOX --- */
+    .info-box {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border-left: 5px solid var(--c12-accent);
+        max-width: 800px;
+        text-align: left;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-box span {
+        font-size: 1.1rem;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-box b {
+        color: var(--c12-mid);
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.3);
+        color: #fff;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-control:hover {
+        background: var(--c12-accent);
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c12-accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    table {
+        width: 100%;
+        max-width: 850px;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: left;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--c12-mid);
+    }
+
+    .input-select {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid #fff;
+        padding: 5px;
+        border-radius: 5px;
+        color: #000;
+        font-size: 1.1rem;
+        outline: none;
+    }
+
+    .input-select option {
+        background: #fff;
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 12</h3>
+                <h1>Family & Appearance 👨‍👩‍👧‍👦👀</h1>
+                <div style="font-size: 6rem; margin: 30px;">🏠👪👗</div>
+                <p>Welcome! Today we will learn how to talk about our family members and describe what they look like!
+                </p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">LET'S START! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: IMMEDIATE FAMILY -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Immediate Family 👨‍👩‍👧‍👦</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Mother')">
+                        <div class="item-icon">👩</div>
+                        <div class="item-title">Mother / Mom</div>
+                        <div class="item-subtitle">Mãe</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Father')">
+                        <div class="item-icon">👨</div>
+                        <div class="item-title">Father / Dad</div>
+                        <div class="item-subtitle">Pai</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Sister')">
+                        <div class="item-icon">👧</div>
+                        <div class="item-title">Sister</div>
+                        <div class="item-subtitle">Irmã</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Brother')">
+                        <div class="item-icon">👦</div>
+                        <div class="item-title">Brother</div>
+                        <div class="item-subtitle">Irmão</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Parents')">
+                        <div class="item-icon">👫</div>
+                        <div class="item-title">Parents</div>
+                        <div class="item-subtitle">Pais (mãe e pai)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Grandparents')">
+                        <div class="item-icon">👴👵</div>
+                        <div class="item-title">Grandparents</div>
+                        <div class="item-subtitle">Avós</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: EXTENDED FAMILY -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Extended Family 🌳</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Uncle')">
+                        <div class="item-icon">🧔</div>
+                        <div class="item-title">Uncle</div>
+                        <div class="item-subtitle">Tio</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Aunt')">
+                        <div class="item-icon">👱‍♀️</div>
+                        <div class="item-title">Aunt</div>
+                        <div class="item-subtitle">Tia</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Cousin')">
+                        <div class="item-icon">🧒</div>
+                        <div class="item-title">Cousin</div>
+                        <div class="item-subtitle">Primo / Prima</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Nephew')">
+                        <div class="item-icon">👦</div>
+                        <div class="item-title">Nephew</div>
+                        <div class="item-subtitle">Sobrinho</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Niece')">
+                        <div class="item-icon">👧</div>
+                        <div class="item-title">Niece</div>
+                        <div class="item-subtitle">Sobrinha</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: PHYSICAL APPEARANCE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Physical Appearance (Body & Age) 📏</h2>
+                <div class="info-box">
+                    <span>We use the verb <b>TO BE</b> (am/is/are) for adjectives like tall, short, thin, young,
+                        old.</span>
+                </div>
+                <div class="grid-container" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="item-card" onclick="speak('Tall')">
+                        <div class="item-icon">🦒</div>
+                        <div class="item-title">Tall</div>
+                        <div class="item-subtitle">Alto(a)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Short')">
+                        <div class="item-icon">🧍</div>
+                        <div class="item-title">Short</div>
+                        <div class="item-subtitle">Baixo(a)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Thin')">
+                        <div class="item-icon">🧥</div>
+                        <div class="item-title">Thin</div>
+                        <div class="item-subtitle">Magro(a)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Chubby')">
+                        <div class="item-icon">🧸</div>
+                        <div class="item-title">Chubby</div>
+                        <div class="item-subtitle">Gordinho(a)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Young')">
+                        <div class="item-icon">👶</div>
+                        <div class="item-title">Young</div>
+                        <div class="item-subtitle">Jovem / Novo</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Old')">
+                        <div class="item-icon">👴</div>
+                        <div class="item-title">Old</div>
+                        <div class="item-subtitle">Velho(a)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: EYES AND HAIR -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Hair and Eyes 👁️💇</h2>
+                <div class="info-box">
+                    <span>We use the verb <b>HAVE / HAS</b> to talk about hair and eyes! <br><i>(I have..., He
+                            has...)</i></span>
+                </div>
+
+                <div class="grid-container" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="item-card" onclick="speak('Short hair')">
+                        <div class="item-icon">👦</div>
+                        <div class="item-title">Short hair</div>
+                        <div class="item-subtitle">Cabelo curto</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Long hair')">
+                        <div class="item-icon">👩‍🦰</div>
+                        <div class="item-title">Long hair</div>
+                        <div class="item-subtitle">Cabelo longo</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Curly hair')">
+                        <div class="item-icon">👩‍🦱</div>
+                        <div class="item-title">Curly hair</div>
+                        <div class="item-subtitle">Cabelo cacheado</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Straight hair')">
+                        <div class="item-icon">👩</div>
+                        <div class="item-title">Straight hair</div>
+                        <div class="item-subtitle">Cabelo liso</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Brown eyes')">
+                        <div class="item-icon">🤎</div>
+                        <div class="item-title">Brown eyes</div>
+                        <div class="item-subtitle">Olhos castanhos</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Blue eyes')">
+                        <div class="item-icon">💙</div>
+                        <div class="item-title">Blue eyes</div>
+                        <div class="item-subtitle">Olhos azuis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: SENTENCES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Describing People 🗣️</h2>
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 800px; text-align:left;">
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">👩</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>My mother <b>is</b> short. She <b>has</b> brown
+                                eyes.</i><br>(Minha mãe é baixa. Ela tem olhos castanhos.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('My mother is short. She has brown eyes.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">🧔</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>My uncle <b>is</b> tall. He <b>has</b> short
+                                hair.</i><br>(Meu tio é alto. Ele tem cabelo curto.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('My uncle is tall. He has short hair.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">👦</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>I <b>am</b> young. I <b>have</b> curly
+                                hair.</i><br>(Eu sou jovem. Eu tenho cabelo cacheado.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I am young. I have curly hair.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: QUESTIONS & ANSWERS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Questions & Answers ❓</h2>
+                <div class="info-box">
+                    <span>Use <b>"Who is he/she?"</b> to ask about family, and <b>"What does he/she look like?"</b> for
+                        appearance!</span>
+                </div>
+                <table>
+                    <tr>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Listen</th>
+                    </tr>
+                    <tr>
+                        <td><b>Who</b> is he?</td>
+                        <td style="color:#bbf7d0">He is my brother.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('Who is he? He is my brother.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>What does</b> she <b>look like?</b></td>
+                        <td style="color:#ffcdd2">She is tall and thin.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What does she look like? She is tall and thin.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>Does</b> he <b>have</b> blue eyes?</td>
+                        <td style="color:#fff59d">No, he has brown eyes.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('Does he have blue eyes? No, he has brown eyes.')">🔊</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: PRACTICE EXERCISE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Family & Looks ✍️</h2>
+
+                <div
+                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; width: 100%; max-width: 700px; text-align: left; font-size: 1.2rem; display: flex; flex-direction: column; gap: 15px; border:1px solid #fff;">
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">1. My mother's sister is my <select id="ex1" class="input-select">
+                                <option value="?">?</option>
+                                <option value="aunt">aunt</option>
+                                <option value="grandmother">grandmother</option>
+                                <option value="uncle">uncle</option>
+                            </select>. (tia)</span>
+                        <span id="res1"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">2. She <select id="ex2" class="input-select">
+                                <option value="?">?</option>
+                                <option value="are">are</option>
+                                <option value="is">is</option>
+                                <option value="have">have</option>
+                            </select> tall and thin. (é alta e magra)</span>
+                        <span id="res2"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">3. He <select id="ex3" class="input-select">
+                                <option value="?">?</option>
+                                <option value="has">has</option>
+                                <option value="have">have</option>
+                                <option value="is">is</option>
+                            </select> short hair. (ele tem cabelo curto)</span>
+                        <span id="res3"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">4. My father's brother is my <select id="ex4" class="input-select">
+                                <option value="?">?</option>
+                                <option value="aunt">aunt</option>
+                                <option value="uncle">uncle</option>
+                                <option value="cousin">cousin</option>
+                            </select>. (tio)</span>
+                        <span id="res4"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">5. <select id="ex5" class="input-select">
+                                <option value="?">?</option>
+                                <option value="Who">Who</option>
+                                <option value="What">What</option>
+                                <option value="Where">Where</option>
+                            </select> is she? She is my sister. (Quem)</span>
+                        <span id="res5"></span>
+                    </div>
+
+                </div>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: #fff; color: #000; font-weight: bold;"
+                    onclick="checkFamEx()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem; color:#fff;">
+                        Can you beat the Family Quiz?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c12-mid);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #000; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆👨‍👩‍👧📸</div>
+                <p>Excellent work! Now you can describe anyone in your family!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5);"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5); text-decoration: none;">HOME
+                        🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()" style="background:rgba(0,0,0,0.5);">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)"
+                style="background:rgba(0,0,0,0.5);">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)"
+                style="background:rgba(0,0,0,0.5);">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- EXERCISE --- */
+    function checkFamEx() {
+        let correct = 0;
+        const answers = [
+            { id: 'ex1', ans: 'aunt' },
+            { id: 'ex2', ans: 'is' },
+            { id: 'ex3', ans: 'has' },
+            { id: 'ex4', ans: 'uncle' },
+            { id: 'ex5', ans: 'Who' },
+        ];
+
+        answers.forEach((item, idx) => {
+            const val = document.getElementById(item.id).value;
+            const res = document.getElementById('res' + (idx + 1));
+            if (val === item.ans) {
+                res.innerHTML = '✅';
+                correct++;
+            } else {
+                res.innerHTML = '❌';
+            }
+        });
+
+        if (correct === 5) speak("Good job! You know your family.");
+        else speak("Try again.");
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "How do you say 'mãe' in English?", options: ["Aunt", "Sister", "Mother"], ans: 2 },
+        { q: "Your father's brother is your...", options: ["Uncle", "Nephew", "Cousin"], ans: 0 },
+        { q: "Choose the correct sentence:", options: ["He are tall.", "He is tall.", "He have tall."], ans: 1 },
+        { q: "If someone has 'blue eyes', they have...", options: ["Olhos azuis", "Cabelo azul", "Olhos castanhos"], ans: 0 },
+        { q: "The opposite of 'tall' is...", options: ["Thin", "Old", "Short"], ans: 2 },
+        { q: "How do you say 'Pais' (mãe e pai)?", options: ["Fathers", "Parents", "Relatives"], ans: 1 },
+        { q: "She ______ long hair.", options: ["have", "has", "is"], ans: 1 },
+        { q: "What does 'curly hair' mean?", options: ["Cabelo curto", "Cabelo liso", "Cabelo cacheado"], ans: 2 },
+        { q: "I _________ young.", options: ["am", "is", "have"], ans: 0 },
+        { q: "Who is he? He is my...", options: ["Niece", "Aunt", "Brother"], ans: 2 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 12 (Family)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = `${quizIdx + 1}. ${currentQ.q}`;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: 60px; border:1px solid #fff; color:#fff;" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
