@@ -1,0 +1,816 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 14: Food & Drinks - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Appetizing Food (Red & Orange) --- */
+    :root {
+        --c14-bg: #FF416C;
+        --c14-mid: #FF4B2B;
+        --c14-accent: #FFD54F;
+        /* Cheese/Butter Yellow */
+        --c14-text: #ffffff;
+        --c14-card: rgba(255, 255, 255, 0.2);
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c14-bg) 0%, var(--c14-mid) 100%);
+        color: var(--c14-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c14-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #fffde7;
+        max-width: 800px;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 15px;
+    }
+
+    .item-card {
+        background: var(--c14-card);
+        padding: 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--c14-accent);
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .item-subtitle {
+        font-size: 0.95rem;
+        color: #ffe0b2;
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .item-icon {
+        font-size: 3.5rem;
+        margin-bottom: 5px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* --- INFO BOX --- */
+    .info-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border-left: 5px solid var(--c14-accent);
+        max-width: 800px;
+        text-align: left;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-box span {
+        font-size: 1.1rem;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-box b {
+        color: var(--c14-accent);
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.3);
+        color: #fff;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-control:hover {
+        background: var(--c14-accent);
+        color: #d32f2f;
+        transform: scale(1.1);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c14-accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    table {
+        width: 100%;
+        max-width: 850px;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: left;
+        color: #fff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        font-size: 1.1rem;
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.4);
+        color: var(--c14-accent);
+    }
+
+    .input-select {
+        background: rgba(255, 255, 255, 0.3);
+        border: 1px solid #fff;
+        padding: 5px;
+        border-radius: 5px;
+        color: #000;
+        font-size: 1.1rem;
+        outline: none;
+    }
+
+    .input-select option {
+        background: #fff;
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 14</h3>
+                <h1>Food & Drinks 🍔🥤</h1>
+                <div style="font-size: 6rem; margin: 30px;">🍕🥗☕</div>
+                <p>Are you hungry? Let's learn how to order food, name your favorite meals, and talk about drinks!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">LET'S EAT! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: MEALS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The Meals of the Day 🍽️</h2>
+                <div class="grid-container" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="item-card" onclick="speak('Breakfast')">
+                        <div class="item-icon">🥞</div>
+                        <div class="item-title">Breakfast</div>
+                        <div class="item-subtitle">Café da manhã</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Lunch')">
+                        <div class="item-icon">🍱</div>
+                        <div class="item-title">Lunch</div>
+                        <div class="item-subtitle">Almoço</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Dinner')">
+                        <div class="item-icon">🍝</div>
+                        <div class="item-title">Dinner</div>
+                        <div class="item-subtitle">Jantar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Snack')">
+                        <div class="item-icon">🍪</div>
+                        <div class="item-title">Snack</div>
+                        <div class="item-subtitle">Lanche</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: FRUITS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Fruits 🍎</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Apple')">
+                        <div class="item-icon">🍎</div>
+                        <div class="item-title">Apple</div>
+                        <div class="item-subtitle">Maçã</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Banana')">
+                        <div class="item-icon">🍌</div>
+                        <div class="item-title">Banana</div>
+                        <div class="item-subtitle">Banana</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Orange')">
+                        <div class="item-icon">🍊</div>
+                        <div class="item-title">Orange</div>
+                        <div class="item-subtitle">Laranja</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Grapes')">
+                        <div class="item-icon">🍇</div>
+                        <div class="item-title">Grapes</div>
+                        <div class="item-subtitle">Uvas</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Strawberry')">
+                        <div class="item-icon">🍓</div>
+                        <div class="item-title">Strawberry</div>
+                        <div class="item-subtitle">Morango</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Watermelon')">
+                        <div class="item-icon">🍉</div>
+                        <div class="item-title">Watermelon</div>
+                        <div class="item-subtitle">Melancia</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: VEGETABLES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Vegetables 🥕</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Carrot')">
+                        <div class="item-icon">🥕</div>
+                        <div class="item-title">Carrot</div>
+                        <div class="item-subtitle">Cenoura</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Potato')">
+                        <div class="item-icon">🥔</div>
+                        <div class="item-title">Potato</div>
+                        <div class="item-subtitle">Batata</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Tomato')">
+                        <div class="item-icon">🍅</div>
+                        <div class="item-title">Tomato</div>
+                        <div class="item-subtitle">Tomate</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Onion')">
+                        <div class="item-icon">🧅</div>
+                        <div class="item-title">Onion</div>
+                        <div class="item-subtitle">Cebola</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Lettuce')">
+                        <div class="item-icon">🥬</div>
+                        <div class="item-title">Lettuce</div>
+                        <div class="item-subtitle">Alface</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Broccoli')">
+                        <div class="item-icon">🥦</div>
+                        <div class="item-title">Broccoli</div>
+                        <div class="item-subtitle">Brócolis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: FAST FOOD & PROTEINS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Everyday Food & Fast Food 🍕🥩</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Hamburger')">
+                        <div class="item-icon">🍔</div>
+                        <div class="item-title">Hamburger</div>
+                        <div class="item-subtitle">Hambúrguer</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Pizza')">
+                        <div class="item-icon">🍕</div>
+                        <div class="item-title">Pizza</div>
+                        <div class="item-subtitle">Pizza</div>
+                    </div>
+                    <div class="item-card" onclick="speak('French fries')">
+                        <div class="item-icon">🍟</div>
+                        <div class="item-title">French fries</div>
+                        <div class="item-subtitle">Batata frita</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Chicken')">
+                        <div class="item-icon">🍗</div>
+                        <div class="item-title">Chicken</div>
+                        <div class="item-subtitle">Frango</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Fish')">
+                        <div class="item-icon">🐟</div>
+                        <div class="item-title">Fish</div>
+                        <div class="item-subtitle">Peixe</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Bread')">
+                        <div class="item-icon">🍞</div>
+                        <div class="item-title">Bread</div>
+                        <div class="item-subtitle">Pão</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: DRINKS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Drinks ☕🥤</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Water')">
+                        <div class="item-icon">💧</div>
+                        <div class="item-title">Water</div>
+                        <div class="item-subtitle">Água</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Coffee')">
+                        <div class="item-icon">☕</div>
+                        <div class="item-title">Coffee</div>
+                        <div class="item-subtitle">Café</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Tea')">
+                        <div class="item-icon">🍵</div>
+                        <div class="item-title">Tea</div>
+                        <div class="item-subtitle">Chá</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Juice')">
+                        <div class="item-icon">🧃</div>
+                        <div class="item-title">Juice</div>
+                        <div class="item-subtitle">Suco</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Milk')">
+                        <div class="item-icon">🥛</div>
+                        <div class="item-title">Milk</div>
+                        <div class="item-subtitle">Leite</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Soda')">
+                        <div class="item-icon">🥤</div>
+                        <div class="item-title">Soda</div>
+                        <div class="item-subtitle">Refrigerante</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: SENTENCES & VERBS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Important Verbs 🗣️</h2>
+                <div class="info-box">
+                    <span>Use <b>EAT</b> for food, and <b>DRINK</b> for liquids. You can also use <b>HAVE</b> for
+                        both!</span>
+                </div>
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 800px; text-align:left;">
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">🍕</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>I <b>eat</b> pizza on weekends.</i><br>(Eu como pizza
+                            aos finais de semana.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I eat pizza on weekends.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">💧</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>She <b>drinks</b> water every day.</i><br>(Ela bebe
+                            água todo dia.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('She drinks water every day.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">🍳</div>
+                        <div style="flex-grow: 1; color:#fff;"><i>I <b>have breakfast</b> at 8 AM.</i><br>(Eu tomo café
+                            da manhã às 8h.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I have breakfast at 8 A M.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: QUESTIONS & ANSWERS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Ordering & Asking ❓</h2>
+                <table>
+                    <tr>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Listen</th>
+                    </tr>
+                    <tr>
+                        <td><b>What do you want to eat?</b></td>
+                        <td style="color:#ffeb3b">I want a hamburger.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What do you want to eat? I want a hamburger.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>What do you want to drink?</b></td>
+                        <td style="color:#ffeb3b">I want orange juice, please.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What do you want to drink? I want orange juice, please.')">🔊</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Can I have</b> a coffee?</td>
+                        <td style="color:#ffeb3b">Yes, here you go.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('Can I have a coffee? Yes, here you go.')">🔊</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: PRACTICE EXERCISE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Kitchen Check ✍️</h2>
+
+                <div
+                    style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; width: 100%; max-width: 700px; text-align: left; font-size: 1.2rem; display: flex; flex-direction: column; gap: 15px; border:1px solid #fff;">
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">1. I <select id="ex1" class="input-select">
+                                <option value="?">?</option>
+                                <option value="drink">drink</option>
+                                <option value="eat">eat</option>
+                                <option value="have">have</option>
+                            </select> pizza.</span>
+                        <span id="res1"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">2. She <select id="ex2" class="input-select">
+                                <option value="?">?</option>
+                                <option value="drink">drink</option>
+                                <option value="drinks">drinks</option>
+                                <option value="eat">eat</option>
+                            </select> tea. (Ela bebe)</span>
+                        <span id="res2"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">3. "Lunch" means <select id="ex3" class="input-select">
+                                <option value="?">?</option>
+                                <option value="Lanche">Lanche</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Café">Café</option>
+                            </select></span>
+                        <span id="res3"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">4. A maçã é vermelha = The <select id="ex4" class="input-select">
+                                <option value="?">?</option>
+                                <option value="apple">apple</option>
+                                <option value="strawberry">strawberry</option>
+                                <option value="orange">orange</option>
+                            </select> is red.</span>
+                        <span id="res4"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span style="color:#fff;">5. <select id="ex5" class="input-select">
+                                <option value="?">?</option>
+                                <option value="Can I have">Can I have</option>
+                                <option value="What you want">What you want</option>
+                                <option value="I want to">I want to</option>
+                            </select> a coffee, please? (Eu posso ter)</span>
+                        <span id="res5"></span>
+                    </div>
+
+                </div>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: var(--c14-accent); color: #d32f2f; font-weight: bold;"
+                    onclick="checkEx()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem; color:#fff;">
+                        Can you beat the Food Quiz?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c14-accent);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #000; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆👨‍🍳🌟</div>
+                <p>Delicious Job! You can now order food perfectly in English!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5);"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5); text-decoration: none;">HOME
+                        🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()" style="background:rgba(0,0,0,0.5);">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)"
+                style="background:rgba(0,0,0,0.5);">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)"
+                style="background:rgba(0,0,0,0.5);">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- EXERCISE --- */
+    function checkEx() {
+        let correct = 0;
+        const answers = [
+            { id: 'ex1', ans: 'eat' },
+            { id: 'ex2', ans: 'drinks' },
+            { id: 'ex3', ans: 'Almoço' },
+            { id: 'ex4', ans: 'apple' },
+            { id: 'ex5', ans: 'Can I have' },
+        ];
+
+        answers.forEach((item, idx) => {
+            const val = document.getElementById(item.id).value;
+            const res = document.getElementById('res' + (idx + 1));
+            if (val === item.ans) {
+                res.innerHTML = '✅';
+                correct++;
+            } else {
+                res.innerHTML = '❌';
+            }
+        });
+
+        if (correct === 5) speak("Good job! Perfect score.");
+        else speak("Try again.");
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "How do you say 'Café da manhã'?", options: ["Dinner", "Lunch", "Breakfast"], ans: 2 },
+        { q: "What is 'Water'?", options: ["Suco", "Água", "Leite"], ans: 1 },
+        { q: "I _________ pizza.", options: ["drink", "eat", "play"], ans: 1 },
+        { q: "Which one is a Fruit?", options: ["Carrot", "Potato", "Strawberry"], ans: 2 },
+        { q: "How do you say 'Pão'?", options: ["Bread", "Cheese", "Meat"], ans: 0 },
+        { q: "Complete: 'Can I _______ a coffee?'", options: ["has", "have", "eat"], ans: 1 },
+        { q: "Which word means 'Batata frita'?", options: ["Chips", "French fries", "Fried potato"], ans: 1 },
+        { q: "She ______ water every day.", options: ["drink", "drinks", "is drink"], ans: 1 },
+        { q: "What does 'Lunch' mean?", options: ["Almoço", "Lanche", "Jantar"], ans: 0 },
+        { q: "O que é 'Chicken'?", options: ["Carne bovina", "Frango", "Peixe"], ans: 1 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 14 (Food & Drinks)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = `${quizIdx + 1}. ${currentQ.q}`;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: 60px; border:1px solid #fff; color:#fff;" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

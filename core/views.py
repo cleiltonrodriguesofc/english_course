@@ -71,6 +71,48 @@ def lesson_7(request):
     return render(request, "lesson_7.html")
 
 
+def lesson_8(request):
+    log_activity(request.user, "Viewed Lesson 8 (Numbers, Dates & Time)")
+    return render(request, "lesson_8.html")
+
+
+def lesson_9(request):
+    log_activity(request.user, "Viewed Lesson 9 (Daily Routine)")
+    return render(request, "lesson_9.html")
+
+
+def lesson_10(request):
+    log_activity(request.user, "Viewed Lesson 10 (Likes & Dislikes)")
+    return render(request, "lesson_10.html")
+
+
+def lesson_11(request):
+    log_activity(request.user, "Viewed Lesson 11 (City & Transportation)")
+    return render(request, "lesson_11.html")
+
+
+def lesson_12(request):
+    log_activity(request.user, "Viewed Lesson 12 (Family & Appearance)")
+    return render(request, "lesson_12.html")
+
+
+def lesson_13(request):
+    log_activity(request.user, "Viewed Lesson 13 (Clothes & Colors)")
+    return render(request, "lesson_13.html")
+
+
+def lesson_14(request):
+    log_activity(request.user, "Viewed Lesson 14 (Food & Drinks)")
+    return render(request, "lesson_14.html")
+
+
+
+
+
+
+
+
+
 def quiz_view(request):
     return render(request, "quiz.html")
 

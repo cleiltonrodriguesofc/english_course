@@ -1,0 +1,830 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 8: Numbers, Dates & Time - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Advanced Time, Dates & Numbers --- */
+    :root {
+        --c8-bg: #2b1055;
+        --c8-accent: #753a88;
+        --c8-text: #ffffff;
+        --c8-secondary: #fbc2eb;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c8-bg) 0%, var(--c8-accent) 100%);
+        color: var(--c8-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c8-secondary);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #e0f2fe;
+        max-width: 800px;
+        margin-bottom: 20px;
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .item-card {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        color: var(--c8-secondary);
+    }
+
+    .item-subtitle {
+        font-size: 0.9rem;
+        color: #bbf7d0;
+    }
+
+    /* --- INFO BOX --- */
+    .info-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border-left: 5px solid var(--c8-secondary);
+        max-width: 800px;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .info-box span {
+        font-size: 1.1rem;
+    }
+
+    .info-box b {
+        color: var(--c8-secondary);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-control:hover {
+        background: #fff;
+        color: var(--c8-accent);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c8-secondary);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    table {
+        width: 100%;
+        max-width: 850px;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: left;
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--c8-secondary);
+    }
+
+    .big-time {
+        font-size: 2.5rem;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px 15px;
+        border-radius: 10px;
+        color: var(--c8-secondary);
+        margin-right: 20px;
+        min-width: 130px;
+        text-align: center;
+    }
+
+    .input-field {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 8px;
+        border-radius: 5px;
+        color: white;
+        font-size: 1.1rem;
+        width: 150px;
+        outline: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 8</h3>
+                <h1>Numbers, Dates & Time 🕰️📅</h1>
+                <div style="font-size: 6rem; margin: 30px;">⏱️🗓️1️⃣</div>
+                <p>Welcome! We will learn how to say dates, ordinal numbers (1st, 2nd), exact times, and cool time
+                    expressions. Be ready for a mega challenge!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">START ADVENTURE 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: ORDINAL NUMBERS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Ordinal Numbers 🥇🥈🥉</h2>
+                <p>We use ordinal numbers to talk about <b>dates</b>, <b>positions</b>, and <b>order</b>.</p>
+                <div class="info-box">
+                    <span>💡 <b>General Rule:</b> Just add <b>-TH</b> to the number (four → fourth, six → sixth).<br>
+                        ⚠️ <b>Exceptions:</b> 1st (first), 2nd (second), 3rd (third), 5th (fifth), 8th (eighth), 9th
+                        (ninth), 12th (twelfth).</span>
+                </div>
+                <div class="grid-container" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="item-card" onclick="speak('First')">
+                        <div class="item-title">1st</div>
+                        <div class="item-subtitle">First</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Second')">
+                        <div class="item-title">2nd</div>
+                        <div class="item-subtitle">Second</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Third')">
+                        <div class="item-title">3rd</div>
+                        <div class="item-subtitle">Third</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Fourth')">
+                        <div class="item-title">4th</div>
+                        <div class="item-subtitle">Fourth</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Fifth')">
+                        <div class="item-title">5th</div>
+                        <div class="item-subtitle">Fifth</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Sixth')">
+                        <div class="item-title">6th</div>
+                        <div class="item-subtitle">Sixth</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Twelfth')">
+                        <div class="item-title">12th</div>
+                        <div class="item-subtitle">Twelfth</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Twentieth')">
+                        <div class="item-title">20th</div>
+                        <div class="item-subtitle">Twentieth</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Twenty-first')">
+                        <div class="item-title">21st</div>
+                        <div class="item-subtitle">Twenty-first</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Thirty-first')">
+                        <div class="item-title">31st</div>
+                        <div class="item-subtitle">Thirty-first</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: HOW TO SAY DATES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>How to Say Dates 🗓️</h2>
+                <div class="info-box">
+                    <span>⚠️ <b>Watch out!</b> English formats are tricky!<br>
+                        01/02/2026 in USA = January 2nd, 2026 (Month / Day / Year)<br>
+                        01/02/2026 in UK = February 1st, 2026 (Day / Month / Year)</span>
+                </div>
+                <table>
+                    <tr>
+                        <th>Format</th>
+                        <th>Written</th>
+                        <th>Spoken (listen 🔊)</th>
+                    </tr>
+                    <tr>
+                        <td>🇺🇸 American (EUA)</td>
+                        <td>March 2, 2026</td>
+                        <td style="cursor:pointer;" onclick="speak('March second, twenty twenty-six')">March second,
+                            twenty twenty-six 🔊</td>
+                    </tr>
+                    <tr>
+                        <td>🇬🇧 British (UK)</td>
+                        <td>2 March 2026</td>
+                        <td style="cursor:pointer;" onclick="speak('The second of March, twenty twenty-six')">The second
+                            of March, twenty twenty-six 🔊</td>
+                    </tr>
+                </table>
+                <br>
+                <h3>Questions about dates:</h3>
+                <table>
+                    <tr>
+                        <td><b>What is today's date?</b></td>
+                        <td>Qual é a data de hoje?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What is todays date?')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>When is the holiday?</b><br><span style="color:#bbf7d0">It is on November 2nd.</span>
+                        </td>
+                        <td>Quando é o feriado?<br><span style="color:#bbf7d0">É em 2 de novembro.</span></td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('When is the holiday? It is on November second.')">🔊</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: TELLING THE TIME DETAILED -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Telling the Time ⏰</h2>
+                <p>We usually divide the clock in <b>"past"</b> and <b>"to"</b>.</p>
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; text-align: left; width: 100%; max-width: 800px;">
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:00</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Seven o'clock</div>
+                            <div>São sete horas.</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is seven oclock.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:05</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Five past seven</div>
+                            <div>São sete e cinco. (5 minutos passados das 7)</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is five past seven.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:15</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Quarter past seven</div>
+                            <div>São sete e quinze. (um quarto de hora passado)</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is quarter past seven.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:30</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Half past seven</div>
+                            <div>São sete e meia. (meia hora passado)</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is half past seven.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: TELLING THE TIME PART 2 -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Telling the Time (Part 2) ⏳</h2>
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; text-align: left; width: 100%; max-width: 800px;">
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:45</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Quarter to eight</div>
+                            <div>São quinze para as oito.</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is quarter to eight.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">07:50</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Ten to eight</div>
+                            <div>São dez para as oito.</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is ten to eight.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">12:00</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Noon / Midday</div>
+                            <div>Meio-dia.</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is noon.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="display: flex; align-items: center; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px;">
+                        <span class="big-time">00:00</span>
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">Midnight</div>
+                            <div>Meia-noite.</div>
+                        </div>
+                        <button class="btn-control" style="margin-left: auto; width: 40px; height: 40px;"
+                            onclick="speak('It is midnight.')">🔊</button>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">AM vs PM</h3>
+                <div class="info-box">
+                    <span><b>AM:</b> Midnight to noon (00:00 - 11:59)<br><b>PM:</b> Noon to midnight (12:00 -
+                        23:59)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: TIME EXPRESSIONS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Time Expressions ⏱️</h2>
+                <div class="grid-container" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div class="item-card" onclick="speak('today')">
+                        <div class="item-title">today</div>
+                        <div class="item-subtitle">hoje</div>
+                    </div>
+                    <div class="item-card" onclick="speak('yesterday')">
+                        <div class="item-title">yesterday</div>
+                        <div class="item-subtitle">ontem</div>
+                    </div>
+                    <div class="item-card" onclick="speak('tomorrow')">
+                        <div class="item-title">tomorrow</div>
+                        <div class="item-subtitle">amanhã</div>
+                    </div>
+
+                    <div class="item-card" onclick="speak('last Monday')">
+                        <div class="item-title">last Monday</div>
+                        <div class="item-subtitle">na última segunda</div>
+                    </div>
+                    <div class="item-card" onclick="speak('next Friday')">
+                        <div class="item-title">next Friday</div>
+                        <div class="item-subtitle">na próxima sexta</div>
+                    </div>
+                    <div class="item-card" onclick="speak('every day')">
+                        <div class="item-title">every day</div>
+                        <div class="item-subtitle">todo dia</div>
+                    </div>
+
+                    <div class="item-card" onclick="speak('in the morning')">
+                        <div class="item-title">in the morning</div>
+                        <div class="item-subtitle">de manhã</div>
+                    </div>
+                    <div class="item-card" onclick="speak('in the afternoon')">
+                        <div class="item-title">in the afternoon</div>
+                        <div class="item-subtitle">à tarde</div>
+                    </div>
+                    <div class="item-card" onclick="speak('at night')">
+                        <div class="item-title">at night</div>
+                        <div class="item-subtitle">à noite</div>
+                    </div>
+
+                    <div class="item-card" onclick="speak('once a week')">
+                        <div class="item-title">once a week</div>
+                        <div class="item-subtitle">1 vez por semana</div>
+                    </div>
+                    <div class="item-card" onclick="speak('twice a week')">
+                        <div class="item-title">twice a week</div>
+                        <div class="item-subtitle">2 vezes por semana</div>
+                    </div>
+                    <div class="item-card" onclick="speak('three times a week')">
+                        <div class="item-title">three times a week</div>
+                        <div class="item-subtitle">3 vezes por semana</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: PRACTICE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Complete the Expressions ✍️</h2>
+                <p>Type the missing words combining time expressions! (Type exact words)</p>
+                <div
+                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; width: 100%; max-width: 650px; text-align: left; font-size: 1.2rem; display: flex; flex-direction: column; gap: 15px;">
+
+                    <div>
+                        1. I brush my teeth <input type="text" id="t1" class="input-field" placeholder="todo dia">.
+                        <span id="tres1"></span>
+                    </div>
+
+                    <div>
+                        2. The exam is <input type="text" id="t2" class="input-field" placeholder="amanhã">! I need to
+                        study.
+                        <span id="tres2"></span>
+                    </div>
+
+                    <div>
+                        3. She goes swimming <input type="text" id="t3" class="input-field" placeholder="duas vezes"> a
+                        week.
+                        <span id="tres3"></span>
+                    </div>
+
+                    <div>
+                        4. We had a party <input type="text" id="t4" class="input-field" placeholder="ontem">.
+                        <span id="tres4"></span>
+                    </div>
+
+                    <div>
+                        5. I play games <input type="text" id="t5" class="input-field" placeholder="à noite"> (2 words).
+                        <span id="tres5"></span>
+                    </div>
+
+                </div>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: #00e676; color: #000; font-weight: bold;"
+                    onclick="checkTextEx()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: CONVERSATION -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>About You! (Conversation) 💬</h2>
+                <div class="info-box">
+                    <span>Practice answering these questions out loud! Ask a friend to practice together!</span>
+                </div>
+                <table style="font-size: 1.2rem;">
+                    <tr>
+                        <td>1. What time do you wake up on weekdays?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What time do you wake up on weekdays?')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>2. What time do you have lunch?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What time do you have lunch?')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>3. What do you do in the evenings?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What do you do in the evenings?')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>4. What is today's full date?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What is todays full date?')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td>5. How many times a week do you exercise?</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('How many times a week do you exercise?')">🔊</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem;">Ready to
+                        show your skills?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c8-secondary);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #ff512f; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆👑✨</div>
+                <p>You are a master of time, dates, and numbers! Awesome job!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- EXERCISE --- */
+    function checkTextEx() {
+        let correct = 0;
+        const answers = [
+            { id: 't1', ans: 'every day' },
+            { id: 't2', ans: 'tomorrow' },
+            { id: 't3', ans: 'twice' },
+            { id: 't4', ans: 'yesterday' },
+            { id: 't5', ans: 'at night' },
+        ];
+
+        answers.forEach((item, idx) => {
+            const val = document.getElementById(item.id).value.toLowerCase().trim();
+            const res = document.getElementById('tres' + (idx + 1));
+            if (val === item.ans) {
+                res.innerHTML = '✅';
+                correct++;
+            } else {
+                res.innerHTML = '❌';
+            }
+        });
+
+        if (correct === 5) speak("Amazing job! All correct.");
+        else speak("Almost there, try again.");
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "How do you say 1º in English?", options: ["Oneth", "First", "Firth"], ans: 1 },
+        { q: "What is 07:15?", options: ["Quarter past seven", "Quarter to seven", "Five past seven"], ans: 0 },
+        { q: "If today is Tuesday, yesterday was...", options: ["Sunday", "Wednesday", "Monday"], ans: 2 },
+        { q: "How do you abbreviate 'third'?", options: ["3rd", "3th", "3nd"], ans: 0 },
+        { q: "We eat lunch at 12:00. This is...", options: ["Midnight", "Noon / Midday", "Evening"], ans: 1 },
+        { q: "07:45 is...", options: ["Quarter past eight", "Quarter to eight", "Half past seven"], ans: 1 },
+        { q: "Which expression means 'todo dia'?", options: ["Twice a week", "Every time", "Every day"], ans: 2 },
+        { q: "How do you say 12º in English?", options: ["Twelveth", "Twelfth", "Twelth"], ans: 1 },
+        { q: "I wake up at 6 ___.", options: ["AM", "PM", "O'clock"], ans: 0 },
+        { q: "March 2nd is spoken as:", options: ["March two", "March twice", "March second"], ans: 2 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 8 (Numbers & Time)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = `${quizIdx + 1}. ${currentQ.q}`;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: 60px;" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

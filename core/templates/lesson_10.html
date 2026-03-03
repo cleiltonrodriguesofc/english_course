@@ -1,0 +1,754 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 10: Likes & Dislikes - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Likes & Dislikes (Vibrant Pink & Purple) --- */
+    :root {
+        --c10-bg: #9c27b0;
+        --c10-accent: #e91e63;
+        --c10-text: #ffffff;
+        --c10-secondary: #00bcd4;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c10-bg) 0%, var(--c10-accent) 100%);
+        color: var(--c10-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c10-secondary);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #fffde7;
+        max-width: 800px;
+        margin-bottom: 20px;
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .item-card {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 15px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.3rem;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+
+    .item-subtitle {
+        font-size: 1rem;
+        color: #b2ebf2;
+        /* Light cyan */
+    }
+
+    .item-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+
+    /* --- INFO BOX --- */
+    .info-box {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px 20px;
+        border-radius: 15px;
+        border-left: 5px solid var(--c10-secondary);
+        max-width: 800px;
+        text-align: left;
+        margin-bottom: 15px;
+    }
+
+    .info-box span {
+        font-size: 1.1rem;
+    }
+
+    .info-box b {
+        color: var(--c10-secondary);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .btn-control:hover {
+        background: #fff;
+        color: var(--c10-accent);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c10-secondary);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    table {
+        width: 100%;
+        max-width: 850px;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: left;
+    }
+
+    th {
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--c10-secondary);
+    }
+
+    .input-select {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 5px;
+        border-radius: 5px;
+        color: white;
+        font-size: 1.1rem;
+        outline: none;
+        width: auto;
+    }
+
+    .input-select option {
+        background: var(--c10-accent);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 10</h3>
+                <h1>Likes & Dislikes ❤️💔</h1>
+                <div style="font-size: 6rem; margin: 30px;">👍👎🍕</div>
+                <p>Let's talk about what we love, what we like, and what we don't like! We'll cover hobbies, sports, and
+                    food!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">LET'S START! 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: HOBBIES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Hobbies & Activities 🎨🎵</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Reading books')">
+                        <div class="item-icon">📚</div>
+                        <div class="item-title">Reading books</div>
+                        <div class="item-subtitle">Ler livros</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Listening to music')">
+                        <div class="item-icon">🎧</div>
+                        <div class="item-title">Listening to music</div>
+                        <div class="item-subtitle">Ouvir música</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Dancing')">
+                        <div class="item-icon">💃</div>
+                        <div class="item-title">Dancing</div>
+                        <div class="item-subtitle">Dançar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Singing')">
+                        <div class="item-icon">🎤</div>
+                        <div class="item-title">Singing</div>
+                        <div class="item-subtitle">Cantar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Drawing')">
+                        <div class="item-icon">🖍️</div>
+                        <div class="item-title">Drawing</div>
+                        <div class="item-subtitle">Desenhar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Cooking')">
+                        <div class="item-icon">🍳</div>
+                        <div class="item-title">Cooking</div>
+                        <div class="item-subtitle">Cozinhar</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: SPORTS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Sports ⚽🏀</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Soccer')">
+                        <div class="item-icon">⚽</div>
+                        <div class="item-title">Soccer</div>
+                        <div class="item-subtitle">Futebol</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Basketball')">
+                        <div class="item-icon">🏀</div>
+                        <div class="item-title">Basketball</div>
+                        <div class="item-subtitle">Basquete</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Tennis')">
+                        <div class="item-icon">🎾</div>
+                        <div class="item-title">Tennis</div>
+                        <div class="item-subtitle">Tênis</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Swimming')">
+                        <div class="item-icon">🏊‍♂️</div>
+                        <div class="item-title">Swimming</div>
+                        <div class="item-subtitle">Natação</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Volleyball')">
+                        <div class="item-icon">🏐</div>
+                        <div class="item-title">Volleyball</div>
+                        <div class="item-subtitle">Vôlei</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: FOOD -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Food & Drinks 🍔🥤</h2>
+                <div class="grid-container">
+                    <div class="item-card" onclick="speak('Pizza')">
+                        <div class="item-icon">🍕</div>
+                        <div class="item-title">Pizza</div>
+                        <div class="item-subtitle">Pizza</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Hamburger')">
+                        <div class="item-icon">🍔</div>
+                        <div class="item-title">Hamburger</div>
+                        <div class="item-subtitle">Hambúrguer</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Salad')">
+                        <div class="item-icon">🥗</div>
+                        <div class="item-title">Salad</div>
+                        <div class="item-subtitle">Salada</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Water')">
+                        <div class="item-icon">💧</div>
+                        <div class="item-title">Water</div>
+                        <div class="item-subtitle">Água</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Juice')">
+                        <div class="item-icon">🧃</div>
+                        <div class="item-title">Juice</div>
+                        <div class="item-subtitle">Suco</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Ice cream')">
+                        <div class="item-icon">🍦</div>
+                        <div class="item-title">Ice cream</div>
+                        <div class="item-subtitle">Sorvete</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: LIKES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Expressing Likes ❤️</h2>
+                <div class="info-box">
+                    <span>When you like something, you can say: <b>I like</b>, <b>I love</b>, or <b>I enjoy</b>.</span>
+                </div>
+
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 800px; text-align:left;">
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 50px;">👍</div>
+                        <div style="flex-grow: 1;"><i>I <b>like</b> soccer.</i><br>(Eu gosto de futebol.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I like soccer.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 50px;">❤️</div>
+                        <div style="flex-grow: 1;"><i>I <b>love</b> pizza!</i><br>(Eu amo pizza!)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I love pizza.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 50px;">😎</div>
+                        <div style="flex-grow: 1;"><i>I <b>enjoy</b> reading books.</i><br>(Eu aprecio/curto ler
+                            livros.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I enjoy reading books.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: DISLIKES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Expressing Dislikes 💔</h2>
+                <div class="info-box">
+                    <span>When you don't like something, say: <b>I don't like</b> or <b>I hate</b>.</span>
+                </div>
+
+                <div
+                    style="display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 800px; text-align:left;">
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">👎</div>
+                        <div style="flex-grow: 1;"><i>I <b>don't like</b> salad.</i><br>(Eu não gosto de salada.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I dont like salad.')">🔊</button>
+                    </div>
+
+                    <div
+                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; display: flex; align-items:center;">
+                        <div style="font-size: 2rem; width: 60px;">👿</div>
+                        <div style="flex-grow: 1;"><i>I <b>hate</b> tennis.</i><br>(Eu odeio tênis.)</div>
+                        <button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                            onclick="speak('I hate tennis.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: QUESTIONS & ANSWERS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Questions & Answers ❓</h2>
+                <div class="info-box">
+                    <span>Use <b>"Do you like...?"</b> to ask questions!</span>
+                </div>
+                <table>
+                    <tr>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Listen</th>
+                    </tr>
+                    <tr>
+                        <td><b>Do you like</b> ice cream?</td>
+                        <td style="color:#bbf7d0">Yes, I do!</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('Do you like ice cream? Yes, I do.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>Do you like</b> washing the dishes?</td>
+                        <td style="color:#ffcdd2">No, I don't.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('Do you like washing the dishes? No, I dont.')">🔊</button></td>
+                    </tr>
+                    <tr>
+                        <td><b>What is your favorite</b> sport?</td>
+                        <td style="color:#bbf7d0">My favorite sport is soccer.</td>
+                        <td><button class="btn-control" style="width: 30px; height: 30px; font-size: 0.8rem;"
+                                onclick="speak('What is your favorite sport? My favorite sport is soccer.')">🔊</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: PRACTICE EXERCISE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Choose the Right Phrase ✍️</h2>
+                <p>Complete the sentences about feelings!</p>
+
+                <div
+                    style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; width: 100%; max-width: 700px; text-align: left; font-size: 1.2rem; display: flex; flex-direction: column; gap: 15px;">
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>1. ❤️ I <select id="ex1" class="input-select">
+                                <option value="?">?</option>
+                                <option value="hate">hate</option>
+                                <option value="dont like">don't like</option>
+                                <option value="love">love</option>
+                            </select> pizza.</span>
+                        <span id="res1"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>2. 👎 I <select id="ex2" class="input-select">
+                                <option value="?">?</option>
+                                <option value="dont like">don't like</option>
+                                <option value="love">love</option>
+                                <option value="like">like</option>
+                            </select> tennis.</span>
+                        <span id="res2"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>3. 👍 I <select id="ex3" class="input-select">
+                                <option value="?">?</option>
+                                <option value="enjoy">enjoy</option>
+                                <option value="hate">hate</option>
+                                <option value="dont like">don't like</option>
+                            </select> reading books.</span>
+                        <span id="res3"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>4. ❓ <select id="ex4" class="input-select">
+                                <option value="?">?</option>
+                                <option value="Are you like">Are you like</option>
+                                <option value="Do you like">Do you like</option>
+                                <option value="Does you like">Does you like</option>
+                            </select> ice cream?</span>
+                        <span id="res4"></span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span>5. — Do you like soccer? <br> — Yes, I <select id="ex5" class="input-select">
+                                <option value="?">?</option>
+                                <option value="do">do</option>
+                                <option value="don't">don't</option>
+                                <option value="am">am</option>
+                            </select>!</span>
+                        <span id="res5"></span>
+                    </div>
+
+                </div>
+                <button class="btn-control"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: #00e676; color: #000; font-weight: bold;"
+                    onclick="checkLikesEx()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem;">Can you
+                        beat the Likes & Dislikes Quiz?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c10-secondary);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #ff512f; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆🔥</div>
+                <p>Now you can say what you love and what you don't like! Great job!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- EXERCISE --- */
+    function checkLikesEx() {
+        let correct = 0;
+        const answers = [
+            { id: 'ex1', ans: 'love' },
+            { id: 'ex2', ans: 'dont like' },
+            { id: 'ex3', ans: 'enjoy' },
+            { id: 'ex4', ans: 'Do you like' },
+            { id: 'ex5', ans: 'do' },
+        ];
+
+        answers.forEach((item, idx) => {
+            const val = document.getElementById(item.id).value;
+            const res = document.getElementById('res' + (idx + 1));
+            if (val === item.ans) {
+                res.innerHTML = '✅';
+                correct++;
+            } else {
+                res.innerHTML = '❌';
+            }
+        });
+
+        if (correct === 5) speak("Good job! Perfect score.");
+        else speak("Try again.");
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "How do you ask 'Você gosta de pizza?'", options: ["You like pizza?", "Do you like pizza?", "Are you like pizza?"], ans: 1 },
+        { q: "If you hate something, you...", options: ["Like it very much", "Don't like it at all", "Enjoy it"], ans: 1 },
+        { q: "Soccer, basketball, and tennis are...", options: ["Food", "Hobbies", "Sports"], ans: 2 },
+        { q: "What is 'Listening to music'?", options: ["Assistir TV", "Ouvir música", "Ler um livro"], ans: 1 },
+        { q: "Complete: 'No, I ________.'", options: ["don't", "not", "am not"], ans: 0 },
+        { q: "Which word means 'Eu aprecio'?", options: ["I hate", "I don't like", "I enjoy"], ans: 2 },
+        { q: "What is 'Singing'?", options: ["Cantar", "Dançar", "Brincar"], ans: 0 },
+        { q: "Which one is Food?", options: ["Drawing", "Water", "Hamburger"], ans: 2 },
+        { q: "Do you like apples? Yes, I ___.", options: ["am", "do", "like"], ans: 1 },
+        { q: "Which symbol goes with 'I love'?", options: ["💔", "❤️", "👎"], ans: 1 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 10 (Likes & Dislikes)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = `${quizIdx + 1}. ${currentQ.q}`;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: 60px;" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
