@@ -106,13 +106,6 @@ def lesson_14(request):
     return render(request, "lesson_14.html")
 
 
-
-
-
-
-
-
-
 def quiz_view(request):
     return render(request, "quiz.html")
 
