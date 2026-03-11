@@ -463,9 +463,12 @@ window.createNewSession = function () {
 
     // Trigger greeting
     setTimeout(() => {
-        const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
-        window.addMsg('assistant', greeting);
-        if (currentMode !== 'chat') window.speak(greeting);
+        // Double check if this is still the active session and history is empty
+        if (id === currentSessionId && chatHistory.length <= 1) {
+            const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
+            window.addMsg('assistant', greeting);
+            if (currentMode !== 'chat') window.speak(greeting);
+        }
     }, 600);
 };
 
@@ -497,8 +500,9 @@ window.renderSessionList = function () {
 window.launchMode = function (mode, isAuto = false, skipGreeting = false) {
     currentMode = mode;
     
-    // Set hash for persistence (if not already auto-launched)
+    // If manually clicked from selection screen, always start a new session
     if (!isAuto) {
+        window.createNewSession();
         window.location.hash = mode;
     }
     
@@ -535,15 +539,17 @@ window.launchMode = function (mode, isAuto = false, skipGreeting = false) {
         }, 1000);
     }
 
-    // Initial Greeting (only if no history exists)
-    if (!skipGreeting) {
+    // Initial Greeting (only if no history exists and NOT a new session we just created)
+    if (!skipGreeting && !(!isAuto)) { 
         setTimeout(() => {
-            const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
-            window.addMsg('assistant', greeting);
-            
-            // Only speak if not in chat mode
-            if (currentMode !== 'chat') {
-                window.speak(greeting);
+            if (chatHistory.length <= 1) {
+                const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
+                window.addMsg('assistant', greeting);
+                
+                // Only speak if not in chat mode
+                if (currentMode !== 'chat') {
+                    window.speak(greeting);
+                }
             }
         }, 600);
     }
