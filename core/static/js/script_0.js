@@ -49,8 +49,9 @@ const elements = {
     get avatar() { return document.getElementById('main-tutor-img'); },
     get statusText() { return document.getElementById('ntStatus'); },
     get stateDot() { return document.getElementById('ntDot'); },
-    get chatMsgs() { return document.getElementById('callMsgs'); },
-    get inputTxt() { return document.getElementById('callTxt'); },
+    // Dynamic getters
+    get chatMsgs() { return document.getElementById(currentMode === 'chat' ? 'chatMsgs' : 'callMsgs'); },
+    get inputTxt() { return document.getElementById(currentMode === 'chat' ? 'chatTxt' : 'callTxt'); },
     get micBtn() { return document.getElementById('micBtn'); },
     get camBtn() { return document.getElementById('camBtn'); },
     get chatOverlay() { return document.getElementById('chatOverlay'); },
@@ -292,11 +293,15 @@ window.toggleMic = function (mode) {
 };
 
 window.doSend = function (mode) {
-    if (!elements.inputTxt) return;
-    const text = elements.inputTxt.value.trim();
+    // If a mode is provided, try to get the specific input for that mode
+    const input = mode ? document.getElementById(mode === 'chat' ? 'chatTxt' : 'callTxt') : elements.inputTxt;
+    if (!input) return;
+    
+    const text = input.value.trim();
     if (!text) return;
 
-    elements.inputTxt.value = '';
+    input.value = '';
+    input.style.height = 'auto'; // Reset height
     window.addMsg('user', text);
     window.getAIResponse();
 };
