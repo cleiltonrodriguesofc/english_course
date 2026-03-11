@@ -43,6 +43,48 @@ let chatHistory = [
     }
 ];
 
+const STORAGE_KEY = `ai_tutor_history_${config.lesson_title.replace(/\s+/g, '_').toLowerCase()}`;
+
+/**
+ * Persist current history to localStorage
+ */
+window.saveHistory = function () {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+    } catch (e) {
+        console.error("Failed to save history:", e);
+    }
+};
+
+/**
+ * Load history from localStorage and populate UI
+ */
+window.loadHistory = function () {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // First item is always the system prompt, keep ours but use the rest
+            const historyToLoad = parsed.filter(m => m.role !== 'system');
+            
+            // Clear current UI messages (just in case)
+            ['callMsgs', 'chatMsgs'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = '';
+            });
+
+            historyToLoad.forEach(msg => {
+                // We call addMsg but we need to prevent it from re-saving while loading
+                window.addMsg(msg.role, msg.content, true);
+            });
+            return historyToLoad.length > 0;
+        }
+    } catch (e) {
+        console.error("Failed to load history:", e);
+    }
+    return false;
+};
+
 // 3. UI MAPPINGS
 const elements = {
     get subtitle() { return document.getElementById('aiSubtitles'); },
@@ -111,8 +153,15 @@ window.setAvState = function (state) {
 /**
  * Adds a message to the chat container.
  */
-window.addMsg = function (role, text) {
-    chatHistory.push({ role: role, content: text });
+window.addMsg = function (role, text, skipSave = false) {
+    if (!skipSave) {
+        chatHistory.push({ role: role, content: text });
+        window.saveHistory();
+    } else {
+        // If loading, we still want it in memory chatHistory
+        // but avoid duplicating system prompt if it was already there (handled in loadHistory)
+        chatHistory.push({ role: role, content: text });
+    }
 
     const name = role === 'assistant' ? 'Professora Maria' : (config.student_name || 'Você');
     const msgClass = role === 'assistant' ? 'a' : 'u';
@@ -130,9 +179,12 @@ window.addMsg = function (role, text) {
         if (container) {
             const div = document.createElement('div');
             div.innerHTML = msgHtml.trim();
-            // We want the inner div (the .msg) to be appended
-            container.appendChild(div.firstChild);
-            container.scrollTop = container.scrollHeight;
+            // Clone the node so it can be appended to multiple containers if needed
+            const messageNode = div.firstChild;
+            if (messageNode) {
+                container.appendChild(messageNode.cloneNode(true));
+                container.scrollTop = container.scrollHeight;
+            }
         }
     });
 
@@ -293,16 +345,32 @@ window.toggleMic = function (mode) {
 };
 
 window.doSend = function (mode) {
-    // If a mode is provided, try to get the specific input for that mode
-    const input = mode ? document.getElementById(mode === 'chat' ? 'chatTxt' : 'callTxt') : elements.inputTxt;
-    if (!input) return;
+    console.log("doSend called with mode:", mode, "currentMode:", currentMode);
+    
+    // Explicitly find the active input
+    let input = (mode === 'chat' || currentMode === 'chat') ? document.getElementById('chatTxt') : document.getElementById('callTxt');
+    
+    if (!input) {
+        console.warn("Input not found by mode, trying fallback...");
+        input = elements.inputTxt;
+    }
+    
+    if (!input) {
+        console.error("Critical: Input element not found.");
+        return;
+    }
     
     const text = input.value.trim();
+    console.log("Input text:", text);
     if (!text) return;
 
     input.value = '';
-    input.style.height = 'auto'; // Reset height
+    input.style.height = 'auto'; 
+    
+    console.log("Appending message to UI...");
     window.addMsg('user', text);
+    
+    console.log("Requesting AI response...");
     window.getAIResponse();
 };
 
@@ -337,8 +405,13 @@ window.toggleChatOverlay = function () {
     if (elements.chatOverlay) elements.chatOverlay.classList.toggle('open');
 };
 
-window.launchMode = function (mode) {
+window.launchMode = function (mode, isAuto = false, skipGreeting = false) {
     currentMode = mode;
+    
+    // Set hash for persistence (if not already auto-launched)
+    if (!isAuto) {
+        window.location.hash = mode;
+    }
     
     // Hide selection screen
     if (elements.modeSelection) elements.modeSelection.style.display = 'none';
@@ -373,16 +446,18 @@ window.launchMode = function (mode) {
         }, 1000);
     }
 
-    // Initial Greeting
-    setTimeout(() => {
-        const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
-        window.addMsg('assistant', greeting);
-        
-        // Only speak if not in chat mode
-        if (currentMode !== 'chat') {
-            window.speak(greeting);
-        }
-    }, 600);
+    // Initial Greeting (only if no history exists)
+    if (!skipGreeting) {
+        setTimeout(() => {
+            const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
+            window.addMsg('assistant', greeting);
+            
+            // Only speak if not in chat mode
+            if (currentMode !== 'chat') {
+                window.speak(greeting);
+            }
+        }, 600);
+    }
 };
 
 /**
@@ -404,14 +479,17 @@ window.hk = function (e, mode) {
 };
 
 window.goHome = function () {
+    window.location.hash = '';
     location.reload();
 };
 
 // Global helper for quick replies
 window.qs = function (btn) {
-    if (elements.inputTxt) {
-        elements.inputTxt.value = btn.innerText;
-        window.doSend('call');
+    // Definitive input resolution for quick replies
+    const input = elements.inputTxt;
+    if (input) {
+        input.value = btn.innerText;
+        window.doSend(currentMode);
     }
 };
 
@@ -433,4 +511,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.setAvState('idle');
+
+    // Persistence Check
+    const hasHistory = window.loadHistory();
+
+    // Auto-launch based on hash
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'chat' || hash === 'call') {
+        console.log("Auto-launching mode from hash:", hash);
+        window.launchMode(hash, true, hasHistory); // Pass if we should skip greeting
+    }
 });
