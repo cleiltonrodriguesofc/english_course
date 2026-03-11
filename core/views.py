@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
@@ -9,6 +10,8 @@ from .models import QuizResult, ActivityLog, Lesson, LessonProgress
 from django.contrib.auth.models import User
 from django.db.models import Avg, Count
 from django.contrib.admin.views.decorators import staff_member_required
+import requests
+import os
 
 
 def log_activity(user, action, details=None):
@@ -261,3 +264,83 @@ def staff_student_detail(request, user_id):
         "progress_data": progress_data,
     }
     return render(request, "staff_student_detail.html", context)
+
+
+@csrf_exempt
+def ai_tutor_chat(request):
+    """
+    Proxy for OpenAI Chat Completions API.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        messages = data.get("messages", [])
+        
+        api_key = getattr(settings, "OPENAI_API_KEY", "")
+        if not api_key:
+            return JsonResponse({"error": "API Key not configured"}, status=500)
+
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "gpt-4o",
+                "messages": messages,
+            },
+            timeout=30
+        )
+        
+        return JsonResponse(response.json())
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@csrf_exempt
+def ai_tutor_tts(request):
+    """
+    Proxy for OpenAI TTS API.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        text = data.get("input", "")
+        
+        api_key = getattr(settings, "OPENAI_API_KEY", "")
+        if not api_key:
+            return JsonResponse({"error": "API Key not configured"}, status=500)
+
+        response = requests.post(
+            "https://api.openai.com/v1/audio/speech",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "tts-1",
+                "voice": "nova",
+                "input": text,
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            from django.http import HttpResponse
+            return HttpResponse(response.content, content_type="audio/mpeg")
+        else:
+            return JsonResponse(response.json(), status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+def ai_tutor(request):
+    """
+    Renders the AI Tutor (Maria) prototype page.
+    """
+    return render(request, "avatar_prototype.html")

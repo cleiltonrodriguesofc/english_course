@@ -25,10 +25,16 @@ from .views import (
     game_memory,
     staff_dashboard,
     staff_student_detail,
+    ai_tutor,
+    ai_tutor_chat,
+    ai_tutor_tts,
 )
 
 urlpatterns = [
     path("", dashboard, name="dashboard"),
+    path("ai-tutor/", ai_tutor, name="ai_tutor"),
+    path("ai-tutor/chat/", ai_tutor_chat, name="ai_tutor_chat"),
+    path("ai-tutor/tts/", ai_tutor_tts, name="ai_tutor_tts"),
     path("lesson/1/", lesson_1, name="lesson_1"),
     path("lesson/2/", lesson_2, name="lesson_2"),
     path("lesson/3/", lesson_3, name="lesson_3"),
