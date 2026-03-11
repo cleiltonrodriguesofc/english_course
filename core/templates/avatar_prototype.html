@@ -637,6 +637,7 @@
             align-items: center;
             gap: 12px;
             flex-shrink: 0;
+            z-index: 10;
         }
 
         .chat-av-thumb {
@@ -745,8 +746,129 @@
             align-self: flex-start
         }
 
-        .msg.u {
-            align-self: flex-end
+        /* ───── HISTORY SIDEBAR ───── */
+        .sidebar {
+            position: absolute;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100%;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.3);
+        }
+
+        .sidebar.open {
+            transform: translateX(320px);
+        }
+
+        .sb-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sb-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .sb-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sb-item {
+            padding: 12px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sb-item:hover {
+            border-color: var(--accent);
+            background: rgba(110, 69, 226, 0.05);
+        }
+
+        .sb-item.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sb-item.active .sb-item-title { color: #fff; }
+        .sb-item.active .sb-item-date { color: rgba(255,255,255,0.7); }
+
+        .sb-item-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .sb-item-date {
+            font-size: 0.75rem;
+            color: var(--txt-dim);
+        }
+
+        .sb-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-new-aula {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-new-aula:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .sidebar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 90;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { width: 85%; left: -85%; }
+            .sidebar.open { transform: translateX(100%); }
+            .sidebar.open { left: 0; transform: none; }
         }
 
         .msg-name {
@@ -1216,8 +1338,24 @@
 
     <!-- ═══════════ SCREEN 2: TEXT CHAT ═══════════ -->
     <div id="sChat" class="screen">
+        <div class="sidebar-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+        <div class="sidebar" id="historySidebar">
+            <div class="sb-header">
+                <span class="sb-title">Minhas Aulas</span>
+                <button class="chat-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <div class="sb-list" id="sessionList">
+                <!-- sessions injected here -->
+            </div>
+            <div class="sb-footer">
+                <button class="btn-new-aula" onclick="createNewSession()">
+                    <span>+</span> Nova Aula
+                </button>
+            </div>
+        </div>
+
         <div class="chat-header">
-            <button class="chat-back" onclick="goHome()" title="Voltar">‹</button>
+            <button class="ib" id="historyBtn" onclick="toggleSidebar()" title="Histórico" style="background:transparent; font-size: 1.2rem; color: var(--txt-dim); padding: 4px;">⌛</button>
             <div class="chat-av-thumb">
                 <div class="chat-av-thumb-inner" id="chatAvThumb"><!-- avatar --></div>
                 <div class="av-status-dot"></div>
@@ -1227,6 +1365,7 @@
                 <div class="chat-hstatus" id="chatStatus">Online</div>
             </div>
             <div class="lesson-pill" id="chatLessonPill">General English</div>
+            <button class="chat-close" onclick="goHome()" title="Voltar">✕</button>
         </div>
 
         <div class="msgs" id="chatMsgs"></div>

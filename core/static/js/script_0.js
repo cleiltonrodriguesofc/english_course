@@ -27,57 +27,72 @@ let isThinking = false;
 let currentAudio = null;
 let recognition = null;
 let currentMode = 'voice'; // 'voice' or 'chat'
-let chatHistory = [
-    {
-        role: "system",
-        content: `You are "Professora Maria", an advanced AI English Tutor. 
-        Context: The student is attending the lesson: ${config.lesson_title}.
-        
-        INSTRUCTIONS:
-        - Communicate primarily in English.
-        - Use Portuguese only when necessary for translation or deep clarification.
-        - Maintain a warm, encouraging, and professional persona.
-        - Provide immediate, constructive feedback on grammar and vocabulary.
-        - Ask open-ended questions to keep the conversation flowing.
-        - Keep spoken responses short (2-4 sentences) for clarity with subtitles.`
-    }
-];
+let currentSessionId = null;
+let sessions = [];
+let chatHistory = [];
 
-const STORAGE_KEY = `ai_tutor_history_${config.lesson_title.replace(/\s+/g, '_').toLowerCase()}`;
+const INDEX_KEY = 'ai_tutor_sessions';
 
 /**
- * Persist current history to localStorage
+ * Persist the session index
+ */
+window.saveSessions = function() {
+    try {
+        localStorage.setItem(INDEX_KEY, JSON.stringify(sessions));
+    } catch (e) {
+        console.error("Failed to save session index:", e);
+    }
+};
+
+/**
+ * Persist current history to localStorage for the active session
  */
 window.saveHistory = function () {
+    if (!currentSessionId) return;
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(chatHistory));
+        localStorage.setItem(`ai_tutor_msg_${currentSessionId}`, JSON.stringify(chatHistory));
+        
+        // Update last peek/date in index
+        const sess = sessions.find(s => s.id === currentSessionId);
+        if (sess) {
+            sess.lastPeek = new Date().toISOString();
+            // Optional: update title if it was the first user message
+            if (sess.title === "Nova Aula" && chatHistory.length > 2) {
+                const firstUser = chatHistory.find(m => m.role === 'user');
+                if (firstUser) sess.title = firstUser.content.substring(0, 25) + (firstUser.content.length > 25 ? "..." : "");
+            }
+            window.saveSessions();
+            window.renderSessionList();
+        }
     } catch (e) {
         console.error("Failed to save history:", e);
     }
 };
 
 /**
- * Load history from localStorage and populate UI
+ * Load a specific session's history and populate UI
  */
-window.loadHistory = function () {
+window.loadHistory = function (sessionId) {
+    if (!sessionId) return false;
     try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(`ai_tutor_msg_${sessionId}`);
         if (saved) {
             const parsed = JSON.parse(saved);
-            // First item is always the system prompt, keep ours but use the rest
-            const historyToLoad = parsed.filter(m => m.role !== 'system');
+            chatHistory = parsed;
             
-            // Clear current UI messages (just in case)
+            // Clear current UI messages
             ['callMsgs', 'chatMsgs'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = '';
             });
 
-            historyToLoad.forEach(msg => {
-                // We call addMsg but we need to prevent it from re-saving while loading
-                window.addMsg(msg.role, msg.content, true);
+            // Re-render all messages (prevent re-saving while loading)
+            chatHistory.forEach(msg => {
+                if (msg.role !== 'system') {
+                    window.renderMsgUI(msg.role, msg.content);
+                }
             });
-            return historyToLoad.length > 0;
+            return true;
         }
     } catch (e) {
         console.error("Failed to load history:", e);
@@ -151,18 +166,9 @@ window.setAvState = function (state) {
 };
 
 /**
- * Adds a message to the chat container.
+ * Pure UI function to render a message bubble
  */
-window.addMsg = function (role, text, skipSave = false) {
-    if (!skipSave) {
-        chatHistory.push({ role: role, content: text });
-        window.saveHistory();
-    } else {
-        // If loading, we still want it in memory chatHistory
-        // but avoid duplicating system prompt if it was already there (handled in loadHistory)
-        chatHistory.push({ role: role, content: text });
-    }
-
+window.renderMsgUI = function (role, text) {
     const name = role === 'assistant' ? 'Professora Maria' : (config.student_name || 'Você');
     const msgClass = role === 'assistant' ? 'a' : 'u';
     
@@ -173,13 +179,12 @@ window.addMsg = function (role, text, skipSave = false) {
         </div>
     `;
     
-    // Support both callMsgs and chatMsgs for safety
+    // Support both callMsgs and chatMsgs
     ['callMsgs', 'chatMsgs'].forEach(id => {
         const container = document.getElementById(id);
         if (container) {
             const div = document.createElement('div');
             div.innerHTML = msgHtml.trim();
-            // Clone the node so it can be appended to multiple containers if needed
             const messageNode = div.firstChild;
             if (messageNode) {
                 container.appendChild(messageNode.cloneNode(true));
@@ -187,6 +192,18 @@ window.addMsg = function (role, text, skipSave = false) {
             }
         }
     });
+};
+
+/**
+ * Adds a message to the chat container and persists it.
+ */
+window.addMsg = function (role, text, skipSave = false) {
+    if (!skipSave) {
+        chatHistory.push({ role: role, content: text });
+        window.saveHistory();
+    }
+
+    window.renderMsgUI(role, text);
 
     // Update unread count if overlay is closed
     if (role === 'assistant' && elements.chatOverlay && !elements.chatOverlay.classList.contains('open')) {
@@ -401,8 +418,80 @@ window.toggleCam = function () {
     }
 };
 
-window.toggleChatOverlay = function () {
-    if (elements.chatOverlay) elements.chatOverlay.classList.toggle('open');
+window.toggleSidebar = function () {
+    const sidebar = document.getElementById('historySidebar');
+    const overlay = document.getElementById('sbOverlay');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
+    if (sidebar && sidebar.classList.contains('open')) {
+        window.renderSessionList();
+    }
+};
+
+window.createNewSession = function () {
+    const id = "sess_" + Date.now();
+    const newSession = {
+        id: id,
+        title: "Nova Aula",
+        date: new Date().toLocaleDateString(),
+        lastPeek: new Date().toISOString()
+    };
+    sessions.unshift(newSession);
+    currentSessionId = id;
+    
+    // Reset history with system prompt
+    chatHistory = [
+        {
+            role: "system",
+            content: `You are "Professora Maria", an advanced AI English Tutor. Context: ${config.lesson_title}.`
+        }
+    ];
+    
+    // Clear UI
+    ['callMsgs', 'chatMsgs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+    
+    window.saveSessions();
+    window.saveHistory();
+    window.renderSessionList();
+    
+    // Close sidebar if mobile or optional
+    const sidebar = document.getElementById('historySidebar');
+    if (sidebar && sidebar.classList.contains('open')) window.toggleSidebar();
+
+    // Trigger greeting
+    setTimeout(() => {
+        const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
+        window.addMsg('assistant', greeting);
+        if (currentMode !== 'chat') window.speak(greeting);
+    }, 600);
+};
+
+window.switchSession = function (id) {
+    currentSessionId = id;
+    const sess = sessions.find(s => s.id === id);
+    if (sess) {
+        sess.lastPeek = new Date().toISOString();
+        window.saveSessions();
+    }
+    window.loadHistory(id);
+    window.renderSessionList();
+    const sidebar = document.getElementById('historySidebar');
+    if (sidebar && sidebar.classList.contains('open')) window.toggleSidebar();
+};
+
+window.renderSessionList = function () {
+    const list = document.getElementById('sessionList');
+    if (!list) return;
+    
+    list.innerHTML = sessions.map(s => `
+        <div class="sb-item ${s.id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.id}')">
+            <span class="sb-item-title">${s.title}</span>
+            <span class="sb-item-date">${s.date}</span>
+        </div>
+    `).join('');
 };
 
 window.launchMode = function (mode, isAuto = false, skipGreeting = false) {
@@ -512,13 +601,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.setAvState('idle');
 
-    // Persistence Check
-    const hasHistory = window.loadHistory();
+    // Persistence Check: Load sessions index
+    try {
+        const savedSessions = localStorage.getItem(INDEX_KEY);
+        if (savedSessions) {
+            sessions = JSON.parse(savedSessions);
+            if (sessions.length > 0) {
+                // Get last used session or first one
+                const last = sessions.sort((a,b) => new Date(b.lastPeek) - new Date(a.lastPeek))[0];
+                currentSessionId = last.id;
+                window.loadHistory(currentSessionId);
+            }
+        }
+    } catch(e) { console.error(e); }
+
+    // If no session exists, create one
+    if (!currentSessionId) {
+        window.createNewSession();
+    }
 
     // Auto-launch based on hash
     const hash = window.location.hash.replace('#', '');
     if (hash === 'chat' || hash === 'call') {
         console.log("Auto-launching mode from hash:", hash);
-        window.launchMode(hash, true, hasHistory); // Pass if we should skip greeting
+        window.launchMode(hash, true, chatHistory.length > 1); 
     }
 });
