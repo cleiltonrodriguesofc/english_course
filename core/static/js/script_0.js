@@ -56,10 +56,25 @@ window.saveHistory = function () {
         const sess = sessions.find(s => s.id === currentSessionId);
         if (sess) {
             sess.lastPeek = new Date().toISOString();
-            // Optional: update title if it was the first user message
-            if (sess.title === "Nova Aula" && chatHistory.length > 2) {
-                const firstUser = chatHistory.find(m => m.role === 'user');
-                if (firstUser) sess.title = firstUser.content.substring(0, 25) + (firstUser.content.length > 25 ? "..." : "");
+            const isGeneric = sess.title === "Nova Aula" || sess.title === "Prática de Inglês";
+            if (isGeneric) {
+                const userMsgs = chatHistory.filter(m => m.role === 'user');
+                const meaningful = userMsgs.find(m => {
+                    const clean = m.content.trim();
+                    const lower = clean.toLowerCase().replace(/[?!.,]/g, "");
+                    const trivial = [
+                        "hi", "hello", "oie", "oi", "ola", "olá", "bom dia", "boa tarde", "boa noite", 
+                        "how are you", "como vai", "tudo bem", "oie como vai", "oi tudo bem", "tudo certo"
+                    ];
+                    return !trivial.includes(lower) && clean.length > 3;
+                });
+                
+                if (meaningful) {
+                    const clean = meaningful.content.trim();
+                    sess.title = clean.substring(0, 30) + (clean.length > 30 ? "..." : "");
+                } else if (userMsgs.length > 0 && sess.title === "Nova Aula") {
+                    sess.title = "Prática de Inglês";
+                }
             }
             window.saveSessions();
             window.renderSessionList();
@@ -166,16 +181,27 @@ window.setAvState = function (state) {
 };
 
 /**
+ * Simple markdown-like parser for bold and line breaks
+ */
+function parseMarkdown(text) {
+    if (!text) return '';
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+}
+
+/**
  * Pure UI function to render a message bubble
  */
 window.renderMsgUI = function (role, text) {
     const name = role === 'assistant' ? 'Professora Maria' : (config.student_name || 'Você');
     const msgClass = role === 'assistant' ? 'a' : 'u';
+    const formattedText = parseMarkdown(text);
     
     const msgHtml = `
         <div class="msg ${msgClass}">
             <div class="msg-name">${name}</div>
-            <div class="msg-bbl">${text}</div>
+            <div class="msg-bbl">${formattedText}</div>
         </div>
     `;
     
@@ -443,7 +469,19 @@ window.createNewSession = function () {
     chatHistory = [
         {
             role: "system",
-            content: `You are "Professora Maria", an advanced AI English Tutor. Context: ${config.lesson_title}.`
+            content: `You are "Professora Maria", a friendly and professional bilingual AI English Tutor.
+Target Student: ${config.student_name}.
+Current Lesson Context: ${config.lesson_title}.
+
+YOUR PERSONALITY & GOALS:
+1. You are BILINGUAL (English and Portuguese). Your primary goal is to teach English.
+2. Use Portuguese to explain grammar, translate difficult words, and ensure the student feels supported since they are beginners.
+3. Encourage the student to speak/type in English as much as possible, but always respond kindly in a mix of English and Portuguese.
+4. When you provide an English sentence, always include its Portuguese translation in parentheses or on a new line.
+5. Keep your responses interactive and avoid massive walls of text.
+6. Use **bold text** for important English terms and phrases.
+
+Example: "How are you? (**Como você está?**)"`
         }
     ];
     
