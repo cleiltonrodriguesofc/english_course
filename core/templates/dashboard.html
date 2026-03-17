@@ -1,59 +1,223 @@
 {% extends 'base.html' %}
 
 {% block title %}Dashboard - English Course{% endblock %}
+{% block page_title %}Welcome back, {{ user.username }}!{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--accent-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .module-group {
+        grid-column: 1 / -1;
+        margin-top: 2rem;
+    }
+
+    .module-card-premium {
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s;
+    }
+
+    .module-card-premium:hover {
+        transform: translateY(-4px);
+        border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .module-card-premium::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+        pointer-events: none;
+    }
+
+    .lesson-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .lesson-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        transition: all 0.2s;
+        gap: 0.75rem;
+    }
+
+    .lesson-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+    }
+
+    .lesson-link i {
+        font-size: 1rem;
+        opacity: 0.7;
+    }
+
+    .prog-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-pill);
+        margin-top: 1rem;
+        overflow: hidden;
+    }
+
+    .prog-fill {
+        height: 100%;
+        background: var(--accent-gradient);
+        border-radius: var(--radius-pill);
+        transition: width 1s ease-out;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <h1 style="color: #000428; margin-bottom: 30px;">Your Learning Path</h1>
-
-    <div class="module-card">
-        <h2>Module 1: The Basics</h2>
-        <p>Start your journey here! Learn the alphabet, greetings, and how to introduce yourself.</p>
+<div class="dashboard-grid">
+    <!-- Quick Stats -->
+    <div class="glass stat-card animate-fade" style="animation-delay: 0.1s;">
+        <div class="stat-icon">
+            <i class="fas fa-fire"></i>
+        </div>
         <div>
-            <a href="{% url 'lesson_1' %}" class="lesson-btn">Lesson 1: Alphabet</a>
-            <a href="{% url 'lesson_2' %}" class="lesson-btn">Lesson 2: Introductions</a>
-            <a href="{% url 'lesson_3' %}" class="lesson-btn">Lesson 3: Family & Verbs</a>
-            <a href="{% url 'lesson_4' %}" class="lesson-btn">Lesson 4: Hobbies</a>
-            <a href="{% url 'lesson_5' %}" class="lesson-btn">Lesson 5: Daily Routine</a>
-            <a href="{% url 'lesson_6' %}" class="lesson-btn" style="background: #20e3b2; color: #000428;">Lesson 6:
-                Conversational Review</a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'quiz' %}" class="lesson-btn" style="background: #00D2FF; color: #000428;">📝 Quiz:
-                Review</a>
-            {% endif %}
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Daily Streak</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">4 Days</div>
         </div>
     </div>
 
-    <div class="module-card">
-        <h2>Module 2: Everyday English</h2>
-        <p>Learn numbers, colors, dates, time, and everyday vocabulary.</p>
+    <div class="glass stat-card animate-fade" style="animation-delay: 0.2s;">
+        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: var(--accent-secondary);">
+            <i class="fas fa-star"></i>
+        </div>
         <div>
-            <a href="{% url 'lesson_7' %}" class="lesson-btn" style="background: #2a5298; color: #fff;">Lesson 7: Time,
-                Calendar & Dates</a>
-            <a href="{% url 'lesson_8' %}" class="lesson-btn" style="background: #2b1055; color: #fff;">Lesson 8:
-                Numbers,
-                Dates & Time</a>
-            <a href="{% url 'lesson_9' %}" class="lesson-btn" style="background: #ff9966; color: #fff;">Lesson 9: Daily
-                Routine</a>
-            <a href="{% url 'lesson_10' %}" class="lesson-btn" style="background: #e91e63; color: #fff;">Lesson 10:
-                Likes
-                & Dislikes</a>
-            <a href="{% url 'lesson_11' %}" class="lesson-btn"
-                style="background: #0f2027; border: 1px solid #ffd700; color: #fff;">Lesson 11: The City &
-                Transportation</a>
-            <a href="{% url 'lesson_12' %}" class="lesson-btn" style="background: #e65c00; color: #fff;">Lesson 12:
-                Family &
-                Appearance</a>
-            <a href="{% url 'lesson_13' %}" class="lesson-btn" style="background: #b224ef; color: #fff;">Lesson 13:
-                Clothes & Colors</a>
-            <a href="{% url 'lesson_14' %}" class="lesson-btn" style="background: #FF416C; color: #fff;">Lesson 14:
-                Food & Drinks</a>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Quiz Score</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">
+                {% if quiz_score %}{{ quiz_score.percentage }}%{% else %}N/A{% endif %}
+            </div>
         </div>
     </div>
 
-    <div class="module-card" style="opacity: 0.6;">
-        <h2>Module 3: Grammar Foundations (Coming Soon)</h2>
-        <p>Master pronouns, the verb 'to be', and sentence structures.</p>
+    <div class="glass stat-card animate-fade" style="animation-delay: 0.3s;">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+            <i class="fas fa-check-double"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Completed Lessons</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">6 / 14</div>
+        </div>
+    </div>
+
+    <!-- Module 1 -->
+    <div class="module-group">
+        <div class="glass module-card-premium animate-fade" style="animation-delay: 0.4s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 1: The Foundations</h3>
+                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">100% Complete</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Alphabet, introductions, and essential daily vocabulary.</p>
+            <div class="prog-bar">
+                <div class="prog-fill" style="width: 100%;"></div>
+            </div>
+
+            <div class="lesson-grid">
+                <a href="{% url 'lesson_1' %}" class="lesson-link">
+                    <i class="fas fa-font"></i>
+                    <span>Alphabet Master</span>
+                </a>
+                <a href="{% url 'lesson_2' %}" class="lesson-link">
+                    <i class="fas fa-hand-wave"></i>
+                    <span>Introductions</span>
+                </a>
+                <a href="{% url 'lesson_3' %}" class="lesson-link">
+                    <i class="fas fa-users"></i>
+                    <span>Family & People</span>
+                </a>
+                <a href="{% url 'lesson_4' %}" class="lesson-link">
+                    <i class="fas fa-bicycle"></i>
+                    <span>Hobbies & Interest</span>
+                </a>
+                <a href="{% url 'lesson_5' %}" class="lesson-link">
+                    <i class="fas fa-sun"></i>
+                    <span>Morning Routine</span>
+                </a>
+                <a href="{% url 'lesson_6' %}" class="lesson-link" style="border-color: var(--accent-primary); background: rgba(59, 130, 246, 0.05);">
+                    <i class="fas fa-comments" style="color: var(--accent-primary);"></i>
+                    <span style="color: var(--accent-primary);">Review Session</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module 2 -->
+    <div class="module-group" style="margin-top: 0.5rem;">
+        <div class="glass module-card-premium animate-fade" style="animation-delay: 0.5s;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 2: Real-World Communication</h3>
+                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Complete</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Numbers, time, city navigation, and talking about your preferences.</p>
+            <div class="prog-bar">
+                <div class="prog-fill" style="width: 0%;"></div>
+            </div>
+
+            <div class="lesson-grid">
+                <a href="{% url 'lesson_7' %}" class="lesson-link">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendar & Dates</span>
+                </a>
+                <a href="{% url 'lesson_11' %}" class="lesson-link">
+                    <i class="fas fa-city"></i>
+                    <span>City & Places</span>
+                </a>
+                <a href="{% url 'lesson_14' %}" class="lesson-link">
+                    <i class="fas fa-utensils"></i>
+                    <span>Food & Drinks</span>
+                </a>
+                <div class="lesson-link" style="opacity: 0.5; cursor: default;">
+                    <i class="fas fa-lock"></i>
+                    <span>More Coming Soon</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

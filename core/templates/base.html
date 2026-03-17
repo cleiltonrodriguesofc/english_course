@@ -1,325 +1,340 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}English Course{% endblock %}</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Modern Typography: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    {% block extra_css %}{% endblock %}
     <style>
-        /* --- GLOBAL LAYOUT --- */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            /* background: #f0f2f5; REMOVED to allow lessons to set background */
+        /* Ambient Glow Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+            z-index: -1;
+            pointer-events: none;
         }
 
-        /* --- SIDEBAR (BLUE THEME) --- */
+        .layout-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling */
         .sidebar {
-            width: 250px;
-            background: linear-gradient(180deg, #000428, #004e92);
-            color: white;
+            width: var(--nav-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-            overflow: hidden;
-            /* Prevent sidebar itself from scroll */
+            padding: 2rem 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        .sidebar h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 20px;
-            flex-shrink: 0;
-            /* Keep header visible */
+        .logo-area {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
         }
 
-        /* Container for links to allow scrolling */
-        .nav-links-container {
-            flex: 1;
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--accent-gradient);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
             overflow-y: auto;
             padding-right: 5px;
-            /* For scrollbar space */
         }
 
-        /* Custom Scrollbar for Nav */
-        .nav-links-container::-webkit-scrollbar {
-            width: 5px;
+        .nav-links::-webkit-scrollbar {
+            width: 4px;
         }
 
-        .nav-links-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
+        .nav-links::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
         }
 
         .nav-link {
-            display: block;
-            padding: 15px;
-            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
             text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            transition: 0.3s;
+            font-weight: 500;
+            transition: all 0.2s;
+            gap: 1rem;
         }
 
-        .nav-link:hover,
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .nav-link.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            transform: translateX(5px);
+            color: var(--accent-primary);
+            background: rgba(59, 130, 246, 0.1);
         }
 
-        .module-title {
-            font-size: 0.8rem;
+        .module-label {
+            font-size: 0.75rem;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 20px;
-            margin-bottom: 10px;
-            padding-left: 10px;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin: 1.5rem 0 0.5rem 1rem;
+            font-weight: 600;
+            opacity: 0.6;
         }
 
-        /* --- CONTENT AREA --- */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            position: relative;
-            background: #eef2f3;
+        /* Main Content Styling */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem 3rem;
+            max-width: calc(100vw - var(--nav-width));
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- DASHBOARD STYLES --- */
-        .dashboard-container {
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            min-height: 48px;
         }
 
-        .module-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border-left: 5px solid #004e92;
-            color: #333;
-            /* Dark text for white background */
-        }
-
-        .lesson-btn {
-            display: inline-block;
-            background: #004e92;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+        .user-profile-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.2s;
             text-decoration: none;
-            margin-right: 10px;
-            margin-top: 10px;
-            transition: 0.2s;
+            color: inherit;
         }
 
-        .lesson-btn:hover {
-            background: #000428;
+        .user-profile-nav:hover {
+            border-color: var(--accent-primary);
+            background: rgba(59, 130, 246, 0.05);
         }
 
-        /* --- RESPONSIVE LAYOUT --- */
-        .mobile-nav-toggle {
-            display: none;
+        .avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: white;
         }
 
-        @media (max-width: 768px) {
-            body {
+        .content-area {
+            flex-grow: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 2rem 0.75rem;
+            }
+            .sidebar .logo-text, .sidebar .nav-text, .sidebar .module-label, .user-profile-nav .nav-text, .user-profile-nav i.fa-chevron-down {
+                display: none;
+            }
+            .main-content {
+                max-width: calc(100vw - 80px);
+                padding: 2rem;
+            }
+            .logo-area {
+                justify-content: center;
+                margin-bottom: 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .layout-wrapper {
                 flex-direction: column;
             }
-
             .sidebar {
                 width: 100%;
                 height: auto;
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 15px 20px;
                 position: relative;
-                z-index: 1000;
-                box-sizing: border-box;
+                padding: 1rem;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
             }
-
-            .sidebar h2 {
-                font-size: 1.2rem;
-                margin: 0;
-                border: none;
-                padding: 0;
+            .logo-area {
+                margin-bottom: 0;
             }
-
-            /* Toggle Button */
-            .mobile-nav-toggle {
-                display: block;
-                font-size: 1.8rem;
-                cursor: pointer;
-                color: white;
+            .nav-links {
+                display: none; /* Add mobile menu later if needed */
             }
-
-            /* Navigation Links Container */
-            .nav-links-container {
-                display: none;
-                width: 100%;
-                margin-top: 15px;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding-top: 10px;
-            }
-
-            .nav-links-container.active {
-                display: block;
-                animation: slideDown 0.3s ease-out;
-            }
-
-            .nav-link {
-                display: block;
-                /* Make sure they are visible when container is active */
-                padding: 12px;
-                margin-bottom: 5px;
-            }
-
-            .content {
-                height: calc(100vh - 70px);
-                /* Adjust for header height */
-            }
-
-            /* Dashboard Grid on Mobile */
-            .dashboard-container {
-                padding: 10px;
-            }
-
-            .module-card {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-
-            /* Lesson Mobile Overrides */
-            .slide-container {
-                width: 100% !important;
-                height: 85vh !important;
-                border-radius: 0 !important;
-                border: none !important;
-            }
-
-            .lesson-wrapper h1 {
-                font-size: 2rem !important;
-            }
-
-            .lesson-wrapper h2 {
-                font-size: 1.5rem !important;
-            }
-
-            .lesson-wrapper p,
-            .lesson-wrapper li {
-                font-size: 1.1rem !important;
-            }
-
-            .controls {
-                width: 100%;
-                justify-content: center;
-                right: 0 !important;
-                bottom: 10px !important;
-                padding: 0 10px;
-                box-sizing: border-box;
-            }
-
-            .lesson-btn-nav,
-            .btn-nav-c2 {
-                padding: 10px 20px !important;
-                font-size: 1rem !important;
-                flex: 1;
-            }
-
-            .alphabet-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-            }
-
-            /* Animation Fix */
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+            .main-content {
+                max-width: 100vw;
+                padding: 1.5rem;
             }
         }
     </style>
-    {% block extra_css %}{% endblock %}
 </head>
-
 <body>
+    <div class="layout-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="{% url 'dashboard' %}" class="logo-area">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <span class="logo-text text-gradient">EnglishPro</span>
+            </a>
 
-    <div class="sidebar">
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <h2>Full-Stack<br>English Course</h2>
-            <div class="mobile-nav-toggle" onclick="toggleNav()">☰</div>
-        </div>
-
-        <div id="navLinks" class="nav-links-container">
-            <a href="{% url 'dashboard' %}"
-                class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">🏠
-                Dashboard</a>
-
-
-            <div class="module-title">Module 1: The Basics</div>
-            <a href="{% url 'lesson_1' %}" class="nav-link">Lesson 1: Alphabet</a>
-            <a href="{% url 'lesson_2' %}" class="nav-link">Lesson 2: Introductions</a>
-            <a href="{% url 'lesson_3' %}" class="nav-link">Lesson 3: Family</a>
-            <a href="{% url 'lesson_4' %}" class="nav-link">Lesson 4: Hobbies</a>
-            <a href="{% url 'lesson_5' %}" class="nav-link">Lesson 5: Daily Routine</a>
-            <a href="{% url 'lesson_6' %}" class="nav-link {% if request.resolver_match.url_name == 'lesson_6' %}active{% endif %}" style="color: #20e3b2;">🗣️ Lesson 6: Review</a>
-            <a href="{% url 'game_puzzle' %}" class="nav-link" style="color: #FFD700;">🧩 Puzzle Game</a>
-            <a href="{% url 'game_memory' %}" class="nav-link" style="color: #FF4081;">🧠 Memory Game</a>
-            {% if user.is_authenticated %}
-            <a href="{% url 'quiz' %}" class="nav-link" style="color: #00D2FF;">📝 Quiz: Review</a>
-            {% if user.is_staff %}
-            <a href="{% url 'staff_dashboard' %}" class="nav-link" style="color: #FF9800;">🛠️ Staff Admin</a>
-            {% endif %}
-            {% endif %}
-
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-
-            {% if user.is_authenticated %}
-            <div style="padding: 10px 20px; color: #81D4FA; font-size: 0.9em; margin-bottom: 5px;">
-                <a href="{% url 'profile' %}"
-                    style="color: inherit; text-decoration: none; display: flex; align-items: center;">
-                    <span style="margin-right: 5px;">👤</span> {{ user.username }}
+            <nav class="nav-links">
+                <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">Dashboard</span>
                 </a>
+                <a href="{% url 'ai_tutor' %}" class="nav-link {% if request.resolver_match.url_name == 'ai_tutor' %}active{% endif %}">
+                    <i class="fas fa-robot"></i>
+                    <span class="nav-text">AI Tutor Maria</span>
+                </a>
+                <a href="{% url 'level_assessment' %}" class="nav-link {% if request.resolver_match.url_name == 'level_assessment' %}active{% endif %}">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">Assessment</span>
+                </a>
+                
+                <div class="module-label">Learning</div>
+                <a href="{% url 'lesson_1' %}" class="nav-link">
+                    <i class="fas fa-book-open"></i>
+                    <span class="nav-text">Lessons</span>
+                </a>
+                <a href="{% url 'game_puzzle' %}" class="nav-link">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span class="nav-text">Games</span>
+                </a>
+
+                <div class="module-label">Account</div>
+                <a href="{% url 'profile' %}" class="nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+                {% if user.is_staff %}
+                <a href="{% url 'staff_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'staff_dashboard' %}active{% endif %}">
+                    <i class="fas fa-shield-halved"></i>
+                    <span class="nav-text">Staff Area</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-footer">
+                {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="nav-link">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="nav-link">
+                    <i class="fas fa-right-to-bracket"></i>
+                    <span class="nav-text">Login</span>
+                </a>
+                {% endif %}
             </div>
-            <a href="{% url 'profile' %}" class="nav-link">📊 My Progress</a>
-            <a href="{% url 'logout' %}" class="nav-link">🚪 Logout</a>
-            {% else %}
-            <a href="{% url 'login' %}" class="nav-link">🔑 Login</a>
-            <a href="{% url 'register' %}" class="nav-link">✨ Register</a>
-            {% endif %}
-        </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <header class="top-navbar">
+                <div class="page-title-area">
+                    <h2 style="font-size: 1.5rem; margin-bottom: 0; font-family: 'Outfit', sans-serif;">{% block page_title %}Overview{% endblock %}</h2>
+                </div>
+                
+                <div class="nav-actions">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="user-profile-nav">
+                        <div class="avatar-small">
+                            {{ user.username|first|upper }}
+                        </div>
+                        <span class="nav-text" style="font-weight: 600; font-size: 0.9rem;">{{ user.username }}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.7rem; color: var(--text-secondary);"></i>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary">Get Started</a>
+                    {% endif %}
+                </div>
+            </header>
+
+            <div class="content-area">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="glass animate-fade" style="padding: 1rem 1.5rem; margin-bottom: 2rem; border-left: 4px solid var(--accent-primary); display: flex; align-items: center; gap: 1rem;">
+                            <i class="fas fa-info-circle" style="color: var(--accent-primary);"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
     </div>
 
+    <!-- Fullscreen script if needed -->
     <script>
-        function toggleNav() {
-            const nav = document.getElementById('navLinks');
-            nav.classList.toggle('active');
-        }
-
         function toggleFullScreen() {
-            const lessonWrapper = document.querySelector('.lesson-wrapper');
-            const target = lessonWrapper || document.documentElement;
-
             if (!document.fullscreenElement) {
-                target.requestFullscreen().catch(err => {
-                    console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                });
+                document.documentElement.requestFullscreen();
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
@@ -327,12 +342,6 @@
             }
         }
     </script>
-
-    <div class="content">
-        {% block content %}{% endblock %}
-    </div>
-
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

@@ -141,35 +141,38 @@ window.setAvState = function (state) {
     const wrap = document.getElementById('avWrap') || document.getElementById('avFloat');
     const mainImg = document.getElementById('main-tutor-img');
     const selImg = document.getElementById('selAvInner');
+    const typeBadge = document.getElementById('typeBadge');
     
     if (!wrap) return;
 
     // Reset classes
     wrap.classList.remove('talking', 'thinking');
+    if (typeBadge) typeBadge.classList.remove('on');
 
     let imgSrc = ASSETS.idle;
 
     switch (state) {
         case 'talk':
             wrap.classList.add('talking');
-            if (elements.stateDot) elements.stateDot.style.background = "#ff4b2b";
-            if (elements.statusText) elements.statusText.textContent = "Talking...";
+            if (elements.stateDot) elements.stateDot.style.background = "var(--danger)";
+            if (elements.statusText) elements.statusText.textContent = "Professora is speaking...";
             imgSrc = ASSETS.talk;
             isTalking = true;
             isThinking = false;
             break;
         case 'think':
             wrap.classList.add('thinking');
-            if (elements.stateDot) elements.stateDot.style.background = "#f9d423";
-            if (elements.statusText) elements.statusText.textContent = "Thinking...";
+            if (typeBadge) typeBadge.classList.add('on');
+            if (elements.stateDot) elements.stateDot.style.background = "var(--accent-primary)";
+            if (elements.statusText) elements.statusText.textContent = "Professora is thinking...";
             imgSrc = ASSETS.think;
             isThinking = true;
             isTalking = false;
             break;
         case 'idle':
         default:
-            if (elements.stateDot) elements.stateDot.style.background = "#2ecc71";
-            if (elements.statusText) elements.statusText.textContent = "Online";
+            if (elements.stateDot) elements.stateDot.style.background = "var(--success)";
+            if (elements.statusText) elements.statusText.textContent = "Online • Ready to help";
             imgSrc = ASSETS.idle;
             isTalking = false;
             isThinking = false;
@@ -238,6 +241,7 @@ window.addMsg = function (role, text, skipSave = false) {
             let count = parseInt(unread.textContent) || 0;
             unread.textContent = count + 1;
             unread.style.display = 'flex';
+            unread.classList.add('on');
         }
     }
 };
@@ -349,8 +353,12 @@ window.toggleMic = function (mode) {
     recognition.interimResults = true; // Enable live updates
 
     recognition.onstart = () => {
-        const btns = document.querySelectorAll('.cb-mic, .ib-mic');
-        btns.forEach(b => b.classList.add('active'));
+        const btns = document.querySelectorAll('.cb, .ib-mic');
+        btns.forEach(b => {
+            if (b.id === 'micBtn' || b.id === 'callMicIn' || b.id === 'chatMicBtn') {
+                b.classList.add('active');
+            }
+        });
         if (elements.userSubtitle) {
             elements.userSubtitle.textContent = "...";
             elements.userSubtitle.style.display = 'block';
@@ -358,7 +366,7 @@ window.toggleMic = function (mode) {
         }
     };
     recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
+        const transcript = event.results[event.results.length - 1][0].transcript;
         
         // Show interim transcript for user to see
         if (elements.userSubtitle) {
@@ -376,11 +384,11 @@ window.toggleMic = function (mode) {
                     elements.userSubtitle.classList.remove('active');
                     setTimeout(() => elements.userSubtitle.style.display = 'none', 300);
                 }
-            }, 2000);
+            }, 3000);
         }
     };
     recognition.onend = () => {
-        const btns = document.querySelectorAll('.cb-mic, .ib-mic');
+        const btns = document.querySelectorAll('.cb, .ib-mic');
         btns.forEach(b => b.classList.remove('active'));
         recognition = null;
     };
