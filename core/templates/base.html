@@ -137,6 +137,23 @@
             max-width: calc(100vw - var(--nav-width));
             display: flex;
             flex-direction: column;
+            transition: all 0.3s;
+        }
+
+        /* Fullscreen Overrides */
+        :fullscreen .sidebar,
+        :fullscreen .top-navbar {
+            display: none !important;
+        }
+
+        :fullscreen .main-content {
+            max-width: 100vw !important;
+            padding: 0 !important;
+        }
+
+        :fullscreen .content-area {
+            height: 100vh !important;
+            padding: 0 !important;
         }
 
         .top-navbar {
