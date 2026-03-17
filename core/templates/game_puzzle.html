@@ -1,130 +1,165 @@
-{% extends 'base.html' %}
-
 {% block title %}English Puzzle Game 🧩{% endblock %}
 
-{% block content %}
-<div class="dashboard-container">
-    <h1 style="color: #000428; text-align: center; margin-bottom: 30px;">🧩 Sentence Builder Puzzle</h1>
-
-    <!-- Level Selection -->
-    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px;">
-        <button onclick="loadLevel(1)" class="level-btn active" id="btn-lvl-1">Level 1: Alphabet</button>
-        <button onclick="loadLevel(2)" class="level-btn" id="btn-lvl-2">Level 2: Introductions</button>
-        <button onclick="loadLevel(3)" class="level-btn" id="btn-lvl-3">Level 3: Family</button>
-        <button onclick="loadLevel(4)" class="level-btn" id="btn-lvl-4"
-            style="border-color: #FFD700; color: #FF8F00;">Level 4: Colors 🎨</button>
-    </div>
-
-    <!-- Game Area -->
-    <div id="game-area"
-        style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 300px;">
-
-        <h3 id="instruction-text" style="color: var(--secondary); text-align: center;">Arrange the letters to spell:
-            FATHER</h3>
-
-        <!-- Drop Zone (Answer) -->
-        <div id="drop-zone" class="drop-zone">
-            <!-- Slots will be generated here -->
-        </div>
-
-        <!-- Draggable Items (Source) -->
-        <div id="source-zone" class="source-zone">
-            <!-- Draggable items will be generated here -->
-        </div>
-
-        <!-- Check Button -->
-        <div style="text-align: center; margin-top: 30px;">
-            <button onclick="checkAnswer()"
-                style="padding: 12px 30px; background: #00E676; color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 0 #00C853;">
-                Check Answer ✅
-            </button>
-            <p id="feedback" style="margin-top: 15px; font-weight: bold; height: 20px;"></p>
-        </div>
-
-    </div>
-</div>
-
+{% block extra_css %}
 <style>
+    .game-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2.5rem;
+    }
+
+    .game-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .game-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: var(--accent-primary);
+    }
+
+    .level-nav {
+        display: flex;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+    }
+
     .level-btn {
-        padding: 10px 20px;
-        border: 2px solid var(--secondary);
-        background: white;
-        color: var(--secondary);
-        border-radius: 20px;
+        padding: 0.75rem 1.25rem;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-secondary);
+        border-radius: var(--radius-pill);
         cursor: pointer;
-        font-weight: bold;
-        transition: 0.3s;
+        font-weight: 600;
+        transition: all 0.2s;
+        font-size: 0.9rem;
     }
 
-    .level-btn.active,
     .level-btn:hover {
-        background: var(--secondary);
-        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
     }
 
-    #btn-lvl-4.active,
-    #btn-lvl-4:hover {
-        background: #FFD700 !important;
-        color: #000428 !important;
-        border-color: #FFD700 !important;
+    .level-btn.active {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .puzzle-area {
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
     }
 
     .drop-zone {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin: 30px 0;
-        min-height: 60px;
+        gap: 0.75rem;
+        margin: 2.5rem 0;
+        min-height: 70px;
         flex-wrap: wrap;
+        width: 100%;
     }
 
     .word-slot {
-        width: 60px;
-        /* Adjust based on content */
-        height: 50px;
-        border: 2px dashed #ccc;
-        border-radius: 8px;
+        min-width: 60px;
+        height: 60px;
+        border: 2px dashed var(--border);
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f9f9f9;
+        background: rgba(255, 255, 255, 0.03);
+        transition: all 0.2s;
+        padding: 0 10px;
     }
 
     .source-zone {
         display: flex;
         justify-content: center;
-        gap: 15px;
+        gap: 1rem;
         flex-wrap: wrap;
-        margin-top: 40px;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        width: 100%;
     }
 
     .draggable-item {
-        padding: 10px 20px;
-        background: var(--primary);
-        color: #000428;
-        border-radius: 8px;
-        font-weight: bold;
+        padding: 0.75rem 1.5rem;
+        background: var(--accent-gradient);
+        color: white;
+        border-radius: var(--radius-md);
+        font-weight: 700;
         cursor: grab;
         user-select: none;
-        box-shadow: 0 4px 0 #00B0D5;
-        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        font-size: 1.1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
+
+    .draggable-item:active { cursor: grabbing; }
 
     .draggable-item.dragging {
         opacity: 0.5;
+        transform: scale(0.95);
     }
 
-    /* Correct/Incorrect feedback styles */
-    .correct {
-        background: #00E676 !important;
-        color: white !important;
-    }
-
-    .incorrect {
-        background: #ef5350 !important;
-        color: white !important;
+    #feedback {
+        margin-top: 1.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        min-height: 1.5rem;
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="glass game-container animate-fade">
+    <div class="game-header">
+        <h1 class="game-title">Sentence Builder 🧩</h1>
+        <div class="level-nav">
+            <button onclick="loadLevel(1)" class="level-btn active" id="btn-lvl-1">Level 1: Alphabet</button>
+            <button onclick="loadLevel(2)" class="level-btn" id="btn-lvl-2">Level 2: Greetings</button>
+            <button onclick="loadLevel(3)" class="level-btn" id="btn-lvl-3">Level 3: Family</button>
+            <button onclick="loadLevel(4)" class="level-btn" id="btn-lvl-4">Level 4: Colors 🎨</button>
+        </div>
+    </div>
+
+    <div class="glass puzzle-area">
+        <h3 id="instruction-text" style="color: var(--accent-primary); text-align: center; font-family: 'Outfit';">
+            Arrange the letters to spell: FATHER
+        </h3>
+
+        <div id="drop-zone" class="drop-zone"></div>
+
+        <div id="source-zone" class="source-zone"></div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <button onclick="checkAnswer()" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                Check Answer ✅
+            </button>
+            <p id="feedback"></p>
+        </div>
+    </div>
+</div>
 
 <script>
     const levels = {
@@ -221,11 +256,11 @@
     }
 
     function dragOver(e) { e.preventDefault(); }
-    function dragEnter(e) { e.preventDefault(); this.style.background = '#e3f2fd'; }
-    function dragLeave() { this.style.background = '#f9f9f9'; }
+    function dragEnter(e) { e.preventDefault(); this.style.background = 'rgba(255, 255, 255, 0.1)'; }
+    function dragLeave() { this.style.background = 'rgba(255, 255, 255, 0.03)'; }
 
     function dragDrop() {
-        this.style.background = '#f9f9f9';
+        this.style.background = 'rgba(255, 255, 255, 0.03)';
         // If slot is empty, append. If full, swap or ignore (simple version: only if empty)
         if (this.classList.contains('word-slot') && this.children.length === 0) {
             this.appendChild(draggedItem);
@@ -260,11 +295,11 @@
         const feedback = document.getElementById('feedback');
         if (isCorrect) {
             feedback.innerHTML = "Correct! Great job! 🎉";
-            feedback.style.color = "#00E676";
+            feedback.style.color = "var(--success)";
             // Confetti or sound effect could go here
         } else {
             feedback.innerHTML = "Not quite. Try again! 🤔";
-            feedback.style.color = "#FF1744";
+            feedback.style.color = "#f87171"; // Light red
         }
     }
 

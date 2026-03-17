@@ -1,85 +1,229 @@
-{% extends 'base.html' %}
 {% block title %}Staff Dashboard - English Course{% endblock %}
 
+{% block extra_css %}
+<style>
+    .staff-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2.5rem;
+    }
+
+    .staff-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .staff-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        margin: 0;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: var(--accent-primary);
+    }
+
+    .counter-glass {
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .data-table-container {
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .table-header {
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .search-input {
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-pill);
+        color: var(--text-primary);
+        width: 300px;
+        transition: all 0.2s;
+    }
+
+    .search-input:focus {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .premium-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .premium-table th {
+        padding: 1.25rem 2rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .premium-table td {
+        padding: 1.25rem 2rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .student-row {
+        transition: background 0.2s;
+    }
+
+    .student-row:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-gradient);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-family: 'Outfit';
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .prog-track {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-pill);
+        overflow: hidden;
+        width: 120px;
+    }
+
+    .prog-bar-fill {
+        height: 100%;
+        background: var(--accent-gradient);
+        border-radius: var(--radius-pill);
+    }
+
+    .score-badge {
+        padding: 0.35rem 0.85rem;
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--accent-secondary);
+        border-radius: var(--radius-pill);
+        font-weight: 700;
+        font-size: 0.875rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .action-link {
+        color: var(--accent-primary);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.2s;
+    }
+
+    .action-link:hover {
+        transform: translateX(4px);
+        color: var(--accent-secondary);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="dashboard-container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1 style="color: #004e92; margin: 0;">🛠️ Staff Dashboard</h1>
-        <div
-            style="background: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <span style="color: #666;">Total Students:</span>
-            <strong style="color: #004e92; font-size: 1.2em; margin-left: 10px;">{{ total_students }}</strong>
+<div class="staff-container animate-fade">
+    <div class="staff-header">
+        <h1 class="staff-title">Staff Dashboard 🛠️</h1>
+        <div class="glass counter-glass">
+            <span style="color: var(--text-secondary); font-weight: 600;">Total Students</span>
+            <span style="font-size: 1.75rem; font-weight: 800; font-family: 'Outfit'; color: var(--accent-primary);">{{ total_students }}</span>
         </div>
     </div>
 
-    <div class="module-card" style="padding: 0; overflow: hidden;">
-        <div
-            style="padding: 20px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0; color: #333;">Student Progress Overview</h3>
-            <input type="text" id="studentSearch" placeholder="Search students..."
-                style="padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; width: 250px;">
+    <div class="glass data-table-container">
+        <div class="table-header">
+            <h3 style="margin: 0; font-family: 'Outfit'; font-size: 1.25rem;">Student Progress Overview</h3>
+            <div style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 0.875rem;"></i>
+                <input type="text" id="studentSearch" placeholder="Search by name or email..." class="search-input" style="padding-left: 2.75rem;">
+            </div>
         </div>
 
         <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;" id="studentTable">
+            <table class="premium-table" id="studentTable">
                 <thead>
-                    <tr style="background: #fdfdfd; border-bottom: 2px solid #eee;">
-                        <th style="padding: 15px 20px; color: #666;">Student</th>
-                        <th style="padding: 15px 20px; color: #666;">Progress</th>
-                        <th style="padding: 15px 20px; color: #666;">Avg Score</th>
-                        <th style="padding: 15px 20px; color: #666;">Quizzes</th>
-                        <th style="padding: 15px 20px; color: #666;">Last Active</th>
-                        <th style="padding: 15px 20px; color: #666;">Actions</th>
+                    <tr>
+                        <th>Student</th>
+                        <th>Progress</th>
+                        <th>Avg Score</th>
+                        <th>Quizzes</th>
+                        <th>Last Active</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in student_data %}
-                    <tr style="border-bottom: 1px solid #f0f0f0;" class="student-row">
-                        <td style="padding: 15px 20px;">
-                            <div style="display: flex; align-items: center;">
-                                <div
-                                    style="width: 35px; height: 35px; background: #e3f2fd; color: #1976d2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">
+                    <tr class="student-row">
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="avatar-circle">
                                     {{ item.user.username|slice:":1"|upper }}
                                 </div>
-                                <div>
-                                    <div style="font-weight: 600; color: #333;">{{ item.user.username }}</div>
-                                    <div style="font-size: 0.8em; color: #888;">{{ item.user.email|default:"No email" }}
-                                    </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 700; color: var(--text-primary);">{{ item.user.username }}</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ item.user.email|default:"No email" }}</span>
                                 </div>
                             </div>
                         </td>
-                        <td style="padding: 15px 20px;">
-                            <div style="display: flex; align-items: center;">
-                                <div
-                                    style="flex: 1; height: 8px; background: #eee; border-radius: 4px; margin-right: 10px; min-width: 100px;">
-                                    <div
-                                        style="height: 100%; width: {{ item.progress }}%; background: linear-gradient(90deg, #4caf50, #81c784); border-radius: 4px;">
-                                    </div>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div class="prog-track">
+                                    <div class="prog-bar-fill" style="width: {{ item.progress }}%;"></div>
                                 </div>
-                                <span style="font-size: 0.9em; font-weight: 600; color: #4caf50;">
-                                    {{ item.progress }}%</span>
+                                <span style="font-size: 0.875rem; font-weight: 700; color: var(--success);">{{ item.progress }}%</span>
                             </div>
                         </td>
-                        <td style="padding: 15px 20px;">
-                            <span
-                                style="background: #fff4e5; color: #f57c00; padding: 4px 10px; border-radius: 12px; font-size: 0.9em; font-weight: 600;">
+                        <td>
+                            <span class="score-badge">
                                 {{ item.avg_score|floatformat:1 }}%
                             </span>
                         </td>
-                        <td style="padding: 15px 20px; color: #666;">{{ item.quiz_count }}</td>
-                        <td style="padding: 15px 20px; color: #888; font-size: 0.9em;">
+                        <td style="color: var(--text-secondary); font-weight: 600;">{{ item.quiz_count }}</td>
+                        <td style="color: var(--text-secondary); font-size: 0.875rem;">
                             {{ item.last_login|date:"M d, Y"|default:"Never" }}
                         </td>
-                        <td style="padding: 15px 20px;">
-                            <a href="{% url 'staff_student_detail' item.user.id %}"
-                                style="color: #004e92; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center;">
-                                View Details <span style="margin-left: 5px;">→</span>
+                        <td>
+                            <a href="{% url 'staff_student_detail' item.user.id %}" class="action-link">
+                                Details <i class="fas fa-chevron-right"></i>
                             </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="6" style="padding: 4rem; text-align: center; color: var(--text-secondary);">
+                            <i class="fas fa-users-slash" style="display: block; font-size: 2.5rem; margin-bottom: 1.5rem; opacity: 0.3;"></i>
                             No students registered yet.
                         </td>
                     </tr>
