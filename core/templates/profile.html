@@ -3,89 +3,168 @@
 {% block title %}My Profile - English Course{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <h1 style="color: #000428; margin-bottom: 20px;">👤 My Profile</h1>
+{% block page_title %}My Profile{% endblock %}
 
-    <div
-        style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-left: 5px solid #004e92;">
-        <h2 style="color: #004e92; margin-top: 0;">Student Info</h2>
-        <p style="color: #333; font-size: 1.1em; margin-bottom: 10px;"><strong
-                style="color: #000428;">Username:</strong> {{ user.username }}</p>
-        <p style="color: #666; font-size: 1.1em;"><strong style="color: #000428;">Joined:</strong>
-            {{ user.date_joined|date:"F j, Y" }}</p>
+{% block extra_css %}
+<style>
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .profile-card {
+        padding: 2rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .history-table th {
+        text-align: left;
+        padding: 1rem;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .history-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+    .activity-list {
+        list-style: none;
+    }
+
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-grid">
+    <!-- User Info -->
+    <div class="glass profile-card animate-fade" style="animation-delay: 0.1s;">
+        <h3 style="margin-top: 0; font-family: 'Outfit'; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Student Information</h3>
+        <div class="info-list">
+            <div class="info-item">
+                <span class="info-label">Username</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Member Since</span>
+                <span class="info-value">{{ user.date_joined|date:"F j, Y" }}</span>
+            </div>
+        </div>
     </div>
 
-    <h2 style="margin-top: 40px; color: #000428;">📝 Quiz History</h2>
-
-    {% if quiz_results %}
-    <div
-        style="overflow-x: auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-top: 20px;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead style="background: #f8f9fa; border-bottom: 2px solid #eee;">
-                <tr>
-                    <th style="padding: 18px 20px; color: #004e92;">Quiz Name</th>
-                    <th style="padding: 18px 20px; color: #004e92;">Score</th>
-                    <th style="padding: 18px 20px; color: #004e92;">Result</th>
-                    <th style="padding: 18px 20px; color: #004e92;">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in quiz_results %}
-                <tr style="border-bottom: 1px solid #f0f0f0;">
-                    <td style="padding: 18px 20px; color: #333; font-weight: 500;">{{ result.quiz_name }}</td>
-                    <td style="padding: 18px 20px; font-weight: bold; color: #004e92;">
-                        {{ result.score }} / {{ result.total_questions }}
-                    </td>
-                    <td style="padding: 18px 20px;">
-                        {% widthratio result.score result.total_questions 100 as percent %}
-                        {% if percent|add:"0" >= 80 %}
-                        <span
-                            style="background: #e8f5e9; color: #2e7d32; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-                            Excellent ({{ percent }}%)
-                        </span>
-                        {% else %}
-                        <span
-                            style="background: #fff3e0; color: #ef6c00; padding: 6px 14px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-                            Keep Practicing ({{ percent }}%)
-                        </span>
-                        {% endif %}
-                    </td>
-                    <td style="padding: 18px 20px; color: #888; font-size: 0.9em;">{{ result.date_taken|date:"M j, Y" }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Quiz History -->
+    <div class="glass profile-card animate-fade" style="animation-delay: 0.2s;">
+        <h3 style="margin-top: 0; font-family: 'Outfit'; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Quiz History</h3>
+        {% if quiz_results %}
+        <div style="overflow-x: auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Quiz Name</th>
+                        <th>Score</th>
+                        <th>Result</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in quiz_results %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ result.quiz_name }}</td>
+                        <td style="font-weight: 700; color: var(--accent-primary);">{{ result.score }} / {{ result.total_questions }}</td>
+                        <td>
+                            {% widthratio result.score result.total_questions 100 as percent %}
+                            {% if percent|add:"0" >= 80 %}
+                            <span class="badge badge-success">Excellent ({{ percent }}%)</span>
+                            {% else %}
+                            <span class="badge badge-warning">Keep Practicing ({{ percent }}%)</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: var(--text-secondary); font-size: 0.9rem;">{{ result.date_taken|date:"M j, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color: var(--text-secondary); font-style: italic; margin-top: 1rem;">No quizzes taken yet. <a href="{% url 'quiz' %}" style="color: var(--accent-primary);">Start now!</a></p>
+        {% endif %}
     </div>
-    {% else %}
-    <p style="margin-top: 20px; color: #666; font-style: italic;">You haven't taken any quizzes yet. <a
-            href="{% url 'quiz' %}">Take a quiz now!</a></p>
-    {% endif %}
 
-    <h2 style="margin-top: 40px; color: #000428;">🕵️ Recent Activity</h2>
-
-    {% if activities %}
-    <div
-        style="background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-top: 20px; overflow: hidden;">
-        <ul style="list-style: none; padding: 0; margin: 0;">
+    <!-- Recent Activity -->
+    <div class="glass profile-card animate-fade" style="animation-delay: 0.3s;">
+        <h3 style="margin-top: 0; font-family: 'Outfit'; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">Recent Activity</h3>
+        {% if activities %}
+        <ul class="activity-list">
             {% for activity in activities %}
-            <li
-                style="padding: 18px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #333; font-weight: 500;">{{ activity.action }}</span>
-                <span style="color: #999; font-size: 0.85em;">{{ activity.timestamp|timesince }} ago</span>
+            <li class="activity-item">
+                <span style="font-weight: 500;">{{ activity.action }}</span>
+                <span style="color: var(--text-secondary); font-size: 0.85em;">{{ activity.timestamp|timesince }} ago</span>
             </li>
             {% endfor %}
         </ul>
+        {% else %}
+        <p style="color: var(--text-secondary); font-style: italic; margin-top: 1rem;">No recent activity recorded.</p>
+        {% endif %}
     </div>
-    {% else %}
-    <p style="margin-top: 20px; color: #666; font-style: italic;">No recent activity recorded.</p>
-    {% endif %}
 
-    <div style="margin-top: 40px; text-align: center;">
-        <a href="{% url 'logout' %}"
-            style="display: inline-block; padding: 10px 20px; background: #e53935; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-            Logout
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'logout' %}" class="btn btn-secondary" style="border-color: var(--danger); color: var(--danger);">
+            <i class="fas fa-sign-out-alt"></i> Logout Securely
         </a>
     </div>
 </div>
+{% endblock %}
 {% endblock %}

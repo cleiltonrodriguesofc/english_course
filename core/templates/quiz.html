@@ -4,219 +4,177 @@
 {% block extra_css %}
 <style>
     :root {
-        --q-primary: #00D2FF;
-        --q-secondary: #3A7BD5;
-        --q-dark: #000428;
-        --q-light: #E0F7FA;
-        --q-success: #00E676;
-        --q-error: #FF1744;
+        --q-primary: #3b82f6;
+        --q-secondary: #8b5cf6;
+        --q-success: #10b981;
+        --q-error: #ef4444;
     }
 
     .quiz-container {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 0 20px;
+        max-width: 900px;
+        margin: 2rem auto;
     }
 
     .quiz-header {
         text-align: center;
-        margin-bottom: 40px;
-        color: var(--q-dark);
+        margin-bottom: 3rem;
     }
 
     .quiz-section {
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        border-left: 5px solid var(--q-secondary);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--q-secondary);
     }
 
     .quiz-section h2 {
-        color: var(--q-secondary);
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
         margin-top: 0;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
 
     .question {
-        margin-bottom: 25px;
+        margin-bottom: 2rem;
     }
 
     .question-text {
-        font-weight: bold;
-        color: #000;
-        /* FORCE BLACK */
-        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
         font-size: 1.1rem;
     }
 
     /* Input Styles */
     .q-input {
         width: 100%;
-        padding: 12px;
-        border: 2px solid #ccc;
-        /* Darker border */
-        border-radius: 8px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
         font-size: 1rem;
-        transition: 0.3s;
-        box-sizing: border-box;
-        color: #000;
-        /* FORCE BLACK */
-        background: #fff;
+        color: var(--text-primary);
+        transition: all 0.2s;
     }
 
     .q-input:focus {
         border-color: var(--q-primary);
+        background: rgba(255, 255, 255, 0.1);
         outline: none;
     }
 
     .q-select {
         width: 100%;
-        padding: 12px;
-        border: 2px solid #ccc;
-        border-radius: 8px;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
         font-size: 1rem;
-        background: white;
+        color: var(--text-primary);
         cursor: pointer;
-        color: #000;
-        /* FORCE BLACK */
     }
 
     /* Radio Options */
     .radio-group {
         display: flex;
-        gap: 20px;
+        gap: 1rem;
         flex-wrap: wrap;
     }
 
     .radio-option {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 0.75rem;
         cursor: pointer;
-        background: #fff;
-        /* White background */
-        padding: 10px 15px;
-        border-radius: 8px;
-        border: 2px solid #d0d0d0;
-        /* Visible border */
-        transition: 0.2s;
-        color: #000;
-        /* FORCE BLACK */
+        background: rgba(255, 255, 255, 0.03);
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        transition: all 0.2s;
+        color: var(--text-primary);
         font-weight: 500;
     }
 
     .radio-option:hover {
-        background: var(--q-light);
+        background: rgba(255, 255, 255, 0.08);
         border-color: var(--q-primary);
     }
 
     input[type="radio"] {
-        accent-color: var(--q-secondary);
-        width: 18px;
-        height: 18px;
+        accent-color: var(--q-primary);
+        width: 1.1rem;
+        height: 1.1rem;
     }
 
     /* Voice Recorder Styles */
     .recorder-box {
-        background: #f0f4f8;
-        padding: 20px;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 1.5rem;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
-        gap: 15px;
-        border: 1px dashed #ccc;
+        gap: 1.5rem;
+        border: 1px dashed var(--border);
     }
 
     .record-btn {
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         background: var(--q-error);
         border: none;
         color: white;
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: 0.3s;
-        box-shadow: 0 4px 10px rgba(255, 23, 68, 0.3);
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
     .record-btn.recording {
         animation: pulse 1.5s infinite;
-        background: darkred;
+        background: #991b1b;
     }
 
     .record-btn:disabled {
-        background: #ccc;
+        background: var(--border);
         cursor: not-allowed;
         box-shadow: none;
     }
 
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7);
-        }
-
-        70% {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 10px rgba(255, 23, 68, 0);
-        }
-
-        100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
-        }
-    }
-
-    /* Submit Button */
-    .submit-container {
-        text-align: center;
-        margin-top: 40px;
-        margin-bottom: 60px;
-    }
-
+    /* Submit Button is already covered by global .btn styles mostly, but customizing */
     .submit-btn {
-        background: linear-gradient(90deg, var(--q-secondary), var(--q-primary));
+        background: var(--accent-gradient);
         color: white;
         border: none;
-        padding: 15px 50px;
-        font-size: 1.5rem;
-        border-radius: 50px;
+        padding: 1rem 3rem;
+        font-size: 1.25rem;
+        border-radius: var(--radius-pill);
         cursor: pointer;
-        font-weight: bold;
-        box-shadow: 0 10px 25px rgba(58, 123, 213, 0.4);
-        transition: 0.3s;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        transition: all 0.3s;
+        font-family: 'Outfit', sans-serif;
     }
 
     .submit-btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(58, 123, 213, 0.5);
+        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.6);
     }
 
     /* Feedback */
     .feedback {
-        margin-top: 5px;
-        font-size: 0.9rem;
-        font-weight: bold;
+        margin-top: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
         display: none;
     }
 
-    .feedback.correct {
-        color: var(--q-success);
-        display: block;
-    }
-
-    .feedback.incorrect {
-        color: var(--q-error);
-        display: block;
-    }
+    .feedback.correct { color: var(--q-success); display: block; }
+    .feedback.incorrect { color: var(--q-error); display: block; }
 
     /* Mobile adjustments */
     @media (max-width: 768px) {
@@ -257,9 +215,9 @@
     <form id="quizForm" onsubmit="return false;">
 
         <!-- PART 1 -->
-        <div class="quiz-section">
+        <div class="glass quiz-section animate-fade" style="animation-delay: 0.1s;">
             <h2>Part 1: Pronoun Challenge</h2>
-            <p style="margin-bottom: 20px; color: #666;">Select the correct pronoun for each sentence.</p>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">Select the correct pronoun for each sentence.</p>
 
             <div class="question" data-correct="I">
                 <div class="question-text">1. ______ am a student, but she is the teacher.</div>
@@ -335,9 +293,9 @@
         </div>
 
         <!-- PART 2 -->
-        <div class="quiz-section">
+        <div class="glass quiz-section animate-fade" style="animation-delay: 0.2s;">
             <h2>Part 2: Sentence Transformation</h2>
-            <p style="margin-bottom: 20px; color: #666;">Rewrite the sentences in <strong>Negative</strong> and
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">Rewrite the sentences in <strong>Negative</strong> and
                 <strong>Interrogative</strong> forms.
             </p>
 
@@ -378,9 +336,9 @@
         </div>
 
         <!-- PART 3 -->
-        <div class="quiz-section">
+        <div class="glass quiz-section animate-fade" style="animation-delay: 0.3s;">
             <h2>Part 3: Wh- Questions</h2>
-            <p style="margin-bottom: 20px; color: #666;">Choose the correct word: Where, What, Who, How, When.</p>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">Choose the correct word: Where, What, Who, How, When.</p>
 
             <div class="question" data-correct="Where">
                 <div class="question-text">1. __________ are you from? (Answer: I am from Brazil)</div>
@@ -439,9 +397,9 @@
         </div>
 
         <!-- PART 4 -->
-        <div class="quiz-section">
+        <div class="glass quiz-section animate-fade" style="animation-delay: 0.4s;">
             <h2>Part 4: Speaking Challenge 🎤</h2>
-            <p style="margin-bottom: 20px; color: #666;">Read the sentences aloud. Record your voice to practice!</p>
+            <p style="margin-bottom: 20px; color: var(--text-secondary);">Read the sentences aloud. Record your voice to practice!</p>
 
             <div class="question" data-target="Excuse me but I have to go">
                 <div class="question-text">1. "Excuse me, but I have to go."</div>

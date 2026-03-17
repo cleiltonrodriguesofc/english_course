@@ -128,7 +128,6 @@
             color: var(--text-secondary);
             margin: 1.5rem 0 0.5rem 1rem;
             font-weight: 600;
-            opacity: 0.6;
         }
 
         /* Main Content Styling */
@@ -246,17 +245,20 @@
                     <i class="fas fa-home"></i>
                     <span class="nav-text">Dashboard</span>
                 </a>
+                <!-- Hiding AI Tutor for now as requested -->
+                <!--
                 <a href="{% url 'ai_tutor' %}" class="nav-link {% if request.resolver_match.url_name == 'ai_tutor' %}active{% endif %}">
                     <i class="fas fa-robot"></i>
                     <span class="nav-text">AI Tutor Maria</span>
                 </a>
-                <a href="{% url 'level_assessment' %}" class="nav-link {% if request.resolver_match.url_name == 'level_assessment' %}active{% endif %}">
+                -->
+                <a href="{% url 'quiz' %}" class="nav-link {% if request.resolver_match.url_name == 'quiz' %}active{% endif %}">
                     <i class="fas fa-chart-line"></i>
                     <span class="nav-text">Assessment</span>
                 </a>
                 
                 <div class="module-label">Learning</div>
-                <a href="{% url 'lesson_1' %}" class="nav-link">
+                <a href="{% url 'dashboard' %}#lessons" class="nav-link">
                     <i class="fas fa-book-open"></i>
                     <span class="nav-text">Lessons</span>
                 </a>

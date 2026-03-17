@@ -8,12 +8,12 @@
   --bg-primary: #020617;
   --bg-secondary: #0f172a;
   --surface: rgba(30, 41, 59, 0.7);
-  --border: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.15); /* Increased slightly */
   --accent-primary: #3b82f6;
   --accent-secondary: #8b5cf6;
   --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --text-secondary: #cbd5e1; /* Made it lighter (Slate-300 instead of Slate-400) */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -60,7 +60,7 @@ body {
   background: var(--bg-primary);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.2); /* Much more visible */
   border-radius: var(--radius-pill);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -127,6 +127,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .text-gradient {
+  color: var(--accent-primary); /* Fallback for browsers that don't support clip-text */
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;

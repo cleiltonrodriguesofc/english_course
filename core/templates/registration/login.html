@@ -3,56 +3,117 @@
 {% block title %}Login - English Course{% endblock %}
 
 {% block content %}
-<div
-    style="max-width: 400px; margin: 50px auto; padding: 30px; background: white; color: #333; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-    <h2 style="text-align: center; color: var(--primary); margin-bottom: 30px;">Login 🔐</h2>
+{% block extra_css %}
+<style>
+    .auth-container {
+        max-width: 420px;
+        margin: 4rem auto;
+        padding: 2.5rem;
+    }
+
+    .auth-title {
+        text-align: center;
+        font-family: 'Outfit', sans-serif;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: var(--accent-primary); /* fallback */
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        border-color: var(--accent-primary);
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .error-box {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+    }
+
+    .auth-footer a {
+        color: var(--accent-primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass auth-container animate-fade">
+    <h2 class="auth-title">Login 🔐</h2>
 
     <form method="post">
         {% csrf_token %}
 
         {% if form.errors %}
-        <div style="background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+        <div class="error-box">
             Invalid username or password.
         </div>
         {% endif %}
 
-        <div style="margin-bottom: 20px;">
-            <label for="id_username" style="display: block; margin-bottom: 5px; font-weight: bold;">Username</label>
-            {{ form.username }}
+        <div class="form-group">
+            <label for="id_username" class="form-label">Username</label>
+            <input type="text" name="username" id="id_username" class="form-input" required autofocus>
         </div>
 
-        <div style="margin-bottom: 25px;">
-            <label for="id_password" style="display: block; margin-bottom: 5px; font-weight: bold;">Password</label>
-            {{ form.password }}
+        <div class="form-group">
+            <label for="id_password" class="form-label">Password</label>
+            <input type="password" name="password" id="id_password" class="form-input" required>
         </div>
 
-        <button type="submit"
-            style="width: 100%; padding: 12px; background: var(--secondary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-weight: bold;">
-            Login
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.875rem;">
+            Login to Dashboard
         </button>
     </form>
 
-    <p style="text-align: center; margin-top: 20px;">
-        Don't have an account? <a href="{% url 'register' %}"
-            style="color: var(--secondary); font-weight: bold;">Register here</a>
-    </p>
+    <div class="auth-footer">
+        Don't have an account? <a href="{% url 'register' %}">Register here</a>
+    </div>
 </div>
-
-<style>
-    /* Form inputs styling override */
-    input[type="text"],
-    input[type="password"] {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        box-sizing: border-box;
-    }
-
-    input[type="text"]:focus,
-    input[type="password"]:focus {
-        border-color: var(--secondary);
-        outline: none;
-    }
-</style>
+{% endblock %}
 {% endblock %}
