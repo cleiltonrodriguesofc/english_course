@@ -143,3 +143,27 @@ h1, h2, h3, h4, h5, h6 {
 .animate-fade {
   animation: fadeIn 0.6s ease-out forwards;
 }
+
+/* Global Form Elements Modernization */
+input, select, textarea {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-main);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
