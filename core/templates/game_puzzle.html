@@ -1,3 +1,5 @@
+{% extends 'base.html' %}
+
 {% block title %}English Puzzle Game 🧩{% endblock %}
 
 {% block extra_css %}
@@ -27,92 +29,84 @@
     .level-nav {
         display: flex;
         justify-content: center;
-        gap: 0.75rem;
-        margin-bottom: 2.5rem;
+        gap: 1rem;
         flex-wrap: wrap;
     }
 
     .level-btn {
-        padding: 0.75rem 1.25rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-sm);
+        background: var(--bg-card);
         border: 1px solid var(--border);
-        background: rgba(255, 255, 255, 0.05);
         color: var(--text-secondary);
-        border-radius: var(--radius-pill);
-        cursor: pointer;
         font-weight: 600;
+        cursor: pointer;
         transition: all 0.2s;
-        font-size: 0.9rem;
-    }
-
-    .level-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: var(--accent-primary);
-        color: var(--text-primary);
     }
 
     .level-btn.active {
         background: var(--accent-primary);
         color: white;
         border-color: var(--accent-primary);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
     }
 
     .puzzle-area {
-        min-height: 350px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
+        padding: 3rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        min-height: 300px;
     }
 
-    .drop-zone {
+    .word-slot-container {
         display: flex;
         justify-content: center;
         gap: 0.75rem;
-        margin: 2.5rem 0;
-        min-height: 70px;
-        flex-wrap: wrap;
-        width: 100%;
+        margin-top: 2rem;
+        min-height: 60px;
     }
 
     .word-slot {
-        min-width: 60px;
+        width: 50px;
         height: 60px;
         border: 2px dashed var(--border);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
         background: rgba(255, 255, 255, 0.03);
         transition: all 0.2s;
-        padding: 0 10px;
     }
 
-    .source-zone {
+    .word-slot.highlight {
+        border-color: var(--accent-primary);
+        background: rgba(59, 130, 246, 0.1);
+    }
+
+    .draggable-zone {
         display: flex;
         justify-content: center;
         gap: 1rem;
+        margin-top: 3rem;
         flex-wrap: wrap;
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border);
-        width: 100%;
     }
 
     .draggable-item {
-        padding: 0.75rem 1.5rem;
-        background: var(--accent-gradient);
-        color: white;
-        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
         font-weight: 700;
+        font-size: 1.25rem;
         cursor: grab;
-        user-select: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        font-size: 1.1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+
+    .draggable-item:hover {
+        border-color: var(--accent-primary);
+        transform: translateY(-2px);
     }
 
     .draggable-item:active { cursor: grabbing; }
@@ -148,145 +142,96 @@
             Arrange the letters to spell: FATHER
         </h3>
 
-        <div id="drop-zone" class="drop-zone"></div>
-
-        <div id="source-zone" class="source-zone"></div>
-
-        <div style="text-align: center; margin-top: 3rem;">
-            <button onclick="checkAnswer()" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
-                Check Answer ✅
-            </button>
-            <p id="feedback"></p>
+        <div class="word-slot-container" id="slot-zone">
+            <!-- Slots will be injected -->
         </div>
+
+        <div class="draggable-zone" id="word-zone">
+            <!-- Draggable items will be injected -->
+        </div>
+
+        <div id="feedback"></div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     const levels = {
-        1: {
-            title: "Arrange the letters",
-            type: "letters",
-            items: ["A", "H", "T", "F", "R", "E", "B"], // Distractor B
-            correct: ["F", "A", "T", "H", "E", "R"]
-        },
-        2: {
-            title: "Form the sentence",
-            type: "words",
-            items: ["Sarah", "is", "my", "My", "name", "Your"], // Distractor Your
-            correct: ["My", "name", "is", "Sarah"]
-        },
-        3: {
-            title: "Form the sentence",
-            type: "words",
-            items: ["brother", "This", "my", "is", "He"], // Distractor He
-            correct: ["This", "is", "my", "brother"]
-        },
-        4: {
-            title: "Arrange the letters",
-            type: "letters",
-            items: ["L", "O", "Y", "W", "E", "L", "P"], // Distractor P
-            correct: ["Y", "E", "L", "L", "O", "W"]
-        }
+        1: { target: "FATHER", scrambled: "RETHAF", instruction: "Arrange the letters to spell: FATHER" },
+        2: { target: "GOOD MORNING", scrambled: "MORNING GOOD", instruction: "Arrange the words: GOOD MORNING", isWordLevel: true },
+        3: { target: "BROTHER", scrambled: "REHTORB", instruction: "Arrange the letters to spell: BROTHER" },
+        4: { target: "YELLOW IS SUN", scrambled: "SUN YELLOW IS", instruction: "Arrange the words: YELLOW IS SUN", isWordLevel: true }
     };
 
     let currentLevel = 1;
-    let draggedItem = null;
 
-    function loadLevel(lvl) {
-        currentLevel = lvl;
-        const data = levels[lvl];
+    function loadLevel(level) {
+        currentLevel = level;
+        const data = levels[level];
 
         // Update UI
         document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`btn-lvl-${lvl}`).classList.add('active');
-        document.getElementById('instruction-text').innerText = data.title;
+        document.getElementById(`btn-lvl-${level}`).classList.add('active');
+        document.getElementById('instruction-text').innerText = data.instruction;
         document.getElementById('feedback').innerText = "";
 
-        // Render Slots (Drop Zone)
-        const dropZone = document.getElementById('drop-zone');
-        dropZone.innerHTML = '';
-        data.correct.forEach(() => {
+        const slotZone = document.getElementById('slot-zone');
+        const wordZone = document.getElementById('word-zone');
+        slotZone.innerHTML = "";
+        wordZone.innerHTML = "";
+
+        const items = data.isWordLevel ? data.scrambled.split(' ') : data.scrambled.split('');
+        const slotsCount = data.isWordLevel ? data.target.split(' ').length : data.target.length;
+
+        for (let i = 0; i < slotsCount; i++) {
             const slot = document.createElement('div');
             slot.className = 'word-slot';
-            if (data.type === 'words') slot.style.width = '100px';
-            dropZone.appendChild(slot);
-        });
+            slot.dataset.index = i;
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('drop', handleDrop);
+            slotZone.appendChild(slot);
+        }
 
-        // Render Items (Source Zone)
-        const sourceZone = document.getElementById('source-zone');
-        sourceZone.innerHTML = '';
-        const shuffled = [...data.items].sort(() => Math.random() - 0.5); // Simple shuffle
-
-        shuffled.forEach(text => {
+        items.forEach(char => {
             const item = document.createElement('div');
             item.className = 'draggable-item';
+            item.innerText = char;
             item.draggable = true;
-            item.innerText = text;
-            item.id = 'item-' + text; // Unique ID helpful for logic
-
-            // Drag Events
-            item.addEventListener('dragstart', dragStart);
-            item.addEventListener('dragend', dragEnd);
-
-            sourceZone.appendChild(item);
+            item.addEventListener('dragstart', handleDragStart);
+            wordZone.appendChild(item);
         });
-
-        // Drop Zone Events
-        document.querySelectorAll('.word-slot').forEach(slot => {
-            slot.addEventListener('dragover', dragOver);
-            slot.addEventListener('dragenter', dragEnter);
-            slot.addEventListener('dragleave', dragLeave);
-            slot.addEventListener('drop', dragDrop);
-        });
-
-        // Allow dragging back to source
-        sourceZone.addEventListener('dragover', dragOver);
-        sourceZone.addEventListener('drop', returnToSource);
     }
 
-    // Drag Functions
-    function dragStart() {
+    let draggedItem = null;
+
+    function handleDragStart(e) {
         draggedItem = this;
-        setTimeout(() => this.classList.add('dragging'), 0);
+        e.dataTransfer.setData('text/plain', this.innerText);
     }
 
-    function dragEnd() {
-        this.classList.remove('dragging');
-        draggedItem = null;
-    }
-
-    function dragOver(e) { e.preventDefault(); }
-    function dragEnter(e) { e.preventDefault(); this.style.background = 'rgba(255, 255, 255, 0.1)'; }
-    function dragLeave() { this.style.background = 'rgba(255, 255, 255, 0.03)'; }
-
-    function dragDrop() {
-        this.style.background = 'rgba(255, 255, 255, 0.03)';
-        // If slot is empty, append. If full, swap or ignore (simple version: only if empty)
-        if (this.classList.contains('word-slot') && this.children.length === 0) {
-            this.appendChild(draggedItem);
-        }
-    }
-
-    function returnToSource(e) {
+    function handleDrop(e) {
         e.preventDefault();
-        const sourceZone = document.getElementById('source-zone');
-        sourceZone.appendChild(draggedItem);
+        if (this.children.length > 0) return;
+
+        this.appendChild(draggedItem);
+        checkWin();
     }
 
-    function checkAnswer() {
+    function checkWin() {
         const data = levels[currentLevel];
         const slots = document.querySelectorAll('.word-slot');
-        let isCorrect = true;
         let userArr = [];
+        let isCorrect = true;
 
         slots.forEach((slot, index) => {
             if (slot.children.length === 0) {
                 isCorrect = false;
-                userArr.push(null);
             } else {
                 const text = slot.children[0].innerText;
                 userArr.push(text);
-                if (text !== data.correct[index]) {
+                const targetItems = data.isWordLevel ? data.target.split(' ') : data.target.split('');
+                if (text !== targetItems[index]) {
                     isCorrect = false;
                 }
             }
@@ -296,10 +241,9 @@
         if (isCorrect) {
             feedback.innerHTML = "Correct! Great job! 🎉";
             feedback.style.color = "var(--success)";
-            // Confetti or sound effect could go here
         } else {
-            feedback.innerHTML = "Not quite. Try again! 🤔";
-            feedback.style.color = "#f87171"; // Light red
+            feedback.innerHTML = "Keep going... 🤔";
+            feedback.style.color = "var(--text-secondary)";
         }
     }
 

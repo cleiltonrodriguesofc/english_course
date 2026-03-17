@@ -1,3 +1,5 @@
+{% extends 'base.html' %}
+
 {% block title %}Memory Match Game 🧠{% endblock %}
 
 {% block extra_css %}
@@ -128,7 +130,9 @@
         </button>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     const cardsData = [
         { en: "Father", pt: "Pai" },
@@ -136,7 +140,7 @@
         { en: "Brother", pt: "Irmão" },
         { en: "Sister", pt: "Irmã" },
         { en: "Hello", pt: "Olá" },
-        { en: "Blue", pt: "Azul" }, // Added some colors too!
+        { en: "Blue", pt: "Azul" },
     ];
 
     let grid = document.getElementById('memory-grid');
@@ -153,17 +157,14 @@
         document.getElementById('pair-count').innerText = matchedPairs;
         document.getElementById('win-message').style.display = 'none';
 
-        // Create pairs
         let gameCards = [];
         cardsData.forEach(pair => {
             gameCards.push({ id: pair.en, text: pair.en, type: 'en' });
-            gameCards.push({ id: pair.en, text: pair.pt, type: 'pt' }); // id is same for matching
+            gameCards.push({ id: pair.en, text: pair.pt, type: 'pt' });
         });
 
-        // Shuffle
         gameCards.sort(() => Math.random() - 0.5);
 
-        // Render
         gameCards.forEach(card => {
             const cardEl = document.createElement('div');
             cardEl.classList.add('memory-card');
@@ -208,8 +209,6 @@
     function disableCards() {
         flippedCards[0].classList.add('matched');
         flippedCards[1].classList.add('matched');
-
-        // Remove listeners
         flippedCards[0].removeEventListener('click', flipCard);
         flippedCards[1].removeEventListener('click', flipCard);
 
