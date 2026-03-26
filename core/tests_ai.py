@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 import json
 from unittest.mock import patch
@@ -14,6 +14,7 @@ class AITutorTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'avatar_prototype.html')
 
+    @override_settings(OPENAI_API_KEY="test-key")
     @patch('requests.post')
     def test_ai_tutor_chat_proxy(self, mock_post):
         """Test the AI Chat proxy view."""
@@ -33,6 +34,7 @@ class AITutorTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['choices'][0]['message']['content'], "Hello Word")
 
+    @override_settings(OPENAI_API_KEY="test-key")
     @patch('requests.post')
     def test_ai_tutor_tts_proxy(self, mock_post):
         """Test the AI TTS proxy view."""
