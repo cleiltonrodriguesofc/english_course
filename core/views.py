@@ -11,7 +11,6 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Count
 from django.contrib.admin.views.decorators import staff_member_required
 import requests
-import os
 
 
 def log_activity(user, action, details=None):
@@ -277,7 +276,7 @@ def ai_tutor_chat(request):
     try:
         data = json.loads(request.body)
         messages = data.get("messages", [])
-        
+
         api_key = getattr(settings, "OPENAI_API_KEY", "")
         if not api_key:
             return JsonResponse({"error": "API Key not configured"}, status=500)
@@ -294,7 +293,7 @@ def ai_tutor_chat(request):
             },
             timeout=30
         )
-        
+
         return JsonResponse(response.json())
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -311,7 +310,7 @@ def ai_tutor_tts(request):
     try:
         data = json.loads(request.body)
         text = data.get("input", "")
-        
+
         api_key = getattr(settings, "OPENAI_API_KEY", "")
         if not api_key:
             return JsonResponse({"error": "API Key not configured"}, status=500)
@@ -329,7 +328,7 @@ def ai_tutor_tts(request):
             },
             timeout=30
         )
-        
+
         if response.status_code == 200:
             from django.http import HttpResponse
             return HttpResponse(response.content, content_type="audio/mpeg")

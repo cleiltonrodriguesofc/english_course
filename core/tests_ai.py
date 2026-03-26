@@ -3,6 +3,7 @@ from django.urls import reverse
 import json
 from unittest.mock import patch
 
+
 class AITutorTests(TestCase):
     def setUp(self):
         self.client = Client()
