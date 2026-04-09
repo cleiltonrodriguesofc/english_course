@@ -153,7 +153,8 @@
                 <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 1: The Foundations</h3>
                 <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">100% Complete</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Alphabet, introductions, and essential daily vocabulary.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Alphabet, introductions, and essential daily
+                vocabulary.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 100%;"></div>
             </div>
@@ -179,10 +180,57 @@
                     <i class="fas fa-sun"></i>
                     <span>Morning Routine</span>
                 </a>
-                <a href="{% url 'lesson_6' %}" class="lesson-link" style="border-color: var(--accent-primary); background: rgba(59, 130, 246, 0.05);">
+                <a href="{% url 'lesson_6' %}" class="lesson-link"
+                    style="border-color: var(--accent-primary); background: rgba(59, 130, 246, 0.05);">
                     <i class="fas fa-comments" style="color: var(--accent-primary);"></i>
                     <span style="color: var(--accent-primary);">Review Session</span>
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remedial Mastery Hub -->
+    <div class="module-group" style="margin-top: 0.5rem;">
+        <div class="glass module-card-premium animate-fade"
+            style="animation-delay: 0.7s; border-color: rgba(255, 152, 0, 0.4); background: rgba(255, 152, 0, 0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h3 style="margin-bottom: 0; font-family: 'Outfit'; color: #ff9800;"><i class="fas fa-bolt"></i> Mastery
+                    Drills (Review Hub)</h3>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Sessões de 1 hora de prática intensa para
+                solidificar gramática fundamental e pronúncia.</p>
+
+            <div class="lesson-grid">
+                <a href="{% url 'lesson_review_1' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
+                    <i class="fas fa-id-card" style="color: #ff9800;"></i>
+                    <span>Drill 1: Identity & Introductions</span>
+                </a>
+                <a href="{% url 'lesson_review_2' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
+                    <i class="fas fa-brain" style="color: #ff9800;"></i>
+                    <span>Drill 2: The Answer Engine</span>
+                </a>
+                <a href="{% url 'lesson_review_3' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
+                    <i class="fas fa-clock" style="color: #ff9800;"></i>
+                    <span>Drill 3: Action Engine (Routine)</span>
+                </a>
+                <!-- Missing templates for lessons 4-7 - Commented out to prevent errors 
+                <a href="{% url 'lesson_review_4' %}" class="lesson-link" style="border-left: 3px solid #e91e63;">
+                    <i class="fas fa-magnet" style="color: #e91e63;"></i>
+                    <span>Review 4: The 3rd Person "S"</span>
+                </a>
+                <a href="{% url 'lesson_review_5' %}" class="lesson-link" style="border-left: 3px solid #00bcd4;">
+                    <i class="fas fa-question-circle" style="color: #00bcd4;"></i>
+                    <span>Review 5: Do You?</span>
+                </a>
+                <a href="{% url 'lesson_review_6' %}" class="lesson-link" style="border-left: 3px solid #00bcd4;">
+                    <i class="fas fa-search" style="color: #00bcd4;"></i>
+                    <span>Review 6: Does She?</span>
+                </a>
+                <a href="{% url 'lesson_review_7' %}" class="lesson-link" style="border-left: 3px solid #4caf50;">
+                    <i class="fas fa-infinity" style="color: #4caf50;"></i>
+                    <span>Review 7: Fluency Loop</span>
+                </a>
+                -->
             </div>
         </div>
     </div>
@@ -194,7 +242,8 @@
                 <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 2: Daily Life</h3>
                 <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Complete</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Time, daily routines, and expressing your own likes and dislikes.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Time, daily routines, and expressing your own
+                likes and dislikes.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 0%;"></div>
             </div>
@@ -227,7 +276,8 @@
                 <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 3: World Exploration</h3>
                 <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Complete</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Cities, clothes, and talking about food in various situations.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Cities, clothes, and talking about food in
+                various situations.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 0%;"></div>
             </div>
@@ -251,6 +301,7 @@
                 </a>
             </div>
         </div>
+
+
     </div>
-</div>
-{% endblock %}
+    {% endblock %}

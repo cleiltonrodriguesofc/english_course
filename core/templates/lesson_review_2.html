@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+{% block title %}Drill 2: The Answer Engine - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- TEMA REVIEW 2: Perguntas (Roxo Dinâmico e Amarelo Dourado) --- */
+    :root {
+        --rv2-bg: #2b1055;
+        --rv2-panel: #1b0a33;
+        --rv2-accent: #f0a500; /* Amarelo ouro para perguntas */
+        --rv2-text: #e2e2e2;
+        --rv2-highlight: #ff5722; /* Coral quente para contrastes */
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--rv2-bg) 0%, var(--rv2-panel) 100%);
+        color: var(--rv2-text);
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(240, 165, 0, 0.15);
+        position: relative;
+        overflow: hidden;
+        border: 2px dashed rgba(240, 165, 0, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy enter */
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        color: var(--rv2-accent);
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: white;
+        margin-bottom: 20px;
+        border-bottom: 3px solid var(--rv2-highlight);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.4rem;
+        color: var(--rv2-text);
+        max-width: 800px;
+        line-height: 1.6;
+    }
+
+    .button-action {
+        background: var(--rv2-highlight);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(255, 87, 34, 0.4);
+    }
+    .button-action:hover {
+        transform: translateY(-5px);
+        background: var(--rv2-accent);
+        box-shadow: 0 10px 20px rgba(240, 165, 0, 0.4);
+    }
+
+    /* --- PILLARS BOXES --- */
+    .pillar-box {
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
+        padding: 30px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 450px;
+        text-align: left;
+        position: relative;
+    }
+    .pillar-badge {
+        position: absolute;
+        top: -20px;
+        left: 20px;
+        background: var(--rv2-accent);
+        color: #000;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+
+    /* --- INTERVIEW UI --- */
+    .chat-bubble-q {
+        background: rgba(240, 165, 0, 0.2);
+        border: 1px solid var(--rv2-accent);
+        padding: 20px;
+        border-radius: 20px 20px 20px 0;
+        max-width: 600px;
+        text-align: left;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    
+    .answer-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .answer-btn {
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.2);
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 1.5rem;
+        color: white;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .answer-btn:hover {
+        background: rgba(255,255,255,0.15);
+        border-color: var(--rv2-accent);
+    }
+
+    /* --- CONTROLS --- */
+    .controls-wrapper {
+        position: absolute;
+        bottom: 25px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+    .btn-nav-round {
+        background: var(--rv2-panel);
+        color: var(--rv2-accent);
+        border: 2px solid var(--rv2-accent);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-nav-round:hover {
+        background: var(--rv2-accent);
+        color: #000;
+    }
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 8px;
+        background: var(--rv2-highlight);
+        width: 0%;
+        transition: width 0.4s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container" id="mainContainer">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 6rem; text-shadow: 0 0 20px var(--rv2-accent);">❓</div>
+                <h1>Drill 2</h1>
+                <h2 style="border: none;">The Answer Engine</h2>
+                <p>O segredo da fluência não está apenas em falar, mas em <b>saber responder rápido</b> sem traduzir na cabeça toda vez que alguém te perguntar algo.</p>
+                <div style="background: rgba(0,0,0,0.5); padding: 15px 30px; border-radius: 10px; margin-top: 10px;">
+                    <p style="margin:0; font-size: 1.2rem; color:#aaa;">Nesta aula vamos focar nos dois Pilares Mestres de Perguntas:<br><b>"Are you...?"</b> e <b>"Do you...?"</b></p>
+                </div>
+                <button class="button-action" style="margin-top: 40px;" onclick="changeSlide(1)">AWAKEN THE ENGINE ⚙️</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: THE TWO PILLARS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Os Pilares da Pergunta Invertida</h2>
+                <p>No inglês, não mudamos apenas o tom de voz para perguntar. Nós <b>jogamos palavras para a frente</b>.</p>
+                
+                <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; width: 100%; margin-top: 30px;">
+                    <!-- Pillar 1 -->
+                    <div class="pillar-box" onclick="speak('Are you Brazilian?')" style="cursor: pointer;">
+                        <div class="pillar-badge">ESTADOS / IDENTIDADE</div>
+                        <div style="font-size: 3rem; margin-top: 10px;">🤔</div>
+                        <h3 style="font-size: 2rem; margin: 10px 0; color: var(--rv2-accent);">ARE you...?</h3>
+                        <p style="font-size: 1.1rem; color: #ccc;">Usa-se quando você quer saber <b>quem</b> a pessoa é ou <b>como</b> ela está.<br><br><b>Ex:</b> Are you Brazilian? <br>(Você é brasileira?)</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <button style="background:none; border:none; color:var(--rv2-highlight); font-size:1.2rem; cursor:pointer;" onclick="speak('Are you Brazilian?')">🔊 Escutar</button>
+                    </div>
+
+                    <!-- Pillar 2 -->
+                    <div class="pillar-box" onclick="speak('Do you like pizza?')" style="cursor: pointer; border-color: var(--rv2-highlight);">
+                        <div class="pillar-badge" style="background: var(--rv2-highlight); color: white;">AÇÕES / ROTINA</div>
+                        <div style="font-size: 3rem; margin-top: 10px;">🏃‍♀️</div>
+                        <h3 style="font-size: 2rem; margin: 10px 0; color: var(--rv2-accent);">DO you...?</h3>
+                        <p style="font-size: 1.1rem; color: #ccc;">A palavra <b>DO</b> (invisível na tradução) sai voando lá pra frente para perguntar sobre <b>ações</b>.<br><br><b>Ex:</b> Do you like pizza? <br>(Você gosta de pizza?)</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <button style="background:none; border:none; color:var(--rv2-highlight); font-size:1.2rem; cursor:pointer;" onclick="speak('Do you like pizza?')">🔊 Escutar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: THE GOLDEN REFLECTION RULE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>A Regra do Espelho 🪞</h2>
+                <div style="background: rgba(255, 87, 34, 0.2); padding: 20px; border-radius: 15px; border-left: 5px solid var(--rv2-highlight); max-width: 800px; text-align: left;">
+                    <h3 style="margin:0 0 10px 0; color: white;">Se a pessoa jogar um tijolo, não devolva um pneu!</h3>
+                    <p style="margin:0; font-size: 1.3rem;">A resposta curta perfeita no Inglês <b>devolve a primeira palavra</b> que a pessoa usou na pergunta.</p>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 800px; margin-top: 30px;">
+                    <!-- Espelho 1 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 15px 30px; border-radius: 10px;">
+                        <span style="font-size: 1.5rem; font-weight: bold;"><span style="color:var(--rv2-accent);">ARE you</span> okay?</span>
+                        <span style="font-size: 2rem;">➡️</span>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #4caf50;">Yes, I <span style="color:var(--rv2-accent);">AM</span>.</span>
+                        <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="speak('Are you okay? Yes, I am.')">🔊</button>
+                    </div>
+
+                    <!-- Espelho 2 -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 15px 30px; border-radius: 10px;">
+                        <span style="font-size: 1.5rem; font-weight: bold;"><span style="color:var(--rv2-highlight);">DO you</span> study?</span>
+                        <span style="font-size: 2rem;">➡️</span>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #4caf50;">Yes, I <span style="color:var(--rv2-highlight);">DO</span>.</span>
+                        <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="speak('Do you study? Yes, I do.')">🔊</button>
+                    </div>
+
+                    <!-- Espelho 3 (Negative) -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 15px 30px; border-radius: 10px;">
+                        <span style="font-size: 1.5rem; font-weight: bold;"><span style="color:var(--rv2-highlight);">DO you</span> work?</span>
+                        <span style="font-size: 2rem;">➡️</span>
+                        <span style="font-size: 1.5rem; font-weight: bold; color: #f44336;">No, I <span style="color:var(--rv2-highlight);">DON'T</span>.</span>
+                        <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="speak('Do you work? No, I don\'t.')">🔊</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE INJETADO VIA JS PARA O HOT SEAT REPETITIVO -->
+
+        <!-- FINAL -->
+        <div class="slide" id="finalSlide">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 6rem;">🎯</div>
+                <h1>HOT SEAT MASTERED</h1>
+                <p>Sua velocidade de resposta foi impressionante. <br>Você nunca mais misturará o "To Be" com ações comuns!</p>
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button class="button-action" style="background: transparent; border: 2px solid var(--rv2-accent); color: var(--rv2-accent);" onclick="location.reload()">AGAIN ↺</button>
+                    <a href="{% url 'dashboard' %}" class="button-action" style="text-decoration: none;">MENU 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls-wrapper">
+            <button class="btn-nav-round" onclick="toggleFullScreen()" title="Fullscreen">⛶</button>
+            <button class="btn-nav-round" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav-round" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- DATA HOT SEAT --- */
+    // Perguntas intercalando ARE e DO para quebrar o vício do aluno de responder sempre da mesma forma.
+    const questionsDB = [
+        { q: "Are you a student?", a1: "Yes, I am.", a2: "Yes, I do.", correct: 1, type: "Are" },
+        { q: "Do you like chocolate?", a1: "Yes, I am.", a2: "Yes, I do.", correct: 2, type: "Do" },
+        { q: "Are you from Brazil?", a1: "Yes, I am.", a2: "Yes, I do.", correct: 1, type: "Are" },
+        { q: "Do you study English?", a1: "Yes, I am.", a2: "Yes, I do.", correct: 2, type: "Do" },
+        { q: "Are you hungry? (Com fome)", a1: "No, I am not.", a2: "No, I don't.", correct: 1, type: "Are" },
+        { q: "Do you play tennis?", a1: "No, I am not.", a2: "No, I don't.", correct: 2, type: "Do" },
+        { q: "Are you 12 years old?", a1: "Yes, I am.", a2: "Yes, I have.", correct: 1, type: "Are" }, // Pegadinha clássica com Have
+        { q: "Do you live in the USA?", a1: "No, I am not.", a2: "No, I don't.", correct: 2, type: "Do" },
+    ];
+
+    const mainContainer = document.getElementById('mainContainer');
+    const finalSlide = document.getElementById('finalSlide');
+
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    let qCounter = 0;
+    let currentScore = 0;
+
+    // 2 Rounds of 8 = 16 questions (Fast Paced)
+    for(let r=1; r<=2; r++) {
+        let roundData = shuffleArray([...questionsDB]);
+        
+        roundData.forEach(item => {
+            qCounter++;
+            let btn1Text = item.a1;
+            let btn2Text = item.a2;
+            let correctText = item.correct === 1 ? item.a1 : item.a2;
+            
+            // Randomizar os botões
+            let isSwap = Math.random() > 0.5;
+            let bLeft = isSwap ? btn2Text : btn1Text;
+            let bRight = isSwap ? btn1Text : btn2Text;
+
+            const slideHtml = `
+            <div class="slide drill-slide">
+                <div class="slide-content-wrapper">
+                    <p style="color: var(--rv2-accent); font-weight: bold; letter-spacing: 2px; font-size:1.2rem;">
+                        THE HOT SEAT 🪑 • Q${qCounter} &nbsp; | &nbsp; <span style="background:rgba(255,255,255,0.1); padding:5px 15px; border-radius:20px; color:#fff;">SCORE: <span class="score-display">0</span></span>
+                    </p>
+                    
+                    <button style="background: rgba(255,255,255,0.1); border: 2px solid white; border-radius: 50%; width: 80px; height: 80px; font-size: 2rem; cursor:pointer; margin-bottom: 20px;" onclick="speak('${item.q}', 0.8)">🔊</button>
+                    
+                    <div class="chat-bubble-q">
+                        🧑‍💻: "${item.q}"
+                    </div>
+
+                    <div class="answer-grid">
+                        <button class="answer-btn" onclick="checkHotSeat(this, '${bLeft}', '${correctText}')">${bLeft}</button>
+                        <button class="answer-btn" onclick="checkHotSeat(this, '${bRight}', '${correctText}')">${bRight}</button>
+                    </div>
+                    
+                    <div class="feedback-msg" style="margin-top: 25px; font-size: 1.6rem; font-weight: bold; min-height: 35px; text-align: center;"></div>
+                    
+                    <div class="drill-controls" style="display:none; margin-top: 20px; text-align: center; gap: 15px; justify-content: center;">
+                        <button class="button-action btn-repeat-drill" style="background: transparent; border: 2px solid var(--rv2-highlight); color: #fff; width: 45%;" onclick="speakSequence('${correctText}')">REPETIR ÁUDIO 🔊</button>
+                        <button class="button-action btn-next-drill" style="background: var(--rv2-highlight); color: #fff; width: 45%;" onclick="changeSlide(1)">NEXT QUESTION ➔</button>
+                    </div>
+                </div>
+            </div>`;
+            finalSlide.insertAdjacentHTML('beforebegin', slideHtml);
+        });
+    }
+
+    // ATUALIZAR JS COM NOVOS SLIDES
+    let currentSlide = 0;
+    let slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    updateUI();
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide) / (slides.length - 1)) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.style.visibility = (currentSlide === 0) ? 'hidden' : 'visible';
+        nextBtn.style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+        
+        // Falar a pergunta automaticamente se for o slide do Hot Seat
+        if(slides[currentSlide] && slides[currentSlide].classList.contains('drill-slide')) {
+            const el = slides[currentSlide].querySelector('.chat-bubble-q');
+            if(el) {
+                const hText = el.innerText.replace('🧑‍💻: "', '').replace('"', '');
+                setTimeout(() => { speak(hText, 0.85); }, 500);
+            }
+        }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speakSequence(textToSpeak) {
+        window.speechSynthesis.cancel();
+        let u1 = new SpeechSynthesisUtterance(textToSpeak); u1.rate = 0.5; u1.lang = 'en-US';
+        let u2 = new SpeechSynthesisUtterance(textToSpeak); u2.rate = 0.85; u2.lang = 'en-US';
+        let u3 = new SpeechSynthesisUtterance(textToSpeak); u3.rate = 1.0; u3.lang = 'en-US';
+        window.speechSynthesis.speak(u1);
+        window.speechSynthesis.speak(u2);
+        window.speechSynthesis.speak(u3);
+    }
+
+    function checkHotSeat(btnElement, chosen, correct) {
+        const container = btnElement.parentElement.parentElement;
+        const allBtns = container.querySelectorAll('.answer-btn');
+        const feedback = container.querySelector('.feedback-msg');
+        const controls = container.querySelector('.drill-controls');
+        allBtns.forEach(b => { b.style.pointerEvents = 'none'; });
+
+        if (chosen === correct) {
+            currentScore += 10;
+            document.querySelectorAll('.score-display').forEach(el => el.innerText = currentScore);
+            
+            btnElement.style.background = '#00c853'; 
+            btnElement.style.opacity = '1';
+            
+            feedback.innerHTML = "✅ RESPOSTA EXATA! +10 Points";
+            feedback.style.color = "#00c853";
+        } else {
+            btnElement.style.background = '#d50000'; 
+            btnElement.style.opacity = '1';
+            
+            feedback.innerHTML = `❌ ERROU! A resposta natural seria <b>${correct}</b>.`;
+            feedback.style.color = "#ff5252";
+            
+            // Highlight o correto
+            allBtns.forEach(b => {
+                if(b.innerText === correct) { b.style.background = '#00c853'; b.style.opacity = '1'; }
+            });
+        }
+        
+        controls.style.display = 'flex';
+        speakSequence(correct);
+    }
+
+    /* --- AUDIO --- */
+    function speak(text, rate = 0.85) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- GLOBALS --- */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.querySelector('.lesson-wrapper').requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+</script>
+{% endblock %}

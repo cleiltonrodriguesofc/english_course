@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% block title %}Drill 3: The Action Engine (Routine) - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- TEMA REVIEW 3: Rotina e Ações (Verde / Produtividade) --- */
+    :root {
+        --rv3-bg: #122315;
+        --rv3-panel: #1b3320;
+        --rv3-accent: #00e676; 
+        --rv3-text: #e2e2e2;
+        --rv3-highlight: #ffea00; 
+        --rv3-error: #ff5252;
+    }
+
+    .lesson-wrapper {
+        background: radial-gradient(circle at center, var(--rv3-panel) 0%, var(--rv3-bg) 100%);
+        color: var(--rv3-text);
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 230, 118, 0.1);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(0, 230, 118, 0.2);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: all 0.5s ease;
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    .slide.prev {
+        transform: translateY(-100%);
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h1 { font-size: 3.5rem; color: var(--rv3-accent); margin: 0; font-weight: 800; letter-spacing: 1px; }
+    h2 { font-size: 2.2rem; color: white; margin-bottom: 20px; border-bottom: 3px solid var(--rv3-highlight); padding-bottom: 10px; display: inline-block; }
+    p { font-size: 1.4rem; color: var(--rv3-text); max-width: 800px; line-height: 1.6; }
+
+    .button-action {
+        background: var(--rv3-accent);
+        color: #000;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);
+    }
+    .button-action:hover {
+        transform: translateY(-5px);
+        background: var(--rv3-highlight);
+        box-shadow: 0 10px 20px rgba(255, 234, 0, 0.3);
+    }
+
+    /* --- VERB GRID --- */
+    .grid-verbs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .card-verb {
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: center;
+    }
+    .card-verb:hover {
+        background: rgba(0, 230, 118, 0.1);
+        border-color: var(--rv3-accent);
+        transform: scale(1.05);
+    }
+    .verb-title { font-size: 1.8rem; font-weight: bold; color: var(--rv3-accent); }
+    .verb-trans { font-size: 1.1rem; color: #aaa; margin-top: 5px; }
+
+    /* --- ROUTINE BUILDER --- */
+    .routine-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background: rgba(0,0,0,0.5);
+        padding: 15px 25px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+        width: 100%;
+        max-width: 700px;
+    }
+    .sel-verb {
+        background: transparent;
+        border: none;
+        border-bottom: 2px dashed var(--rv3-highlight);
+        color: var(--rv3-highlight);
+        font-size: 1.8rem;
+        font-weight: bold;
+        outline: none;
+        cursor: pointer;
+    }
+    .sel-verb:focus { border-bottom-style: solid; background: rgba(255, 234, 0, 0.1); }
+
+    /* --- CONTROLS --- */
+    .controls-wrapper { position: absolute; bottom: 25px; right: 30px; display: flex; gap: 15px; z-index: 100; }
+    .btn-nav-round { background: rgba(255,255,255,0.1); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+    .btn-nav-round:hover { background: var(--rv3-accent); color: #000; }
+    .progress-bar { position: absolute; bottom: 0; left: 0; height: 8px; background: var(--rv3-accent); width: 0%; transition: width 0.4s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container" id="mainContainer">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 6rem; text-shadow: 0 0 20px var(--rv3-accent);">🔋</div>
+                <h1>Drill 3</h1>
+                <h2 style="border: none;">The Action Engine (Sua Rotina)</h2>
+                <p>Nesta aula, saímos do mundo de Identidade (Ser/Estar) e entramos no mundo das <b>Ações</b>.</p>
+                
+                <div style="background: rgba(0,0,0,0.5); padding: 15px 30px; border-radius: 10px; margin-top: 10px;">
+                    <p style="margin:0; font-size: 1.2rem; color:#aaa;">O Inglês é o idioma mais fácil do mundo para rotina.<br>Você <b>NÃO MUDA O VERBO</b> dependendo da pessoa (Exceto na 3ª pessoa do singular, mas isso é assunto para a próxima aula!).</p>
+                </div>
+
+                <button class="button-action" style="margin-top: 40px;" onclick="changeSlide(1)">START THE DAY ☀️</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: THE 6 CORE VERBS -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Os 6 Motores do Dia ⚙️</h2>
+                <p>Esses 6 verbos comandam 90% da sua vida diária. Pressione para fixar a pronúncia correta em sua mente.</p>
+
+                <div class="grid-verbs">
+                    <div class="card-verb" onclick="speak('Wake up')">
+                        <div style="font-size: 3rem;">⏰</div>
+                        <div class="verb-title">Wake up</div><div class="verb-trans">Acordar</div>
+                    </div>
+                    <div class="card-verb" onclick="speak('Eat')">
+                        <div style="font-size: 3rem;">🍽️</div>
+                        <div class="verb-title">Eat</div><div class="verb-trans">Comer</div>
+                    </div>
+                    <div class="card-verb" onclick="speak('Work')">
+                        <div style="font-size: 3rem;">💻</div>
+                        <div class="verb-title">Work</div><div class="verb-trans">Trabalhar</div>
+                    </div>
+                    <div class="card-verb" onclick="speak('Study')">
+                        <div style="font-size: 3rem;">📚</div>
+                        <div class="verb-title">Study</div><div class="verb-trans">Estudar</div>
+                    </div>
+                    <div class="card-verb" onclick="speak('Play')">
+                        <div style="font-size: 3rem;">🎮</div>
+                        <div class="verb-title">Play</div><div class="verb-trans">Jogar/Brincar</div>
+                    </div>
+                    <div class="card-verb" onclick="speak('Sleep')">
+                        <div style="font-size: 3rem;">🛏️</div>
+                        <div class="verb-title">Sleep</div><div class="verb-trans">Dormir</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: THE GOLDEN RULE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>A Regra Master do Lego 🧩</h2>
+                <div style="background: rgba(255, 234, 0, 0.2); padding: 20px 40px; border-radius: 15px; border-left: 5px solid var(--rv3-highlight); text-align: left; max-width: 800px;">
+                    <p style="margin:0; font-size: 1.5rem; color: white;">Em português, o verbo muda para todos: Eu acord<span style="color:var(--rv3-highlight)">O</span>, Tu acord<span style="color:var(--rv3-highlight)">AS</span>, Nós acord<span style="color:var(--rv3-highlight)">AMOS</span>...</p>
+                    <p style="margin:10px 0 0 0; font-size: 1.5rem; font-weight:bold; color: var(--rv3-accent);">No Inglês? É só encaixar o bloco!</p>
+                </div>
+
+                <div style="display: flex; gap: 30px; margin-top: 30px;">
+                    <div style="font-size: 2rem; background: #000; padding: 20px; border-radius: 10px; border: 1px solid #333;">
+                        <span style="color:#aaa;">I</span> <span style="color:var(--rv3-accent); font-weight:bold;">work</span> at home.
+                    </div>
+                    <div style="font-size: 2rem; background: #000; padding: 20px; border-radius: 10px; border: 1px solid #333;">
+                        <span style="color:#aaa;">You</span> <span style="color:var(--rv3-accent); font-weight:bold;">work</span> at home.
+                    </div>
+                    <div style="font-size: 2rem; background: #000; padding: 20px; border-radius: 10px; border: 1px solid #333;">
+                        <span style="color:#aaa;">We</span> <span style="color:var(--rv3-accent); font-weight:bold;">work</span> at home.
+                    </div>
+                    <div style="font-size: 2rem; background: #000; padding: 20px; border-radius: 10px; border: 1px solid #333;">
+                        <span style="color:#aaa;">They</span> <span style="color:var(--rv3-accent); font-weight:bold;">work</span> at home.
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px; font-size: 1.2rem; color: #888;">*Atenção: He, She e It sofrem mutação, mas hoje ignoraremos eles para ganharmos velocidade.</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: ROUTINE BUILDER -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Crie a sua manhã ☕</h2>
+                <p>Use os verbos que aprendeu para montar seu início de dia. Fale a frase em voz alta assim que montar!</p>
+
+                <div class="routine-row">
+                    <span>1.</span> <span style="font-weight:bold; width: 40px; color:var(--rv3-accent);">I</span>
+                    <select class="sel-verb" id="r1">
+                        <option value="" disabled selected>---</option>
+                        <option value="wake up">wake up</option><option value="sleep">sleep</option>
+                    </select>
+                    <span>at 7:00 AM.</span>
+                    <button style="margin-left:auto; background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="playRow('r1', 'I {v} at 7:00 AM.')">🔊</button>
+                </div>
+
+                <div class="routine-row">
+                    <span>2.</span> <span style="font-weight:bold; width: 40px; color:var(--rv3-accent);">I</span>
+                    <select class="sel-verb" id="r2">
+                        <option value="" disabled selected>---</option>
+                        <option value="play">play</option><option value="eat">eat</option>
+                    </select>
+                    <span>breakfast with my family.</span>
+                    <button style="margin-left:auto; background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="playRow('r2', 'I {v} breakfast with my family.')">🔊</button>
+                </div>
+
+                <div class="routine-row">
+                    <span>3.</span> <span style="font-weight:bold; width: 40px; color:var(--rv3-accent);">We</span>
+                    <select class="sel-verb" id="r3">
+                        <option value="" disabled selected>---</option>
+                        <option value="study">study</option><option value="wake up">wake up</option>
+                    </select>
+                    <span>English online.</span>
+                    <button style="margin-left:auto; background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="playRow('r3', 'We {v} English online.')">🔊</button>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- SLIDE 5: NEGATIVE MACHINE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>The DON'T Machine 🚫</h2>
+                <p>Para dizer que você NÃO faz algo na rotina, basta jogar a palavra <b>DON'T</b> antes da ação.</p>
+
+                <div style="background: rgba(255, 82, 82, 0.1); border: 2px solid var(--rv3-error); padding: 30px; border-radius: 15px; text-align: center;">
+                    <div style="font-size: 3rem; font-weight: bold;">
+                        I <span style="color: var(--rv3-error);">DON'T</span> study Spanish.
+                    </div>
+                    <div style="font-size: 2rem; color: #aaa; margin-top: 10px;">
+                        Eu <span style="color: var(--rv3-error); font-weight:bold;">não</span> estudo espanhol.
+                    </div>
+                </div>
+
+                <p style="margin-top: 30px; color:var(--rv3-highlight);">Lembrete: O DON'T só funciona para verbos de ação! <br>Nunca use ele com o verbo *To Be* (am/is/are tem que usar o *Not*).</p>
+                <div style="display: flex; gap: 20px;">
+                    <button class="button-action" style="background:#4caf50; color:white;" onclick="speak('I don\'t wake up early.')">🔊 I don't wake up early</button>
+                    <button class="button-action" style="background:#4caf50; margin-left: 20px; color:white;" onclick="changeSlide(1)">GO TO DRILLS ⚡</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FINAL SLIDE (MUST KEEP ID finalSlide) -->
+        <div class="slide" id="finalSlide">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 6rem;">🎖️</div>
+                <h1>ROUTINE ACQUIRED</h1>
+                <p>Você domina o motor das ações e sabe perfeitamente reagir às situações negando e testando as escolhas. Amanhã tem mais!</p>
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button class="button-action" style="background: transparent; border: 2px solid var(--rv3-accent); color: var(--rv3-accent);" onclick="location.reload()">REPEAT CLASS ↺</button>
+                    <a href="{% url 'dashboard' %}" class="button-action" style="text-decoration: none;">MENU 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls-wrapper">
+            <button class="btn-nav-round" onclick="toggleFullScreen()" title="Fullscreen">⛶</button>
+            <button class="btn-nav-round" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav-round" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- DRILL SYSTEM FRENÉTICO INJECTION --- */
+    const drillData = [
+        { scenario: 'De manhã o despertador toca:', text: 'I ______ up at 6 AM.', correct: 'wake', wrong: 'sleep' },
+        { scenario: 'Na mesa da cozinha:', text: 'We ______ bread.', correct: 'eat', wrong: 'study' },
+        { scenario: 'Na mesa do computador:', text: 'I ______ English.', correct: 'study', wrong: 'am' },
+        { scenario: 'Falando de algo que você ODEIA:', text: 'I ______ eat onions.', correct: "don't", wrong: "not" },
+        { scenario: 'Seus amigos no fim de semana:', text: 'They ______ video games.', correct: 'play', wrong: 'work' },
+        { scenario: 'No fim do dia, cansado:', text: 'I ______ at 10 PM.', correct: 'sleep', wrong: 'wake' },
+        { scenario: 'Rejeitando uma ida à academia:', text: 'I ______ go to the gym.', correct: "don't", wrong: "am not" },
+        // NOVAS:
+        { scenario: 'Saindo de casa para a empresa:', text: 'I ______ every day.', correct: 'work', wrong: 'play' },
+        { scenario: 'Recusando um prato de peixe:', text: 'I ______ like fish.', correct: "don't", wrong: "not" },
+        { scenario: 'Seus pais no domingo:', text: 'They ______ TV all day.', correct: 'watch', wrong: 'eat' },
+        { scenario: 'Na lanchonete:', text: 'We ______ pizza on Fridays.', correct: 'eat', wrong: 'sleep' },
+        { scenario: 'No fim de semana com a família:', text: 'We ______ games together.', correct: 'play', wrong: 'study' },
+        { scenario: 'Falando sobre uma banda que você odeia:', text: 'I ______ listen to them.', correct: "don't", wrong: "work" },
+        { scenario: 'Voltando para a cama de manhã:', text: 'I ______ until 11 AM.', correct: 'sleep', wrong: 'wake' },
+        { scenario: 'Na biblioteca municipal:', text: 'They ______ every afternoon.', correct: 'study', wrong: 'play' }
+    ];
+
+    const finalSlide = document.getElementById('finalSlide');
+    
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    let drillCounter = 0;
+    let currentScore = 0;
+
+    for(let i=0; i<2; i++) {
+        let roundData = shuffleArray([...drillData]);
+        
+        roundData.forEach(data => {
+            drillCounter++;
+            let opt1 = Math.random() > 0.5 ? data.correct : data.wrong;
+            let opt2 = opt1 === data.correct ? data.wrong : data.correct;
+
+            const slideHtml = `
+            <div class="slide drill-slide">
+                <div class="slide-content-wrapper">
+                    <p style="color: var(--rv3-highlight); font-weight: bold; letter-spacing: 1px; font-size:1.2rem;">
+                        DRILL DE FIXAÇÃO • Q${drillCounter} &nbsp; | &nbsp; <span style="background:rgba(255,255,255,0.2); padding:5px 15px; border-radius:20px; color:#fff;">SCORE: <span class="score-display">0</span></span>
+                    </p>
+                    <h2 style="font-size: 2rem; border: none; color: #fff;">Situação: ${data.scenario}</h2>
+                    
+                    <div style="background: rgba(0,0,0,0.5); padding: 30px; border-radius: 15px; border-left: 5px solid var(--rv3-accent); width: 100%; max-width: 800px; margin: 20px 0;">
+                        <div style="font-size: 3rem; text-align: center; margin-bottom: 20px; font-weight: bold;" class="drill-sentence" data-full="${data.text}">
+                            ${data.text}
+                        </div>
+                        
+                        <div style="display: flex; justify-content: center; gap: 20px;" class="btn-grid-drill">
+                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${opt1}', '${data.correct}')">${opt1}</button>
+                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${opt2}', '${data.correct}')">${opt2}</button>
+                        </div>
+                        
+                        <div class="feedback-msg" style="margin-top: 25px; font-size: 1.6rem; font-weight: bold; min-height: 35px; text-align: center;"></div>
+                        
+                        <div class="drill-controls" style="display:none; margin-top: 20px; text-align: center; gap: 15px; justify-content: center;">
+                            <button class="button-action btn-repeat-drill" style="background: transparent; border: 2px solid var(--rv3-highlight); color: #fff; width: 45%;" onclick="speakSequence(this.parentElement.parentElement.querySelector('.drill-sentence').innerText)">REPETIR ÁUDIO 🔊</button>
+                            <button class="button-action btn-next-drill" style="background: var(--rv3-highlight); color: #000; width: 45%;" onclick="changeSlide(1)">NEXT QUESTION ➔</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            finalSlide.insertAdjacentHTML('beforebegin', slideHtml);
+        });
+    }
+
+    slides = document.querySelectorAll('.slide');
+    updateUI();
+
+    function speakSequence(textToSpeak) {
+        window.speechSynthesis.cancel();
+        let u1 = new SpeechSynthesisUtterance(textToSpeak); u1.rate = 0.5; u1.lang = 'en-US';
+        let u2 = new SpeechSynthesisUtterance(textToSpeak); u2.rate = 0.85; u2.lang = 'en-US';
+        let u3 = new SpeechSynthesisUtterance(textToSpeak); u3.rate = 1.0; u3.lang = 'en-US';
+        window.speechSynthesis.speak(u1);
+        window.speechSynthesis.speak(u2);
+        window.speechSynthesis.speak(u3);
+    }
+
+    function checkDrill(btnElement, chosen, correct) {
+        const container = btnElement.parentElement.parentElement;
+        const allBtns = container.querySelectorAll('.button-action:not(.btn-next-drill)');
+        const feedback = container.querySelector('.feedback-msg');
+        const nextBtn = container.querySelector('.btn-next-drill');
+        const sentenceBox = container.querySelector('.drill-sentence');
+        
+        allBtns.forEach(b => { b.style.pointerEvents = 'none'; });
+
+        let fullSentenceStr = sentenceBox.getAttribute('data-full').replace('______', correct);
+
+        if (chosen === correct) {
+            currentScore += 10;
+            document.querySelectorAll('.score-display').forEach(el => el.innerText = currentScore);
+            
+            btnElement.style.background = 'var(--rv3-accent)'; 
+            btnElement.style.color = '#fff';
+            
+            feedback.innerHTML = "✅ CORRECT! +10 Points";
+            feedback.style.color = "var(--rv3-accent)";
+        } else {
+            btnElement.style.background = 'var(--rv3-error)'; 
+            btnElement.style.color = '#fff';
+            
+            feedback.innerHTML = `❌ WRONG! A resposta correta era <b>${correct}</b>.`;
+            feedback.style.color = "var(--rv3-error)";
+            
+            allBtns.forEach(b => {
+                if(b.innerText === correct) { b.style.background = 'var(--rv3-accent)'; b.style.color = '#fff';}
+            });
+        }
+        
+        nextBtn.style.display = 'block';
+        sentenceBox.innerHTML = fullSentenceStr.replace(correct, `<span style="color:var(--rv3-accent);">${correct}</span>`);
+        speakSequence(fullSentenceStr);
+    }
+
+    /* --- PLAY BUILDER AUDIO --- */
+    function playRow(id, templateStr) {
+        const val = document.getElementById(id).value;
+        if (!val) {
+            playError();
+            return;
+        }
+        let sentence = templateStr.replace('{v}', val);
+        speak(sentence);
+    }
+
+    function playError() {
+        const u = new SpeechSynthesisUtterance("Please select an option first.");
+        u.lang = 'en-US'; u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+    }
+
+    /* --- AUDIO --- */
+    function speak(text, rate = 0.85) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- VIEW LOGIC --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    updateUI();
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            s.classList.remove('prev');
+            if (i === currentSlide) {
+                s.classList.add('active');
+            } else if (i < currentSlide) {
+                s.classList.add('prev');
+            }
+        });
+
+        const percent = ((currentSlide) / (slides.length - 1)) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.style.visibility = (currentSlide === 0) ? 'hidden' : 'visible';
+        nextBtn.style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+        
+        if(slides[currentSlide].classList.contains('drill-slide')) {
+            setTimeout(() => {
+                let drillText = slides[currentSlide].querySelector('.slide-content-wrapper > div > div').innerText.replace('______', 'blank');
+                speak(drillText, 0.9);
+            }, 400);
+        }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    /* --- GLOBALS --- */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) document.querySelector('.lesson-wrapper').requestFullscreen();
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+</script>
+{% endblock %}

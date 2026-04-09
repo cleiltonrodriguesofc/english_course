@@ -108,6 +108,41 @@ def lesson_14(request):
     return render(request, "lesson_14.html")
 
 
+def lesson_review_1(request):
+    log_activity(request.user, "Viewed Drill 1: Identity & Introductions")
+    return render(request, "lesson_review_1.html")
+
+
+def lesson_review_2(request):
+    log_activity(request.user, "Viewed Drill 2: The Answer Engine")
+    return render(request, "lesson_review_2.html")
+
+
+def lesson_review_3(request):
+    log_activity(request.user, "Viewed Drill 3: Action Engine (Routine)")
+    return render(request, "lesson_review_3.html")
+
+
+def lesson_review_4(request):
+    log_activity(request.user, "Viewed Lesson Review 4 (The 3rd Person S Wall)")
+    return render(request, "lesson_review_4.html")
+
+
+def lesson_review_5(request):
+    log_activity(request.user, "Viewed Lesson Review 5 (Simple Inquiries Do You)")
+    return render(request, "lesson_review_5.html")
+
+
+def lesson_review_6(request):
+    log_activity(request.user, "Viewed Lesson Review 6 (Simple Inquiries Does She)")
+    return render(request, "lesson_review_6.html")
+
+
+def lesson_review_7(request):
+    log_activity(request.user, "Viewed Lesson Review 7 (Complete Fluency Loop)")
+    return render(request, "lesson_review_7.html")
+
+
 def quiz_view(request):
     return render(request, "quiz.html")
 

@@ -1,0 +1,747 @@
+{% extends 'base.html' %}
+{% block title %}Drill 1: Identity & Introductions - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- TEMA REVIEW 1 (Mundo Real / Identidade) --- */
+    :root {
+        --rv1-bg: #1a1a2e;
+        --rv1-accent: #0f3460;
+        --rv1-text: #e94560; /* Coral/Rosa */
+        --rv1-highlight: #43e8d8; /* Ciano fluorecente */
+        --rv1-light: #f5f5f5;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--rv1-bg) 0%, #16213e 100%);
+        color: var(--rv1-light);
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(15, 52, 96, 0.4);
+        border-radius: 20px;
+        box-shadow: 0 0 40px rgba(233, 69, 96, 0.1);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid rgba(233, 69, 96, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.5s ease;
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: translateX(0);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    .slide.prev {
+        transform: translateX(-100%);
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* --- TYPOGRAPHY --- */
+    h1 {
+        font-size: 3.5rem;
+        color: var(--rv1-highlight);
+        margin: 0;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: var(--rv1-text);
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--rv1-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    p {
+        font-size: 1.4rem;
+        color: var(--rv1-light);
+        max-width: 800px;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    /* --- COMPONENTES --- */
+    .button-action {
+        background: var(--rv1-text);
+        color: white;
+        border: none;
+        padding: 15px 35px;
+        border-radius: 50px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        min-width: 150px;
+        box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+    }
+    .button-action:hover {
+        transform: translateY(-3px);
+        background: var(--rv1-highlight);
+        color: var(--rv1-bg);
+        box-shadow: 0 8px 20px rgba(67, 232, 216, 0.4);
+    }
+
+    .grid-pronouns {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+    }
+
+    .card-pro {
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: center;
+    }
+    .card-pro:hover {
+        background: rgba(255,255,255,0.1);
+        border-color: var(--rv1-highlight);
+        transform: scale(1.05);
+    }
+    .pro-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--rv1-highlight);
+    }
+    .pro-trans {
+        font-size: 1.1rem;
+        color: #aaa;
+        margin-top: 5px;
+    }
+
+    /* --- PROFILE BUILDER --- */
+    .profile-card {
+        background: rgba(0,0,0,0.5);
+        border: 1px solid var(--rv1-text);
+        border-radius: 20px;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        text-align: left;
+    }
+    
+    .input-clean {
+        background: transparent;
+        border: none;
+        border-bottom: 2px dashed var(--rv1-highlight);
+        color: var(--rv1-highlight);
+        font-size: 1.5rem;
+        font-weight: bold;
+        width: 250px;
+        padding: 5px;
+        outline: none;
+        font-family: inherit;
+    }
+    .input-clean:focus {
+        border-bottom-style: solid;
+        background: rgba(67, 232, 216, 0.1);
+    }
+
+    .btn-audio {
+        background: transparent;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        vertical-align: middle;
+        margin-left: 10px;
+        transition: 0.2s;
+    }
+    .btn-audio:hover { transform: scale(1.2); }
+
+    /* --- CONTROLS --- */
+    .controls-wrapper {
+        position: absolute;
+        bottom: 25px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+    .btn-nav-round {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-nav-round:hover {
+        background: var(--rv1-highlight);
+        color: var(--rv1-bg);
+    }
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 6px;
+        background: var(--rv1-text);
+        width: 0%;
+        transition: width 0.4s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 5rem; margin-bottom: 10px;">🎙️</div>
+                <h1>Drill 1</h1>
+                <h2 style="border: none; color: white;">Identity & Introductions</h2>
+                <p>O objetivo de hoje é colocar o seu Inglês no mundo real. <br>Vamos te preparar para <b>falar sobre quem você é</b> com confiança absoluta.</p>
+                
+                <div style="margin-top: 30px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
+                    <p style="font-size: 1.1rem; color: #ccc; margin: 0;">Nesta 1ª hora faremos o rastreio base:<br>Saudações + Controle de <b>Todos os Pronomes</b> + Frase de Apresentação.</p>
+                </div>
+
+                <button class="button-action" style="margin-top: 40px;" onclick="changeSlide(1)">LET'S GO 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: GREETINGS RECAP -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>1. The Approach (A Abordagem) 🤝</h2>
+                <p>Antes de falar de si, é preciso cumprimentar. Clique e treine a pronúncia em voz alta.</p>
+
+                <div class="grid-pronouns" style="max-width: 700px; margin-top: 40px;">
+                    <div class="card-pro" onclick="speak('Hi', 0.9)">
+                        <div style="font-size: 3rem;">👋</div>
+                        <div class="pro-title">Hi</div>
+                        <div class="pro-trans">Oi (Informal)</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('Hello', 0.9)">
+                        <div style="font-size: 3rem;">🙋‍♀️</div>
+                        <div class="pro-title">Hello</div>
+                        <div class="pro-trans">Olá (Formal)</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('Good Morning', 0.9)">
+                        <div style="font-size: 3rem;">☀️</div>
+                        <div class="pro-title" style="font-size: 2rem;">Good Morning</div>
+                        <div class="pro-trans">Bom dia</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; text-align: left; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; width: 100%; max-width: 700px;">
+                    <strong style="color: var(--rv1-highlight);">DICA DE OURO:</strong> 
+                    Nas palavras <b style="color: #fff;">Hello</b> e <b style="color: #fff;">Hi</b>, a letra H tem o som de <i>"bafo quente limpando vidro"</i>. Nunca faça som de R do português.
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: THE MAP OF EVERYONE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>2. O Mapa das Pessoas 🗺️</h2>
+                <p>Para se apresentar e falar da sua vida, você precisa dominar os <b>7 Pronomes</b> do Inglês.<br>Sem traduzir, apenas associe à imagem e ao som!</p>
+
+                <div class="grid-pronouns" style="gap: 10px;">
+                    <div class="card-pro" onclick="speak('I')">
+                        <div class="pro-title">I</div><div class="pro-trans">Eu</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('You')">
+                        <div class="pro-title">YOU</div><div class="pro-trans">Você</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('He')">
+                        <div class="pro-title">HE</div><div class="pro-trans">Ele (Homem)</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('She')">
+                        <div class="pro-title">SHE</div><div class="pro-trans">Ela (Mulher)</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('It')">
+                        <div class="pro-title">IT</div><div class="pro-trans">Ele/Ela (Coisas/Animais)</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('We')">
+                        <div class="pro-title">WE</div><div class="pro-trans">Nós</div>
+                    </div>
+                    <div class="card-pro" onclick="speak('They')">
+                        <div class="pro-title">THEY</div><div class="pro-trans">Eles/Elas (Plural de tudo)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: GIVING IDENTITY (TO BE) -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>3. Atribuindo Identidade 🎭</h2>
+                <p>Pronomes agem sozinhos? Não! Eles precisam de um verbo. O principal é o de identiddade: <b>Am, Is, Are</b>.</p>
+
+                <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 900px; margin-top: 30px;">
+                    <!-- I am -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border-left: 4px solid var(--rv1-highlight); text-align: left; min-width: 250px;">
+                        <h3 style="margin:0; font-size: 2rem;">I <span style="color: var(--rv1-text);">am</span></h3>
+                        <p style="font-size: 1.1rem; color: #aaa; margin: 5px 0;">(Eu sou / Eu estou)</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <div style="margin-top:10px; cursor:pointer;" onclick="speak('I am Sarah.')">➡️ I am Sarah.<button class="btn-audio">🔊</button></div>
+                    </div>
+
+                    <!-- He She It is -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border-left: 4px solid var(--rv1-highlight); text-align: left; min-width: 250px;">
+                        <h3 style="margin:0; font-size: 2rem;">He/She <span style="color: var(--rv1-text);">is</span></h3>
+                        <p style="font-size: 1.1rem; color: #aaa; margin: 5px 0;">(Ele/Ela é / está)</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <div style="margin-top:10px; cursor:pointer;" onclick="speak('She is my friend.')">➡️ She is my friend.<button class="btn-audio">🔊</button></div>
+                    </div>
+
+                    <!-- You We They are -->
+                    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border-left: 4px solid var(--rv1-highlight); text-align: left; min-width: 250px;">
+                        <h3 style="margin:0; font-size: 2rem;">You/We/They <span style="color: var(--rv1-text);">are</span></h3>
+                        <p style="font-size: 1.1rem; color: #aaa; margin: 5px 0;">(Você/Nós somos / estão)</p>
+                        <hr style="border-color: rgba(255,255,255,0.1);">
+                        <div style="margin-top:10px; cursor:pointer;" onclick="speak('We are happy.')">➡️ We are happy.<button class="btn-audio">🔊</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: SELF PRESENTATION BUILDER -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>4. O Seu Pitch Pessoal (Self Introduction) 🎙️</h2>
+                <p>É a sua vez! Preencha as lacunas com a sua vida real para criarmos a sua apresentação completa (igualzinha a do vídeo!).</p>
+
+                <div class="profile-card" style="max-height: 50vh; overflow-y: auto;">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">1) Saudação (Greeting):</label>
+                        <select id="selGreet" style="font-size: 1.3rem; padding: 5px; border-radius: 5px; background: #fff; margin-top: 5px; width: 100%;">
+                            <option value="Hello everyone!">Hello everyone!</option>
+                            <option value="Hi!">Hi!</option>
+                            <option value="Good morning!">Good morning!</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">2) Seu Nome:</label>
+                        <div style="margin-top: 10px; font-size: 1.5rem; font-weight: bold;">
+                            My name is <input type="text" class="input-clean" id="iptName" placeholder="[Seu nome]">.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">3) Sua Idade (Age) - Lembre do Tio To Be!</label>
+                        <div style="margin-top: 10px; font-size: 1.5rem; font-weight: bold;">
+                            I am <input type="number" class="input-clean" id="iptAge" style="width: 80px;" placeholder="12"> years old.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">4) Onde você vive:</label>
+                        <div style="margin-top: 10px; font-size: 1.5rem; font-weight: bold;">
+                            I live in <input type="text" class="input-clean" id="iptCity" placeholder="[Sua Cidade]">.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">5) Favoritos (Cor ou Comida):</label>
+                        <div style="margin-top: 10px; font-size: 1.5rem; font-weight: bold;">
+                            My favorite color is <input type="text" class="input-clean" id="iptColor" style="width: 150px;" placeholder="blue">.
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 1.1rem; color: #aaa; font-weight: bold; display: block;">6) Passatempo (Hobby):</label>
+                        <div style="margin-top: 10px; font-size: 1.5rem; font-weight: bold;">
+                            I like to <input type="text" class="input-clean" id="iptHobby" style="width: 150px;" placeholder="play games">.
+                        </div>
+                    </div>
+
+                    <button class="button-action" style="width: 100%; border-radius: 10px; margin-top: 10px;" onclick="generatePitch()">MONTAR APRESENTAÇÃO E OUVIR 🎧</button>
+                    
+                    <div id="resultPitch" style="margin-top: 20px; font-size: 1.5rem; color: var(--rv1-highlight); text-align: left; min-height: 40px; font-weight: bold; line-height: 1.5;">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: INTERVIEW DRILL -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>5. Interview Reaction (Bate e Volta) ⚡</h2>
+                <p>Em uma situação real, as perguntas vêm rápido. Preencha as respostas velozmente usando o Pronome + Verbo correto!</p>
+
+                <div style="width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 20px; text-align: left; margin-top: 20px;">
+                    
+                    <!-- Q1 -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="color: #aaa; font-size: 1.2rem;">🧑‍💻 Interviewer asks: <b style="color: white;">Are you from the USA?</b></div>
+                        <div style="font-size: 1.5rem; margin-top: 10px;">
+                            No! <input type="text" id="ans1" class="input-clean" style="width: 150px;" placeholder="____ am"> from Brazil.
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="color: #aaa; font-size: 1.2rem;">🧑‍💻 Teacher pointing to a girl: <b style="color: white;">Is Maria your sister?</b></div>
+                        <div style="font-size: 1.5rem; margin-top: 10px;">
+                            Yes. <input type="text" id="ans2" class="input-clean" style="width: 150px;" placeholder="____ is"> my sister.
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="color: #aaa; font-size: 1.2rem;">🧑‍💻 Tourist approaches you and your friend: <b style="color: white;">Are you Brazilians?</b></div>
+                        <div style="font-size: 1.5rem; margin-top: 10px;">
+                            Yes, <input type="text" id="ans3" class="input-clean" style="width: 150px;" placeholder="____ are"> Brazilians.
+                        </div>
+                    </div>
+
+                    <button class="button-action" style="width: auto; margin-top: 10px;" onclick="checkInterview()">VERIFICAR MENTE RÁPIDA ✅</button>
+                    <div id="interviewResult" style="font-size: 1.5rem; color: var(--rv1-highlight); margin-top: 10px; font-weight: bold; min-height: 30px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: FINAL WRAP UP -->
+        <div class="slide" id="finalSlide">
+            <div class="slide-content-wrapper">
+                <div style="font-size: 6rem;">🏆</div>
+                <h1>MISSION ACCOMPLISHED</h1>
+                <p>O foco de hoje foi construído e concluído! Mapeamos todos os pronomes principais e treinamos o seu pitch inicial para amanhã!</p>
+                <div style="display: flex; gap: 15px; margin-top: 40px;">
+                    <button class="button-action" style="background: transparent; border: 2px solid var(--rv1-text);" onclick="location.reload()">REPEAT CLASS ↺</button>
+                    <a href="{% url 'dashboard' %}" class="button-action" style="text-decoration: none;">MENU 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls-wrapper">
+            <button class="btn-nav-round" onclick="toggleFullScreen()" title="Fullscreen">⛶</button>
+            <button class="btn-nav-round" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav-round" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- VIEW LOGIC --- */
+    let currentSlide = 0;
+    let slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    updateUI();
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            s.classList.remove('prev');
+            if (i === currentSlide) {
+                s.classList.add('active');
+            } else if (i < currentSlide) {
+                s.classList.add('prev');
+            }
+        });
+
+        const percent = ((currentSlide) / (slides.length - 1)) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.style.visibility = (currentSlide === 0) ? 'hidden' : 'visible';
+        nextBtn.style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    /* --- AUDIO --- */
+    function speak(text, rate = 0.85) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = rate; // Ritmo mais lento para repetição clara
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- EXERCICES --- */
+    function generatePitch() {
+        const greet = document.getElementById('selGreet').value;
+        const name = document.getElementById('iptName').value.trim() || "[Seu Nome]";
+        const age = document.getElementById('iptAge').value.trim() || "[Idade]";
+        const city = document.getElementById('iptCity').value.trim() || "[Local]";
+        const color = document.getElementById('iptColor').value.trim() || "[Cor]";
+        const hobby = document.getElementById('iptHobby').value.trim() || "[Hobby]";
+        const resultBox = document.getElementById('resultPitch');
+
+        const fullPitch = `${greet} My name is ${name}. I am ${age} years old. I live in ${city}. My favorite color is ${color}, and I like to ${hobby}. Nice to meet you!`;
+        
+        resultBox.innerHTML = `"${fullPitch}" <br><br><button class="button-action" onclick="speak('${fullPitch}')" style="background:var(--rv1-highlight); color:var(--rv1-bg); padding:10px 20px; font-size:1.2rem;">🔊 OUVIR PRONÚNCIA OFICIAL</button>`;
+        resultBox.style.color = "var(--rv1-light)";
+        speak(fullPitch);
+    }
+
+    function cleanStr(s) {
+        return s.toLowerCase().replace(/[^a-z\s']/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    function checkInterview() {
+        const inp1 = document.getElementById('ans1');
+        const inp2 = document.getElementById('ans2');
+        const inp3 = document.getElementById('ans3');
+        const resDiv = document.getElementById('interviewResult');
+
+        const ans1 = cleanStr(inp1.value);
+        const ans2 = cleanStr(inp2.value);
+        const ans3 = cleanStr(inp3.value);
+
+        let hits = 0;
+        
+        // Q1
+        if(ans1 === 'i' || ans1 === 'i am' || ans1 === "i'm" || ans1 === "im") { 
+            hits++; inp1.style.borderColor = '#4caf50'; inp1.style.color = '#4caf50';
+        } else { 
+            inp1.style.borderColor = '#f44336'; 
+            inp1.style.color = '#f44336';
+            inp1.value = "I am"; 
+        }
+
+        // Q2
+        if(ans2 === 'she' || ans2 === 'she is' || ans2 === "she's" || ans2 === "shes") { 
+            hits++; inp2.style.borderColor = '#4caf50'; inp2.style.color = '#4caf50';
+        } else { 
+            inp2.style.borderColor = '#f44336'; 
+            inp2.style.color = '#f44336';
+            inp2.value = "She is";
+        }
+
+        // Q3
+        if(ans3 === 'we' || ans3 === 'we are' || ans3 === "we're" || ans3 === "were") { 
+            hits++; inp3.style.borderColor = '#4caf50'; inp3.style.color = '#4caf50';
+        } else { 
+            inp3.style.borderColor = '#f44336'; 
+            inp3.style.color = '#f44336';
+            inp3.value = "We are";
+        }
+
+        if(hits === 3) {
+            resDiv.innerHTML = "Excelente! Mente rápida e impecável! ✨";
+            resDiv.style.color = "#43e8d8";
+            speak("Excellent!");
+        } else {
+            resDiv.innerHTML = "Atenção: Corrigi suas respostas de vermelho para a forma certa. Estude-as e avance para os DRILLS!";
+            resDiv.style.color = "var(--rv1-text)";
+        }
+    }
+
+    /* --- DRILL SYSTEM (FRENÉTICO) --- */
+    const drillData = [
+        { scenario: 'Você indica a si mesma:', text: '______ am Sarah.', correct: 'I', wrong: 'You' },
+        { scenario: 'Você aponta para o professor:', text: '______ are my teacher.', correct: 'You', wrong: 'I' },
+        { scenario: 'Apontando para uma menina longe:', text: '______ is my sister.', correct: 'She', wrong: 'He' },
+        { scenario: 'Apontando para um menino longe:', text: '______ is a good student.', correct: 'He', wrong: 'She' },
+        { scenario: 'Falando de um cachorro:', text: '______ is sleeping.', correct: 'It', wrong: 'She' },
+        { scenario: 'Você abraça sua amiga e diz:', text: '______ are happy.', correct: 'We', wrong: 'They' },
+        { scenario: 'Mostrando uma família passando na rua:', text: '______ are walking.', correct: 'They', wrong: 'We' },
+        // NOVAS:
+        { scenario: 'Gritando com o seu videogame que travou:', text: '______ is broken!', correct: 'It', wrong: 'He' },
+        { scenario: 'Apontando para várias árvores grandes:', text: '______ are tall.', correct: 'They', wrong: 'It' },
+        { scenario: 'Você e sua mãe na cozinha:', text: '______ are cooking.', correct: 'We', wrong: 'You' },
+        { scenario: 'Alguém pergunta quem quebrou o copo, você assume:', text: '______ broke it.', correct: 'I', wrong: 'They' },
+        { scenario: 'Apontando para dois amigos na escola:', text: '______ are my best friends.', correct: 'They', wrong: 'We' },
+        { scenario: 'O professor elogia você e seu irmão:', text: '______ are very smart.', correct: 'You', wrong: 'They' },
+        { scenario: 'Seu pai consertando o carro:', text: '______ is strong.', correct: 'He', wrong: 'It' },
+        { scenario: 'Sua professora ensinando Matemática:', text: '______ is very intelligent.', correct: 'She', wrong: 'We' },
+        { scenario: 'O sol brilhando muito forte hoje:', text: '______ is hot today.', correct: 'It', wrong: 'They' },
+        { scenario: 'Perguntando a idade da pessoa na sua frente:', text: 'How old are ______?', correct: 'You', wrong: 'She' }
+    ];
+
+    const finalSlide = document.getElementById('finalSlide');
+    
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    let drillCounter = 0;
+    let currentScore = 0;
+
+    for(let i=0; i<3; i++) { 
+        let roundData = shuffleArray([...drillData]);
+        
+        roundData.forEach(data => {
+            drillCounter++;
+            let opt1 = Math.random() > 0.5 ? data.correct : data.wrong;
+            let opt2 = opt1 === data.correct ? data.wrong : data.correct;
+
+            const slideHtml = `
+            <div class="slide drill-slide">
+                <div class="slide-content-wrapper">
+                    <p style="color: var(--rv1-highlight); font-weight: bold; letter-spacing: 1px; font-size:1.2rem;">
+                        🔥 DRILL DE FIXAÇÃO • Q${drillCounter} &nbsp; | &nbsp; <span style="color:#fff; background:rgba(255,255,255,0.2); padding:5px 15px; border-radius:20px;">SCORE: <span class="score-display">0</span></span>
+                    </p>
+                    <h2 style="font-size: 2rem; border: none; color: #fff;">${data.scenario}</h2>
+                    
+                    <div style="background: rgba(0,0,0,0.5); padding: 30px; border-radius: 15px; border-left: 5px solid var(--rv1-highlight); width: 100%; max-width: 800px; margin: 20px 0;">
+                        <div style="font-size: 3rem; text-align: center; margin-bottom: 20px;" class="drill-sentence" data-full="${data.text}">
+                            ${data.text}
+                        </div>
+                        
+                        <div style="display: flex; justify-content: center; gap: 20px;" class="btn-grid-drill">
+                            <button class="button-action" onclick="checkDrill(this, '${opt1}', '${data.correct}')">${opt1}</button>
+                            <button class="button-action" onclick="checkDrill(this, '${opt2}', '${data.correct}')">${opt2}</button>
+                        </div>
+                        <div class="feedback-msg" style="margin-top: 25px; font-size: 1.6rem; font-weight: bold; min-height: 35px; text-align: center;"></div>
+                        
+                        <div class="drill-controls" style="display:none; margin-top: 20px; text-align: center; gap: 15px; justify-content: center;">
+                            <button class="button-action btn-repeat-drill" style="background: transparent; border: 2px solid var(--rv1-highlight); color: #fff; width: 45%;" onclick="speakSequence(this.parentElement.parentElement.querySelector('.drill-sentence').innerText)">REPETIR ÁUDIO 🔊</button>
+                            <button class="button-action btn-next-drill" style="background: var(--rv1-highlight); color: #000; width: 45%;" onclick="changeSlide(1)">NEXT QUESTION ➔</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            finalSlide.insertAdjacentHTML('beforebegin', slideHtml);
+        });
+    }
+
+    // ATUALIZAÇÃO CRÍTICA: Recarregar a lista de slides para que o JS saiba que os drills existem!
+    slides = document.querySelectorAll('.slide');
+    updateUI();
+
+    function speakSequence(textToSpeak) {
+        window.speechSynthesis.cancel();
+        
+        let u1 = new SpeechSynthesisUtterance(textToSpeak); u1.rate = 0.5; u1.lang = 'en-US';
+        let u2 = new SpeechSynthesisUtterance(textToSpeak); u2.rate = 0.85; u2.lang = 'en-US';
+        let u3 = new SpeechSynthesisUtterance(textToSpeak); u3.rate = 1.0; u3.lang = 'en-US';
+        
+        window.speechSynthesis.speak(u1);
+        window.speechSynthesis.speak(u2);
+        window.speechSynthesis.speak(u3);
+    }
+
+    function checkDrill(btnElement, chosen, correct) {
+        const container = btnElement.parentElement.parentElement;
+        const allBtns = container.querySelectorAll('.button-action:not(.btn-next-drill):not(.btn-repeat-drill)');
+        const feedback = container.querySelector('.feedback-msg');
+        const controls = container.querySelector('.drill-controls');
+        const sentenceBox = container.querySelector('.drill-sentence');
+        
+        allBtns.forEach(b => { b.style.pointerEvents = 'none'; });
+
+        // Build completed sentence for audio
+        let fullSentenceStr = sentenceBox.getAttribute('data-full').replace('______', correct);
+        
+        if (chosen === correct) {
+            currentScore += 10;
+            document.querySelectorAll('.score-display').forEach(el => el.innerText = currentScore);
+            
+            btnElement.style.background = '#4caf50'; 
+            btnElement.style.color = '#fff';
+            
+            feedback.innerHTML = "✅ CORRECT! +10 Points";
+            feedback.style.color = "#4caf50";
+            
+        } else {
+            btnElement.style.background = '#f44336'; 
+            btnElement.style.color = '#fff';
+            
+            feedback.innerHTML = `❌ WRONG! A resposta certa era <b>${correct}</b>.`;
+            feedback.style.color = "#f44336";
+            
+            // Destacar o correto
+            allBtns.forEach(b => {
+                if(b.innerText === correct) {
+                    b.style.background = '#4caf50';
+                }
+            });
+        }
+        
+        // MOSTRAR CONTROLES
+        controls.style.display = 'flex';
+        
+        // FALAR A FRASE 3 VEZES
+        sentenceBox.innerHTML = fullSentenceStr.replace(correct, `<span style="color:#4caf50;">${correct}</span>`);
+        speakSequence(fullSentenceStr);
+    }
+
+
+    /* --- GLOBALS --- */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+</script>
+{% endblock %}
