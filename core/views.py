@@ -143,6 +143,11 @@ def lesson_review_7(request):
     return render(request, "lesson_review_7.html")
 
 
+def activity_review_1(request):
+    log_activity(request.user, "Started Activity Review 1: Spy Agency")
+    return render(request, "activity_review_1.html")
+
+
 def quiz_view(request):
     return render(request, "quiz.html")
 

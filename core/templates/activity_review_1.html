@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+{% block title %}Mastery Mission: Spy Identity - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --spy-bg: #0b0e14;
+        --spy-primary: #00e5ff;
+        --spy-secondary: #7000ff;
+        --spy-accent: #ff0055;
+        --spy-glass: rgba(255, 255, 255, 0.05);
+        --spy-border: rgba(0, 229, 255, 0.2);
+        --spy-text-pt: #94a3b8;
+    }
+
+    .activity-wrapper {
+        min-height: 100vh;
+        background: radial-gradient(circle at center, #1a2332 0%, var(--spy-bg) 100%);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .mission-container {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: var(--spy-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--spy-border);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 40px rgba(0, 229, 255, 0.05);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .subtitle-pt {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--spy-text-pt);
+        margin-top: 0.25rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-step {
+        display: none;
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .mission-step.active {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ID Card Styles */
+    .id-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 2px solid var(--spy-primary);
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+        .id-card { flex-direction: row; }
+    }
+
+    .photo-placeholder {
+        width: 100%;
+        aspect-ratio: 1/1.2;
+        max-width: 180px;
+        background: #000;
+        border: 1px solid var(--spy-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .scanning-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--spy-primary);
+        box-shadow: 0 0 10px var(--spy-primary);
+        animation: scan 2s linear infinite;
+    }
+
+    @keyframes scan {
+        0% { top: 0; }
+        100% { top: 100%; }
+    }
+
+    .id-field { margin-bottom: 0.75rem; }
+    .id-field label {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--spy-primary);
+        text-transform: uppercase;
+    }
+    .id-field span { font-size: 1.1rem; font-weight: bold; }
+
+    /* Highlights */
+    .highlight-word {
+        color: var(--spy-primary);
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        font-weight: 900;
+        border-bottom: 2px solid var(--spy-primary);
+    }
+
+    /* Logic Matrix */
+    .matrix-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .matrix-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--spy-border);
+        padding: 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        transition: 0.2s;
+    }
+
+    .matrix-item.selected {
+        border-color: var(--spy-primary);
+        background: rgba(0, 229, 255, 0.2);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    /* Suspect Grid */
+    .suspect-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    @media (min-width: 600px) {
+        .suspect-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .suspect-card {
+        background: var(--spy-glass);
+        border: 1px solid var(--spy-border);
+        border-radius: 15px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .suspect-avatar { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    /* Controls */
+    .spy-btn {
+        background: var(--spy-primary);
+        color: var(--spy-bg);
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+    .spy-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--spy-primary); }
+
+    .progress-hud {
+        position: sticky;
+        top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    .hud-stat {
+        background: rgba(0,0,0,0.7);
+        border: 1px solid var(--spy-primary);
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        pointer-events: auto;
+    }
+
+    .full-screen-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--spy-primary);
+        color: var(--spy-bg);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        z-index: 1100;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activity-wrapper" id="master-container">
+    
+    <div class="progress-hud">
+        <div class="hud-stat">MISSION: <span id="mission-status-text">INIT</span></div>
+        <div class="hud-stat">SCORE: <span id="current-score">0000</span></div>
+    </div>
+
+    <div class="mission-container">
+        
+        <!-- STEP 0: INTRODUCTION -->
+        <div class="mission-step active" id="step-0">
+            <div class="glass-panel text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🕵️‍♀️</div>
+                <h1>Welcome, Agent!</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Bem-vinda, Agente!</span>
+                <p style="margin-top: 1.5rem; color: #a0aec0;">
+                    Your training starts now. Master the bases of identity.<br>
+                    <span class="subtitle-pt">Seu treinamento começa agora. Domine as bases da identidade.</span>
+                </p>
+                <div style="margin-top: 2rem; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
+                    <p style="font-size: 0.9rem; margin: 0;"><b>PRONOUNS & VERB TO BE</b></p>
+                    <p class="subtitle-pt">Pronomes e Verbo Ser/Estar</p>
+                </div>
+                <button class="spy-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Start Training 🚀</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: ID CARD -->
+        <div class="mission-step" id="step-1">
+            <div class="glass-panel">
+                <h2>1. Agent Identity 🪪</h2>
+                <span class="subtitle-pt">Identidade do Agente</span>
+                
+                <div style="margin-top: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--spy-primary);">NAME (Nome)</label>
+                            <input type="text" id="alias-name" class="spy-input" style="background:#000;" placeholder="Ghost">
+                            
+                            <label style="font-size: 0.8rem; color: var(--spy-primary); margin-top: 1rem; display: block;">AGE (Idade)</label>
+                            <input type="number" id="alias-age" class="spy-input" style="background:#000;" placeholder="12">
+                            
+                            <button class="spy-btn" style="width: 100%; margin-top: 1.5rem;" onclick="generateID()">Generate ID Card ➔</button>
+                        </div>
+
+                        <div id="card-display" style="opacity: 0.2; pointer-events: none; transition: 0.5s;">
+                            <div class="id-card">
+                                <div class="photo-placeholder">
+                                    <span style="font-size: 4rem;">👤</span>
+                                    <div class="scanning-line"></div>
+                                </div>
+                                <div class="id-content">
+                                    <div class="id-field">
+                                        <label>Identity (Identidade)</label>
+                                        <div style="font-size: 1.2rem;">My name <span class="highlight-word">is</span> <span id="display-name">---</span></div>
+                                    </div>
+                                    <div class="id-field">
+                                        <label>Status (Estado)</label>
+                                        <div style="font-size: 1.2rem;">I <span class="highlight-word">am</span> <span id="display-age">--</span> years old</div>
+                                    </div>
+                                    <button class="spy-btn" style="background: var(--spy-secondary); color: white; margin-top: 1rem; width: 100%;" onclick="nextStep(2)">CONFIRM & PROCEED ➔</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: SUSPECT LINEUP (MASTERY) -->
+        <div class="mission-step" id="step-2">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>2. Identifying Targets 🔍</h3>
+                    <div style="font-weight: bold; color: var(--spy-primary);">Round <span id="round-count">1</span>/15</div>
+                </div>
+                <span class="subtitle-pt">Identificando Alvos</span>
+                
+                <div id="instruction-box" style="margin-top: 1.5rem; background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                    <div id="target-en" style="font-size: 1.8rem; font-weight: 800;">---</div>
+                    <div id="target-pt" class="subtitle-pt" style="font-size: 1.1rem; color: var(--spy-primary);">---</div>
+                    <button class="spy-btn" style="margin-top: 1rem; padding: 5px 15px; font-size: 0.8rem;" onclick="speakSequenceCurrent()">🔊 LISTEN AUDIO</button>
+                </div>
+
+                <div class="suspect-grid" id="suspect-grid"></div>
+                <div id="suspect-feedback" style="margin-top: 1rem; text-align: center; font-weight: bold; min-height: 20px;"></div>
+                
+                <button id="next-suspect-btn" class="spy-btn" style="display: none; width: 100%; margin-top: 1rem;" onclick="initSuspectMission()">Next Target ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: LOGIC MATRIX -->
+        <div class="mission-step" id="step-3">
+            <div class="glass-panel">
+                <h3>3. The Logic Matrix 🧩</h3>
+                <span class="subtitle-pt">A Matriz Lógica - Combine Pronome e Verbo</span>
+                <p style="font-size: 0.9rem; margin-top: 1rem;">Connect the <b>Pronoun</b> to the correct <b>Verb form</b>.</p>
+
+                <div class="matrix-grid">
+                    <div id="pronoun-col">
+                        <div class="matrix-item" onclick="selectItem('p', 'I', this)">I</div>
+                        <div class="matrix-item" style="margin-top:10px;" onclick="selectItem('p', 'HE', this)">HE / SHE / IT</div>
+                        <div class="matrix-item" style="margin-top:10px;" onclick="selectItem('p', 'YOU', this)">YOU / WE / THEY</div>
+                    </div>
+                    <div id="verb-col">
+                        <div class="matrix-item" onclick="selectItem('v', 'IS', this)">IS</div>
+                        <div class="matrix-item" style="margin-top:10px;" onclick="selectItem('v', 'AM', this)">AM</div>
+                        <div class="matrix-item" style="margin-top:10px;" onclick="selectItem('v', 'ARE', this)">ARE</div>
+                    </div>
+                </div>
+                
+                <div id="matrix-feedback" style="margin-top: 2rem; text-align: center; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <!-- STEP 4: FINAL WRAP UP -->
+        <div class="mission-step" id="step-4">
+            <div class="glass-panel text-center">
+                <div style="font-size: 6rem;">🏆</div>
+                <h1 style="color: var(--spy-primary);">Training Complete</h1>
+                <span class="subtitle-pt" style="font-size: 1.2rem;">Treinamento Concluído</span>
+                
+                <div style="margin: 2rem 0; padding: 2rem; background: rgba(0,0,0,0.3); border-radius: 15px;">
+                    <h3>Score: <span id="final-score" style="color: var(--spy-primary);">0</span></h3>
+                    <p id="rank-text">RANK: ELITE AGENT</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="{% url 'dashboard' %}" class="spy-btn" style="text-decoration: none;">Mission Dashboard</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Full Screen Toggle -->
+    <button class="full-screen-btn" onclick="toggleFullScreen()" title="Full Screen">⛶</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentScore = 0;
+    let currentStep = 0;
+    let rounds = 0;
+    const TOTAL_ROUNDS = 15;
+
+    function addScore(points) {
+        currentScore += points;
+        document.getElementById('current-score').innerText = String(currentScore).padStart(4, '0');
+    }
+
+    /* --- AUDIO LOGIC (3 SPEEDS) --- */
+    function speakSequence(text) {
+        window.speechSynthesis.cancel();
+        
+        const createUtterance = (rate) => {
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.rate = rate;
+            return u;
+        };
+
+        const u1 = createUtterance(0.4); // Very Slow
+        const u2 = createUtterance(0.7); // Slow
+        const u3 = createUtterance(1.0); // Normal
+
+        window.speechSynthesis.speak(u1);
+        window.speechSynthesis.speak(u2);
+        window.speechSynthesis.speak(u3);
+    }
+
+    function speakSequenceCurrent() {
+        const text = document.getElementById('target-en').innerText.replace(/\s+/g, ' ');
+        speakSequence(text);
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${step}`).classList.add('active');
+        currentStep = step;
+
+        const statusTexts = ["INIT", "IDENTITY", "TARGETS", "MATRIX", "COMPLETE"];
+        document.getElementById('mission-status-text').innerText = statusTexts[step];
+
+        if(step === 2) { rounds = 0; initSuspectMission(); }
+        if(step === 4) document.getElementById('final-score').innerText = currentScore;
+    }
+
+    /* --- MISSION 1 --- */
+    function generateID() {
+        const name = document.getElementById('alias-name').value.trim();
+        const age = document.getElementById('alias-age').value.trim();
+        if(!name || !age) return alert("Preencha os dados!");
+
+        document.getElementById('display-name').innerText = name;
+        document.getElementById('display-age').innerText = age;
+        document.getElementById('card-display').style.opacity = "1";
+        document.getElementById('card-display').style.pointerEvents = "all";
+        
+        addScore(100);
+        speakSequence(`My name is ${name}. I am ${age} years old.`);
+    }
+
+    /* --- MISSION 2: SUSPECTS --- */
+    const suspectData = [
+        { en: '<span class="highlight-word">He is</span> the chef', pt: 'Ele é o chef', role: 'he_chef', emoji: '👨‍🍳' },
+        { en: '<span class="highlight-word">She is</span> the nurse', pt: 'Ela é a enfermeira', role: 'she_nurse', emoji: '👩‍⚕️' },
+        { en: '<span class="highlight-word">It is</span> a drone', pt: 'Isso é um drone', role: 'it_drone', emoji: '🚁' },
+        { en: '<span class="highlight-word">They are</span> the guards', pt: 'Eles são os guardas', role: 'they_guards', emoji: '👮‍♂️👮‍♀️' },
+        { en: '<span class="highlight-word">We are</span> the team', pt: 'Nós somos o time', role: 'we_team', emoji: '👨‍👩‍👧‍👦' },
+        { en: '<span class="highlight-word">You are</span> the student', pt: 'Você é a estudante', role: 'you_student', emoji: '👩‍🎓' },
+        { en: '<span class="highlight-word">I am</span> the spy', pt: 'Eu sou a espiã', role: 'i_spy', emoji: '🕵️‍♀️' },
+        { en: '<span class="highlight-word">He is</span> happy', pt: 'Ele está feliz', role: 'he_happy', emoji: '😊' },
+        { en: '<span class="highlight-word">She is</span> sad', pt: 'Ela está triste', role: 'she_sad', emoji: '😢' },
+        { en: '<span class="highlight-word">It is</span> cold', pt: 'Está frio', role: 'it_cold', emoji: '❄️' },
+        { en: '<span class="highlight-word">They are</span> tall', pt: 'Eles são altos', role: 'they_tall', emoji: '🦒' },
+        { en: '<span class="highlight-word">We are</span> strong', pt: 'Nós somos fortes', role: 'we_strong', emoji: '💪' },
+        { en: '<span class="highlight-word">It is</span> a cat', pt: 'Isso é um gato', role: 'it_cat', emoji: '🐱' },
+        { en: '<span class="highlight-word">He is</span> a doctor', pt: 'Ele é um médico', role: 'he_doctor', emoji: '👨‍⚕️' },
+        { en: '<span class="highlight-word">She is</span> a pilot', pt: 'Ela é uma pilota', role: 'she_pilot', emoji: '👩‍✈️' }
+    ];
+
+    let currentTarget = null;
+
+    function initSuspectMission() {
+        if(rounds >= TOTAL_ROUNDS) return nextStep(3);
+        rounds++;
+        document.getElementById('round-count').innerText = rounds;
+        
+        const grid = document.getElementById('suspect-grid');
+        grid.innerHTML = '';
+        document.getElementById('suspect-feedback').innerHTML = '';
+        document.getElementById('next-suspect-btn').style.display = 'none';
+
+        const shuffled = [...suspectData].sort(() => 0.5 - Math.random());
+        currentTarget = shuffled[0];
+        const pool = shuffled.slice(0, 6).sort(() => 0.5 - Math.random());
+
+        document.getElementById('target-en').innerHTML = currentTarget.en;
+        document.getElementById('target-pt').innerText = currentTarget.pt;
+        speakSequence(currentTarget.en.replace(/<[^>]*>/g, ''));
+
+        pool.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'suspect-card';
+            card.innerHTML = `<div class="suspect-avatar">${s.emoji}</div><div style="font-size:0.7rem; color:#aaa;">Target #${Math.floor(Math.random()*1000)}</div>`;
+            card.onclick = () => {
+                if(s.role === currentTarget.role) {
+                    card.style.background = "rgba(0, 255, 128, 0.2)";
+                    card.style.borderColor = "#00ff80";
+                    document.getElementById('suspect-feedback').innerHTML = "<span style='color:#00ff80;'>CORRECT! +50 Points</span>";
+                    addScore(50);
+                    document.getElementById('next-suspect-btn').style.display = 'block';
+                    document.querySelectorAll('.suspect-card').forEach(c => c.style.pointerEvents = 'none');
+                } else {
+                    card.style.background = "rgba(255, 0, 85, 0.2)";
+                    card.style.borderColor = "#ff0055";
+                    document.getElementById('suspect-feedback').innerHTML = "<span style='color:#ff0055;'>WRONG! Try again.</span>";
+                    speakSequence("Try again");
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    /* --- MISSION 3: MATRIX --- */
+    let selectedP = null;
+    let selectedV = null;
+    let matches = 0;
+
+    function selectItem(type, val, el) {
+        if(type === 'p') {
+            document.querySelectorAll('#pronoun-col .matrix-item').forEach(i => i.classList.remove('selected'));
+            selectedP = val;
+        } else {
+            document.querySelectorAll('#verb-col .matrix-item').forEach(i => i.classList.remove('selected'));
+            selectedV = val;
+        }
+        el.classList.add('selected');
+
+        if(selectedP && selectedV) {
+            checkMatrix();
+        }
+    }
+
+    function checkMatrix() {
+        const correct = (selectedP === 'I' && selectedV === 'AM') || 
+                        (selectedP === 'HE' && selectedV === 'IS') || 
+                        (selectedP === 'YOU' && selectedV === 'ARE');
+        
+        const fb = document.getElementById('matrix-feedback');
+        if(correct) {
+            fb.innerHTML = "<span style='color:#00ff80;'>PERFECT MATCH! +100 Points</span>";
+            addScore(100);
+            matches++;
+            speakSequence("Correct match");
+            
+            // Reset selection colors
+            setTimeout(() => {
+                document.querySelectorAll('.matrix-item.selected').forEach(i => {
+                    i.style.opacity = '0.3';
+                    i.style.pointerEvents = 'none';
+                    i.classList.remove('selected');
+                });
+                selectedP = null;
+                selectedV = null;
+                if(matches === 3) setTimeout(() => nextStep(4), 1000);
+            }, 800);
+        } else {
+            fb.innerHTML = "<span style='color:#ff0055;'>INCORRECT Logic. Resetting...</span>";
+            speakSequence("Wrong verb");
+            setTimeout(() => {
+                document.querySelectorAll('.matrix-item').forEach(i => i.classList.remove('selected'));
+                selectedP = null; selectedV = null;
+                fb.innerHTML = "";
+            }, 1000);
+        }
+    }
+
+    function toggleFullScreen() {
+        const elem = document.getElementById("master-container");
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+        } else {
+            document.exitFullscreen();
+        }
+    }
+</script>
+{% endblock %}
