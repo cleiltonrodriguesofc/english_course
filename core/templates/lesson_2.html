@@ -157,6 +157,20 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
+    @media (max-width: 640px) {
+        .controls {
+            bottom: 85px;
+            right: 15px;
+            gap: 10px;
+            width: calc(100% - 30px);
+            justify-content: center;
+        }
+        .btn-nav-c2 {
+            padding: 8px 15px !important;
+            font-size: 0.9rem !important;
+        }
+    }
+
     .btn-nav-c2 {
         background: linear-gradient(90deg, var(--c2-secondary), var(--c2-primary));
         border: none;

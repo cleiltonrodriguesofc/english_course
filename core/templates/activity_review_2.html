@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+{% block title %}Mastery Mission: The Interrogation Engine - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --spy-bg: #0b0e14;
+        --spy-primary: #f0a500; /* Amber/Yellow for Interrogation theme */
+        --spy-secondary: #ff5722;
+        --spy-accent: #00e5ff;
+        --spy-glass: rgba(255, 255, 255, 0.05);
+        --spy-border: rgba(240, 165, 0, 0.2);
+        --spy-text-pt: #94a3b8;
+    }
+
+    .activity-wrapper {
+        min-height: 100vh;
+        background: radial-gradient(circle at center, #1a1025 0%, var(--spy-bg) 100%);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .mission-container {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: var(--spy-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--spy-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 0 40px rgba(240, 165, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .subtitle-pt {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--spy-text-pt);
+        margin-top: 0.25rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-step {
+        display: none;
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .mission-step.active {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ID Card Styles Adapted for Mission 2 */
+    .id-card {
+        background: linear-gradient(135deg, #2d1b0a 0%, #0f0a05 100%);
+        border: 2px solid var(--spy-primary);
+        border-radius: 15px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .id-field { margin-bottom: 0.75rem; }
+    .id-field label {
+        display: block;
+        font-size: 0.7rem;
+        color: var(--spy-primary);
+        text-transform: uppercase;
+    }
+    .id-field span { font-size: 1.1rem; font-weight: bold; }
+
+    /* Highlights */
+    .highlight-word {
+        color: var(--spy-primary);
+        text-shadow: 0 0 10px rgba(240, 165, 0, 0.5);
+        font-weight: 900;
+        border-bottom: 2px solid var(--spy-primary);
+    }
+
+    /* Logic Grid */
+    .logic-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    @media (min-width: 600px) {
+        .logic-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .logic-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--spy-border);
+        padding: 1.5rem;
+        border-radius: 15px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100px;
+    }
+
+    .logic-item.selected {
+        border-color: var(--spy-primary);
+        background: rgba(240, 165, 0, 0.2);
+        box-shadow: 0 0 15px rgba(240, 165, 0, 0.3);
+    }
+
+    .logic-item:hover:not(.selected) {
+        background: rgba(255,255,255,0.1);
+        border-color: rgba(240, 165, 0, 0.5);
+    }
+
+    /* Interrogation Room UI */
+    .interrogation-box {
+        background: rgba(0,0,0,0.5);
+        border-left: 5px solid var(--spy-primary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .spy-btn {
+        background: var(--spy-primary);
+        color: #000;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+    .spy-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--spy-primary); }
+
+    .progress-hud {
+        position: sticky;
+        top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    .hud-stat {
+        background: rgba(0,0,0,0.8);
+        border: 1px solid var(--spy-border);
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        color: var(--spy-primary);
+        pointer-events: auto;
+    }
+
+    .full-screen-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--spy-primary);
+        color: #000;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        z-index: 1100;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    @media (max-width: 640px) {
+        .full-screen-btn {
+            bottom: 85px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activity-wrapper" id="master-container">
+    
+    <div class="progress-hud">
+        <div class="hud-stat">PROTOCOLO: <span id="mission-status-text">INÍCIO</span></div>
+        <div class="hud-stat">PONTOS: <span id="current-score">0000</span></div>
+    </div>
+
+    <div class="mission-container">
+        
+        <!-- STEP 0: INTRODUCTION -->
+        <div class="mission-step active" id="step-0">
+            <div class="glass-panel text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">⚖️</div>
+                <h1>Mission: The Answer Engine</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Missão: O Motor de Respostas</span>
+                <p style="margin-top: 1.5rem; color: #a0aec0;">
+                    To survive an interrogation, you must answer without hesitation.<br>
+                    <span class="subtitle-pt">Para sobreviver a um interrogatório, você deve responder sem hesitar.</span>
+                </p>
+                <div style="margin-top: 2rem; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
+                    <p style="font-size: 0.9rem; margin: 0; color: var(--spy-primary);"><b>ARE YOU vs. DO YOU</b></p>
+                    <p class="subtitle-pt">O segredo das respostas invertidas (Regra do Espelho).</p>
+                </div>
+                <button class="spy-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Entrar na Sala de Interrogatório ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: BRAIN OVERRIDE (ARE vs DO) -->
+        <div class="mission-step" id="step-1">
+            <div class="glass-panel">
+                <h2>1. The Mirror Rule 🪞</h2>
+                <span class="subtitle-pt">A Regra do Espelho: Responda com a mesma base.</span>
+                
+                <div style="margin-top: 2rem;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 15px; text-align: center;">
+                        <p style="font-size: 1.2rem; margin-bottom: 1rem;">"If the question starts with <b style="color:var(--spy-primary);">ARE</b>, the answer must use <b style="color:var(--spy-primary);">AM</b>!"</p>
+                        <p class="subtitle-pt">Se começar com ARE, responda com AM. (E se começar com DO, responda com DO).</p>
+                    </div>
+
+                    <div class="logic-grid">
+                        <div class="logic-item" onclick="checkMirror('Are', 'do', this)">
+                            <div>Q: Are you...?</div>
+                            <div style="font-size: 0.8rem; color: var(--spy-secondary);">A: Yes, I do. ❌</div>
+                            <div class="subtitle-pt" style="font-size: 0.7rem; margin-top:5px;">Incorreto: Misturou ARE com DO</div>
+                        </div>
+                        <div class="logic-item" onclick="checkMirror('Are', 'am', this)">
+                            <div>Q: Are you...?</div>
+                            <div style="font-size: 0.8rem; color: var(--spy-accent);">A: Yes, I am. ✅</div>
+                            <div class="subtitle-pt" style="font-size: 0.7rem; margin-top:5px;">Correto: ARE e AM são verbos 'to be'</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mirror-feedback" style="margin-top: 1.5rem; text-align: center; min-height: 25px; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <!-- STEP 2: THE HOT SEAT -->
+        <div class="mission-step" id="step-2">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>2. The Interrogation 🎤</h3>
+                    <div style="font-weight: bold; color: var(--spy-primary);">Rodada <span id="round-count">1</span>/24</div>
+                </div>
+                <span class="subtitle-pt">Responda corretamente! Lembre-se da tradução.</span>
+                
+                <div class="interrogation-box">
+                    <div style="font-size: 0.8rem; color: var(--spy-primary); margin-bottom: 0.5rem; opacity: 0.6;">O INTERROGADOR PERGUNTA:</div>
+                    <div id="question-text" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">---</div>
+                    <button class="spy-btn" style="padding: 5px 15px; font-size: 0.7rem; margin-top: 0.5rem;" onclick="speakCurrentQuestion()">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="answer-grid" style="margin-top: 2rem;"></div>
+                
+                <div id="interrogation-feedback" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 20px;"></div>
+                
+                <button id="next-question-btn" class="spy-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextQuestion()">Próxima Pergunta ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: MISSION COMPLETE -->
+        <div class="mission-step" id="step-3">
+            <div class="glass-panel text-center">
+                <div style="font-size: 6rem;">🛡️</div>
+                <h1 style="color: var(--spy-primary);">Missão Concluída</h1>
+                <span class="subtitle-pt" style="font-size: 1.2rem;">Interrogatório Concluído - Fluência no Motor de Respostas</span>
+                
+                <div style="margin: 2rem 0; padding: 2rem; background: rgba(0,0,0,0.3); border-radius: 15px;">
+                    <h3>Pontos: <span id="final-score" style="color: var(--spy-primary);">0</span>/2400</h3>
+                    <p id="rank-text" style="color: #a0aec0; margin-top: 0.5rem;">STATUS: FLUÊNCIA APROVADA</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="{% url 'dashboard' %}" class="spy-btn" style="text-decoration: none;">Voltar para a Base</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="full-screen-btn" onclick="toggleFullScreen()" title="Full Screen">⛶</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let score = 0;
+    let currentStep = 0;
+    let round = 0;
+    const TOTAL_ROUNDS = 24;
+
+    function addScore(pts) {
+        score += pts;
+        document.getElementById('current-score').innerText = String(score).padStart(4, '0');
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${step}`).classList.add('active');
+        currentStep = step;
+        
+        const protocols = ["INÍCIO", "REGRA_DO_ESPELHO", "INTERROGATÓRIO", "SEGURO"];
+        document.getElementById('mission-status-text').innerText = protocols[step];
+
+        if(step === 2) { round = 0; nextQuestion(); }
+        if(step === 3) document.getElementById('final-score').innerText = score;
+    }
+
+    function speakText(text) {
+        window.speechSynthesis.cancel();
+        
+        const slow = new SpeechSynthesisUtterance(text); slow.rate = 0.5; slow.lang = 'en-US';
+        const med = new SpeechSynthesisUtterance(text); med.rate = 0.8; med.lang = 'en-US';
+        const norm = new SpeechSynthesisUtterance(text); norm.rate = 1.0; norm.lang = 'en-US';
+        
+        window.speechSynthesis.speak(slow);
+        window.speechSynthesis.speak(med);
+        window.speechSynthesis.speak(norm);
+    }
+
+    /* --- STEP 1 LOGIC --- */
+    function checkMirror(qType, aType, el) {
+        const feedback = document.getElementById('mirror-feedback');
+        if(aType === 'am') {
+            el.classList.add('selected');
+            feedback.innerHTML = '<span style="color:#00ff80;">LÓGICA CONFIRMADA! +100 Pontos</span>';
+            addScore(100);
+            speakText("Are you? Yes I am.");
+            setTimeout(() => nextStep(2), 1500);
+        } else {
+            feedback.innerHTML = '<span style="color:#ff5722;">ERRO LÓGICO: Falta sincronia com ARE/AM.</span>';
+            speakText("Wrong logic.");
+        }
+    }
+
+    /* --- STEP 2 LOGIC: INTERROGATION --- */
+    const interrogationDB = [
+        { q: "Are you a student?", pt: "Você é um(a) aluno(a)?", a: "Yes, I am.", a_pt: "Sim, eu sou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you like coffee?", pt: "Você gosta de café?", a: "Yes, I do.", a_pt: "Sim, eu gosto.", w: "Yes, I am.", w_pt: "Sim, eu sou.", base: "do" },
+        { q: "Are you hungry?", pt: "Você está com fome?", a: "No, I am not.", a_pt: "Não, eu não estou.", w: "No, I don't.", w_pt: "Não, eu não (verbo).", base: "are" },
+        { q: "Do you play soccer?", pt: "Você joga futebol?", a: "No, I don't.", a_pt: "Não, eu não jogo.", w: "No, I am not.", w_pt: "Não, eu não sou.", base: "do" },
+        { q: "Are you from Brazil?", pt: "Você é do Brasil?", a: "Yes, I am.", a_pt: "Sim, eu sou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you speak English?", pt: "Você fala inglês?", a: "Yes, I do.", a_pt: "Sim, eu falo.", w: "Yes, I am.", w_pt: "Sim, eu sou.", base: "do" },
+        { q: "Are you happy?", pt: "Você está feliz?", a: "Yes, I am.", a_pt: "Sim, eu estou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you live here?", pt: "Você mora aqui?", a: "No, I don't.", a_pt: "Não, eu não moro.", w: "No, I am not.", w_pt: "Não, eu não estou.", base: "do" },
+        { q: "Are you tired?", pt: "Você está cansado(a)?", a: "No, I am not.", a_pt: "Não, eu não estou.", w: "No, I don't.", w_pt: "Não, eu não (verbo).", base: "are" },
+        { q: "Do you study here?", pt: "Você estuda aqui?", a: "Yes, I do.", a_pt: "Sim, eu estudo.", w: "Yes, I am.", w_pt: "Sim, eu sou.", base: "do" },
+        { q: "Are you the agent?", pt: "Você é o agente?", a: "Yes, I am.", a_pt: "Sim, eu sou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you have a code?", pt: "Você tem um código?", a: "No, I don't.", a_pt: "Não, eu não tenho.", w: "No, I am not.", w_pt: "Não, eu não sou.", base: "do" },
+        { q: "Are you ready?", pt: "Você está pronto(a)?", a: "Yes, I am.", a_pt: "Sim, eu estou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you watch movies?", pt: "Você assiste filmes?", a: "Yes, I do.", a_pt: "Sim, eu assisto.", w: "Yes, I am.", w_pt: "Sim, eu sou.", base: "do" },
+        { q: "Are you a spy?", pt: "Você é um espião?", a: "Yes, I am.", a_pt: "Sim, eu sou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you need help?", pt: "Você precisa de ajuda?", a: "No, I don't.", a_pt: "Não, eu não preciso.", w: "No, I am not.", w_pt: "Não, eu não estou.", base: "do" },
+        { q: "Are you late?", pt: "Você está atrasado(a)?", a: "No, I am not.", a_pt: "Não, eu não estou.", w: "No, I don't.", w_pt: "Não, eu não (verbo).", base: "are" },
+        { q: "Do you work today?", pt: "Você trabalha hoje?", a: "Yes, I do.", a_pt: "Sim, eu trabalho.", w: "Yes, I am.", w_pt: "Sim, eu estou.", base: "do" },
+        { q: "Are you scared?", pt: "Você está com medo?", a: "No, I am not.", a_pt: "Não, eu não estou.", w: "No, I don't.", w_pt: "Não, eu não (verbo).", base: "are" },
+        { q: "Do you understand?", pt: "Você entende?", a: "Yes, I do.", a_pt: "Sim, eu entendo.", w: "Yes, I am.", w_pt: "Sim, eu estou.", base: "do" },
+        { q: "Are you married?", pt: "Você é casado(a)?", a: "No, I am not.", a_pt: "Não, eu não sou.", w: "No, I don't.", w_pt: "Não, eu não (verbo).", base: "are" },
+        { q: "Do you like music?", pt: "Você gosta de música?", a: "Yes, I do.", a_pt: "Sim, eu gosto.", w: "Yes, I am.", w_pt: "Sim, eu sou.", base: "do" },
+        { q: "Are you busy?", pt: "Você está ocupado(a)?", a: "Yes, I am.", a_pt: "Sim, eu estou.", w: "Yes, I do.", w_pt: "Sim, eu (verbo).", base: "are" },
+        { q: "Do you drive a car?", pt: "Você dirige um carro?", a: "No, I don't.", a_pt: "Não, eu não dirijo.", w: "No, I am not.", w_pt: "Não, eu não sou.", base: "do" }
+    ];
+
+    let currentQ = null;
+
+    function nextQuestion() {
+        if(round >= TOTAL_ROUNDS) return nextStep(3);
+        round++;
+        document.getElementById('round-count').innerText = round;
+        document.getElementById('interrogation-feedback').innerHTML = '';
+        document.getElementById('next-question-btn').style.display = 'none';
+        
+        const grid = document.getElementById('answer-grid');
+        grid.innerHTML = '';
+
+        currentQ = interrogationDB[round - 1];
+        document.getElementById('question-text').innerHTML = `"${currentQ.q}"<br><span class="subtitle-pt" style="font-size: 1.1rem; margin-top:0.5rem; opacity: 0.8; font-weight: 400; font-family: 'Outfit', sans-serif;">${currentQ.pt}</span>`;
+        speakText(currentQ.q);
+
+        const options = [
+            { en: currentQ.a, pt: currentQ.a_pt, isCorrect: true },
+            { en: currentQ.w, pt: currentQ.w_pt, isCorrect: false }
+        ].sort(() => Math.random() - 0.5);
+
+        options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'logic-item';
+            btn.innerHTML = `<div>${opt.en}</div><div class="subtitle-pt" style="font-size:0.9rem; margin-top:5px; color: #a0aec0;">${opt.pt}</div>`;
+            btn.onclick = () => {
+                const fb = document.getElementById('interrogation-feedback');
+                if(opt.isCorrect) {
+                    btn.style.borderColor = "#00ff8b";
+                    btn.style.background = "rgba(0,255,139,0.1)";
+                    fb.innerHTML = '<span style="color:#00ff8b;">Acerto Confirmado! +100 Pontos</span>';
+                    addScore(100);
+                    speakText(opt.en);
+                    document.getElementById('next-question-btn').style.display = 'block';
+                    document.querySelectorAll('.logic-item').forEach(b => b.style.pointerEvents = 'none');
+                } else {
+                    btn.style.borderColor = "#ff5722";
+                    btn.style.background = "rgba(255,87,34,0.1)";
+                    fb.innerHTML = `<span style="color:#ff5722;">ERRO! O correto é: ${currentQ.a}</span>`;
+                    speakText(`Wrong. The correct answer is ${currentQ.a}`);
+                }
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function speakCurrentQuestion() {
+        if(currentQ) speakText(currentQ.q);
+    }
+
+    function toggleFullScreen() {
+        const elem = document.getElementById("master-container");
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => console.log(err));
+        } else {
+            document.exitFullscreen();
+        }
+    }
+</script>
+{% endblock %}

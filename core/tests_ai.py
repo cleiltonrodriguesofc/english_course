@@ -1,5 +1,6 @@
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
+from django.contrib.auth.models import User
 import json
 from unittest.mock import patch
 
@@ -7,6 +8,10 @@ from unittest.mock import patch
 class AITutorTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.user = User.objects.create_user(
+            username="testaiuser", password="password123"
+        )
+        self.client.login(username="testaiuser", password="password123")
 
     def test_ai_tutor_page_renders(self):
         """Test if the AI Tutor page renders correctly."""

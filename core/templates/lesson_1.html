@@ -78,14 +78,18 @@
 
     /* Typography */
     .lesson-wrapper h1 {
-        font-size: 3.5rem;
+        font-size: 2.2rem;
         color: var(--c1-primary);
         margin-bottom: 20px;
         text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
     }
 
+    @media (min-width: 768px) {
+        .lesson-wrapper h1 { font-size: 3.5rem; }
+    }
+
     .lesson-wrapper h2 {
-        font-size: 2.5rem;
+        font-size: 1.6rem;
         color: var(--c1-secondary);
         margin-bottom: 30px;
         border-bottom: 2px solid var(--c1-primary);
@@ -93,11 +97,19 @@
         padding-bottom: 5px;
     }
 
+    @media (min-width: 768px) {
+        .lesson-wrapper h2 { font-size: 2.5rem; }
+    }
+
     .lesson-wrapper p,
     .lesson-wrapper li {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
         line-height: 1.6;
         color: #b3e5fc;
+    }
+
+    @media (min-width: 768px) {
+        .lesson-wrapper p, .lesson-wrapper li { font-size: 1.5rem; }
     }
 
     .lesson-wrapper ul {
@@ -178,6 +190,20 @@
         display: flex;
         gap: 20px;
         z-index: 10;
+    }
+
+    @media (max-width: 640px) {
+        .controls {
+            bottom: 85px;
+            right: 20px;
+            gap: 10px;
+            width: calc(100% - 40px);
+            justify-content: center;
+        }
+        .lesson-btn-nav {
+            padding: 10px 20px !important;
+            font-size: 1rem !important;
+        }
     }
 
     .lesson-btn-nav {

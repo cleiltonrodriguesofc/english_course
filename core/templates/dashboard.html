@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Dashboard - English Course{% endblock %}
-{% block page_title %}Welcome back, {{ user.username }}!{% endblock %}
+{% block page_title %}Bem-vinda de volta, {{ user.username }}!{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -119,8 +119,8 @@
             <i class="fas fa-fire"></i>
         </div>
         <div>
-            <div style="font-size: 0.875rem; color: var(--text-secondary);">Daily Streak</div>
-            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">4 Days</div>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Ofensiva Diária</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">4 Dias</div>
         </div>
     </div>
 
@@ -129,7 +129,7 @@
             <i class="fas fa-star"></i>
         </div>
         <div>
-            <div style="font-size: 0.875rem; color: var(--text-secondary);">Quiz Score</div>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Nota do Quiz</div>
             <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">
                 {% if quiz_score %}{{ quiz_score.percentage }}%{% else %}N/A{% endif %}
             </div>
@@ -141,7 +141,7 @@
             <i class="fas fa-check-double"></i>
         </div>
         <div>
-            <div style="font-size: 0.875rem; color: var(--text-secondary);">Completed Lessons</div>
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Aulas Concluídas</div>
             <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">6 / 14</div>
         </div>
     </div>
@@ -150,11 +150,10 @@
     <div class="module-group" id="lessons">
         <div class="glass module-card-premium animate-fade" style="animation-delay: 0.4s;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 1: The Foundations</h3>
-                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">100% Complete</span>
+                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Módulo 1: Fundamentos</h3>
+                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">100% Concluído</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Alphabet, introductions, and essential daily
-                vocabulary.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Alfabeto, apresentações e vocabulário essencial do dia a dia.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 100%;"></div>
             </div>
@@ -183,7 +182,7 @@
                 <a href="{% url 'lesson_6' %}" class="lesson-link"
                     style="border-color: var(--accent-primary); background: rgba(59, 130, 246, 0.05);">
                     <i class="fas fa-comments" style="color: var(--accent-primary);"></i>
-                    <span style="color: var(--accent-primary);">Review Session</span>
+                    <span style="color: var(--accent-primary);">Sessão de Revisão</span>
                 </a>
             </div>
         </div>
@@ -194,28 +193,30 @@
         <div class="glass module-card-premium animate-fade"
             style="animation-delay: 0.7s; border-color: rgba(255, 152, 0, 0.4); background: rgba(255, 152, 0, 0.02);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h3 style="margin-bottom: 0; font-family: 'Outfit'; color: #ff9800;"><i class="fas fa-bolt"></i> Mastery
-                    Drills (Review Hub)</h3>
+                <h3 style="margin-bottom: 0; font-family: 'Outfit'; color: #ff9800;"><i class="fas fa-bolt"></i> Hub de Maestria (Revisões)</h3>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Sessões de 1 hora de prática intensa para
-                solidificar gramática fundamental e pronúncia.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Sessões de prática intensa para solidificar gramática fundamental e pronúncia.</p>
 
             <div class="lesson-grid">
                 <a href="{% url 'lesson_review_1' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
                     <i class="fas fa-id-card" style="color: #ff9800;"></i>
-                    <span>Drill 1: Identity & Introductions</span>
+                    <span>Tópico 1: Identidade e Apresentações</span>
                 </a>
                 <a href="{% url 'activity_review_1' %}" class="lesson-link" style="border-left: 3px solid #00e5ff; background: rgba(0, 229, 255, 0.05);">
                     <i class="fas fa-user-secret" style="color: #00e5ff;"></i>
-                    <span style="color: #00e5ff; font-weight: bold;">Mission: Spy Identity</span>
+                    <span style="color: #00e5ff; font-weight: bold;">Missão 1: Agência de Espiões</span>
+                </a>
+                <a href="{% url 'activity_review_2' %}" class="lesson-link" style="border-left: 3px solid #f0a500; background: rgba(240, 165, 0, 0.05);">
+                    <i class="fas fa-bolt" style="color: #f0a500;"></i>
+                    <span style="color: #f0a500; font-weight: bold;">Missão 2: O Motor de Respostas</span>
                 </a>
                 <a href="{% url 'lesson_review_2' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
                     <i class="fas fa-brain" style="color: #ff9800;"></i>
-                    <span>Drill 2: The Answer Engine</span>
+                    <span>Tópico 2: O Motor de Respostas</span>
                 </a>
                 <a href="{% url 'lesson_review_3' %}" class="lesson-link" style="border-left: 3px solid #ff9800;">
                     <i class="fas fa-clock" style="color: #ff9800;"></i>
-                    <span>Drill 3: Action Engine (Routine)</span>
+                    <span>Tópico 3: Motor de Ação (Rotina)</span>
                 </a>
                 <!-- Missing templates for lessons 4-7 - Commented out to prevent errors 
                 <a href="{% url 'lesson_review_4' %}" class="lesson-link" style="border-left: 3px solid #e91e63;">
@@ -243,11 +244,10 @@
     <div class="module-group" style="margin-top: 0.5rem;">
         <div class="glass module-card-premium animate-fade" style="animation-delay: 0.5s;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 2: Daily Life</h3>
-                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Complete</span>
+                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Módulo 2: Vida Diária</h3>
+                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Concluído</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Time, daily routines, and expressing your own
-                likes and dislikes.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Horas, rotinas diárias e como expressar seus gostos.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 0%;"></div>
             </div>
@@ -277,11 +277,10 @@
     <div class="module-group" style="margin-top: 0.5rem;">
         <div class="glass module-card-premium animate-fade" style="animation-delay: 0.6s;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Module 3: World Exploration</h3>
-                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Complete</span>
+                <h3 style="margin-bottom: 0; font-family: 'Outfit';">Módulo 3: Exploração do Mundo</h3>
+                <span style="font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;">0% Concluído</span>
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Cities, clothes, and talking about food in
-                various situations.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9375rem;">Cidades, roupas e como falar sobre comida em várias situações.</p>
             <div class="prog-bar">
                 <div class="prog-fill" style="width: 0%;"></div>
             </div>
