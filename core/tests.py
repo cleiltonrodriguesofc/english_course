@@ -11,6 +11,7 @@ class EnglishCourseTests(TestCase):
         self.user = User.objects.create_user(
             username="testuser", password="password123"
         )
+        self.client.login(username="testuser", password="password123")
 
     def test_dashboard_load(self):
         """Test if dashboard loads correctly."""
@@ -25,21 +26,24 @@ class EnglishCourseTests(TestCase):
 
     def test_register_view(self):
         """Test registration page load and content."""
+        self.client.logout()  # registration doesn't require login
         response = self.client.get(reverse("register"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "registration/register.html")
-        self.assertContains(response, "Username")
-        self.assertContains(response, "Password")
+        self.assertContains(response, "Usuário")
+        self.assertContains(response, "Senha")
         self.assertNotContains(response, "{{ field.label }}")
 
     def test_login_view(self):
         """Test login page load."""
+        self.client.logout()  # login page doesn't require login
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "registration/login.html")
 
     def test_save_quiz_unauthenticated(self):
         """Test saving quiz result without login (should fail)."""
+        self.client.logout()
         data = {"score": 10, "total": 20, "quiz_name": "test_quiz"}
         response = self.client.post(
             reverse("save_quiz_result"),
@@ -50,7 +54,6 @@ class EnglishCourseTests(TestCase):
 
     def test_save_quiz_authenticated(self):
         """Test saving quiz result with login (should succeed)."""
-        self.client.login(username="testuser", password="password123")
         data = {"score": 15, "total": 20, "quiz_name": "test_quiz"}
         response = self.client.post(
             reverse("save_quiz_result"),
@@ -73,7 +76,6 @@ class EnglishCourseTests(TestCase):
             user=self.user, quiz_name="Class 3 Review", score=6, total_questions=10
         )
 
-        self.client.login(username="testuser", password="password123")
         response = self.client.get(reverse("dashboard"))
 
         self.assertIsNotNone(response.context["quiz_score"])
@@ -83,6 +85,7 @@ class EnglishCourseTests(TestCase):
     def test_profile_view_access(self):
         """Test profile page access and content."""
         # Unauthenticated -> Redirects to login
+        self.client.logout()
         response = self.client.get(reverse("profile"))
         self.assertEqual(response.status_code, 302)
 

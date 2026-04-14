@@ -10,6 +10,7 @@ from .models import QuizResult, ActivityLog, Lesson, LessonProgress
 from django.contrib.auth.models import User
 from django.db.models import Avg, Count
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 import requests
 
 
@@ -18,6 +19,7 @@ def log_activity(user, action, details=None):
         ActivityLog.objects.create(user=user, action=action, details=details)
 
 
+@login_required
 def dashboard(request):
     quiz_score = None
     if request.user.is_authenticated:
@@ -38,116 +40,145 @@ def dashboard(request):
     return render(request, "dashboard.html", {"quiz_score": quiz_score})
 
 
+@login_required
 def lesson_1(request):
     log_activity(request.user, "Viewed Lesson 1")
     return render(request, "lesson_1.html")
 
 
+@login_required
 def lesson_2(request):
     log_activity(request.user, "Viewed Lesson 2")
     return render(request, "lesson_2.html")
 
 
+@login_required
 def lesson_3(request):
     log_activity(request.user, "Viewed Lesson 3")
     return render(request, "lesson_3.html")
 
 
+@login_required
 def lesson_4(request):
     log_activity(request.user, "Viewed Lesson 4")
     return render(request, "lesson_4.html")
 
 
+@login_required
 def lesson_5(request):
     log_activity(request.user, "Viewed Lesson 5")
     return render(request, "lesson_5.html")
 
 
+@login_required
 def lesson_6(request):
     log_activity(request.user, "Viewed Lesson 6 (Conversational Review)")
     return render(request, "lesson_6.html")
 
 
+@login_required
 def lesson_7(request):
     log_activity(request.user, "Viewed Lesson 7 (Time, Calendar & Dates)")
     return render(request, "lesson_7.html")
 
 
+@login_required
 def lesson_8(request):
     log_activity(request.user, "Viewed Lesson 8 (Numbers, Dates & Time)")
     return render(request, "lesson_8.html")
 
 
+@login_required
 def lesson_9(request):
     log_activity(request.user, "Viewed Lesson 9 (Daily Routine)")
     return render(request, "lesson_9.html")
 
 
+@login_required
 def lesson_10(request):
     log_activity(request.user, "Viewed Lesson 10 (Likes & Dislikes)")
     return render(request, "lesson_10.html")
 
 
+@login_required
 def lesson_11(request):
     log_activity(request.user, "Viewed Lesson 11 (City & Transportation)")
     return render(request, "lesson_11.html")
 
 
+@login_required
 def lesson_12(request):
     log_activity(request.user, "Viewed Lesson 12 (Family & Appearance)")
     return render(request, "lesson_12.html")
 
 
+@login_required
 def lesson_13(request):
     log_activity(request.user, "Viewed Lesson 13 (Clothes & Colors)")
     return render(request, "lesson_13.html")
 
 
+@login_required
 def lesson_14(request):
     log_activity(request.user, "Viewed Lesson 14 (Food & Drinks)")
     return render(request, "lesson_14.html")
 
 
+@login_required
 def lesson_review_1(request):
     log_activity(request.user, "Viewed Drill 1: Identity & Introductions")
     return render(request, "lesson_review_1.html")
 
 
+@login_required
 def lesson_review_2(request):
     log_activity(request.user, "Viewed Drill 2: The Answer Engine")
     return render(request, "lesson_review_2.html")
 
 
+@login_required
 def lesson_review_3(request):
     log_activity(request.user, "Viewed Drill 3: Action Engine (Routine)")
     return render(request, "lesson_review_3.html")
 
 
+@login_required
 def lesson_review_4(request):
     log_activity(request.user, "Viewed Lesson Review 4 (The 3rd Person S Wall)")
     return render(request, "lesson_review_4.html")
 
 
+@login_required
 def lesson_review_5(request):
     log_activity(request.user, "Viewed Lesson Review 5 (Simple Inquiries Do You)")
     return render(request, "lesson_review_5.html")
 
 
+@login_required
 def lesson_review_6(request):
     log_activity(request.user, "Viewed Lesson Review 6 (Simple Inquiries Does She)")
     return render(request, "lesson_review_6.html")
 
 
+@login_required
 def lesson_review_7(request):
     log_activity(request.user, "Viewed Lesson Review 7 (Complete Fluency Loop)")
     return render(request, "lesson_review_7.html")
 
 
+@login_required
 def activity_review_1(request):
     log_activity(request.user, "Started Activity Review 1: Spy Agency")
     return render(request, "activity_review_1.html")
 
 
+@login_required
+def activity_review_2(request):
+    log_activity(request.user, "Started Activity Review 2: The Answer Engine")
+    return render(request, "activity_review_2.html")
+
+
+@login_required
 def quiz_view(request):
     return render(request, "quiz.html")
 
@@ -237,11 +268,13 @@ def profile_view(request):
     )
 
 
+@login_required
 def game_puzzle(request):
     log_activity(request.user, "Played Puzzle Game")
     return render(request, "game_puzzle.html")
 
 
+@login_required
 def game_memory(request):
     log_activity(request.user, "Played Memory Game")
     return render(request, "game_memory.html")
@@ -305,6 +338,7 @@ def staff_student_detail(request, user_id):
     return render(request, "staff_student_detail.html", context)
 
 
+@login_required
 @csrf_exempt
 def ai_tutor_chat(request):
     """
@@ -339,6 +373,7 @@ def ai_tutor_chat(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+@login_required
 @csrf_exempt
 def ai_tutor_tts(request):
     """
@@ -378,6 +413,7 @@ def ai_tutor_tts(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
+@login_required
 def ai_tutor(request):
     """
     Renders the AI Tutor (Maria) prototype page.

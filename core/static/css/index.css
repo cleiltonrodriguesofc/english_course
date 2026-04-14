@@ -33,6 +33,15 @@
 
   /* Typography */
   --font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Mobile Defaults */
+  --content-padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --content-padding: 3rem;
+  }
 }
 
 /* Global Reset */
@@ -71,7 +80,7 @@ body {
 .container {
   max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--content-padding);
 }
 
 .glass {
@@ -142,6 +151,20 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-fade {
   animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Responsive Utilities */
+.hide-mobile {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: initial !important;
+  }
+  .show-mobile {
+    display: none !important;
+  }
 }
 
 /* Global Form Elements Modernization */

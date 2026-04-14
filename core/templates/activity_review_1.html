@@ -238,6 +238,15 @@
         z-index: 1100;
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
+
+    @media (max-width: 640px) {
+        .full-screen-btn {
+            bottom: 85px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -245,8 +254,8 @@
 <div class="activity-wrapper" id="master-container">
     
     <div class="progress-hud">
-        <div class="hud-stat">MISSION: <span id="mission-status-text">INIT</span></div>
-        <div class="hud-stat">SCORE: <span id="current-score">0000</span></div>
+        <div class="hud-stat">PROTOCOLO: <span id="mission-status-text">INIT</span></div>
+        <div class="hud-stat">PRECISÃO: <span id="current-score">0000</span></div>
     </div>
 
     <div class="mission-container">
@@ -255,25 +264,31 @@
         <div class="mission-step active" id="step-0">
             <div class="glass-panel text-center">
                 <div style="font-size: 4rem; margin-bottom: 1rem;">🕵️‍♀️</div>
-                <h1>Welcome, Agent!</h1>
-                <span class="subtitle-pt" style="font-size: 1.1rem;">Bem-vinda, Agente!</span>
+                <h1>Missão: Identidade Espiã</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Verificação de Credenciais do Agente</span>
                 <p style="margin-top: 1.5rem; color: #a0aec0;">
-                    Your training starts now. Master the bases of identity.<br>
-                    <span class="subtitle-pt">Seu treinamento começa agora. Domine as bases da identidade.</span>
+                    Complete os protocolos de segurança para confirmar sua identidade.<br>
+                    <span class="subtitle-pt">O acesso à rede global exige precisão total.</span>
                 </p>
                 <div style="margin-top: 2rem; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px;">
-                    <p style="font-size: 0.9rem; margin: 0;"><b>PRONOUNS & VERB TO BE</b></p>
-                    <p class="subtitle-pt">Pronomes e Verbo Ser/Estar</p>
+                    <p style="font-size: 0.9rem; margin: 0; color: var(--spy-primary);"><b>ALERTA DE SEGURANÇA</b></p>
+                    <p class="subtitle-pt">Pronúncia incorreta resultará em falha no acesso.</p>
                 </div>
-                <button class="spy-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Start Training 🚀</button>
+                <button class="spy-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Iniciar Verificação ➔</button>
             </div>
         </div>
 
         <!-- STEP 1: ID CARD -->
         <div class="mission-step" id="step-1">
             <div class="glass-panel">
-                <h2>1. Agent Identity 🪪</h2>
-                <span class="subtitle-pt">Identidade do Agente</span>
+                <h2>1. Verificação de Voz 🎤</h2>
+                <span class="subtitle-pt">Escute e repita o código de acesso.</span>
+                
+                <div id="voice-interrogation" class="voice-box" style="margin-top: 1.5rem; background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 0.8rem; color: var(--spy-primary); margin-bottom: 0.5rem; opacity: 0.6;">SISTEMA DIZ:</div>
+                    <div id="target-phrase" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">"My name is..."</div>
+                    <button class="spy-btn" style="padding: 5px 15px; font-size: 0.7rem; margin-top: 0.5rem;" onclick="speakPhrase()">🔊 OUVIR</button>
+                </div>
                 
                 <div style="margin-top: 1.5rem;">
                     <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
@@ -284,7 +299,7 @@
                             <label style="font-size: 0.8rem; color: var(--spy-primary); margin-top: 1rem; display: block;">AGE (Idade)</label>
                             <input type="number" id="alias-age" class="spy-input" style="background:#000;" placeholder="12">
                             
-                            <button class="spy-btn" style="width: 100%; margin-top: 1.5rem;" onclick="generateID()">Generate ID Card ➔</button>
+                            <button class="spy-btn" style="width: 100%; margin-top: 1.5rem;" onclick="generateID()">Gerar Cartão de Identidade ➔</button>
                         </div>
 
                         <div id="card-display" style="opacity: 0.2; pointer-events: none; transition: 0.5s;">
@@ -323,7 +338,7 @@
                 <div id="instruction-box" style="margin-top: 1.5rem; background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: 10px; text-align: center;">
                     <div id="target-en" style="font-size: 1.8rem; font-weight: 800;">---</div>
                     <div id="target-pt" class="subtitle-pt" style="font-size: 1.1rem; color: var(--spy-primary);">---</div>
-                    <button class="spy-btn" style="margin-top: 1rem; padding: 5px 15px; font-size: 0.8rem;" onclick="speakSequenceCurrent()">🔊 LISTEN AUDIO</button>
+                    <button class="spy-btn" style="margin-top: 1rem; padding: 5px 15px; font-size: 0.8rem;" onclick="speakSequenceCurrent()">🔊 OUVIR AUDIO</button>
                 </div>
 
                 <div class="suspect-grid" id="suspect-grid"></div>
