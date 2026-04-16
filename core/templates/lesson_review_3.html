@@ -387,6 +387,10 @@
             let opt1 = Math.random() > 0.5 ? data.correct : data.wrong;
             let opt2 = opt1 === data.correct ? data.wrong : data.correct;
 
+            let safeOpt1 = opt1.replace(/'/g, "\\'");
+            let safeOpt2 = opt2.replace(/'/g, "\\'");
+            let safeCorrect = data.correct.replace(/'/g, "\\'");
+
             const slideHtml = `
             <div class="slide drill-slide">
                 <div class="slide-content-wrapper">
@@ -401,8 +405,8 @@
                         </div>
                         
                         <div style="display: flex; justify-content: center; gap: 20px;" class="btn-grid-drill">
-                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${opt1}', '${data.correct}')">${opt1}</button>
-                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${opt2}', '${data.correct}')">${opt2}</button>
+                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${safeOpt1}', '${safeCorrect}')">${opt1}</button>
+                            <button class="button-action" style="background:#fff; color:#000;" onclick="checkDrill(this, '${safeOpt2}', '${safeCorrect}')">${opt2}</button>
                         </div>
                         
                         <div class="feedback-msg" style="margin-top: 25px; font-size: 1.6rem; font-weight: bold; min-height: 35px; text-align: center;"></div>
