@@ -153,7 +153,20 @@
 
     /* --- CONTROLS --- */
     .controls-wrapper { position: absolute; bottom: 25px; right: 30px; display: flex; gap: 15px; z-index: 100; }
-    .btn-nav-round { background: rgba(255,255,255,0.1); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+    .btn-nav-round { 
+        background: rgba(255,255,255,0.1); 
+        color: white; 
+        border: none; 
+        width: 50px; 
+        height: 50px; 
+        border-radius: 50%; 
+        font-size: 1.5rem; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .btn-nav-round:hover { background: var(--rv3-accent); color: #000; }
     .progress-bar { position: absolute; bottom: 0; left: 0; height: 8px; background: var(--rv3-accent); width: 0%; transition: width 0.4s; }
 </style>
@@ -405,9 +418,6 @@
         });
     }
 
-    slides = document.querySelectorAll('.slide');
-    updateUI();
-
     function speakSequence(textToSpeak) {
         window.speechSynthesis.cancel();
         let u1 = new SpeechSynthesisUtterance(textToSpeak); u1.rate = 0.5; u1.lang = 'en-US';
@@ -450,7 +460,7 @@
             });
         }
         
-        nextBtn.style.display = 'block';
+        container.querySelector('.drill-controls').style.display = 'flex';
         sentenceBox.innerHTML = fullSentenceStr.replace(correct, `<span style="color:var(--rv3-accent);">${correct}</span>`);
         speakSequence(fullSentenceStr);
     }
@@ -505,12 +515,12 @@
         const percent = ((currentSlide) / (slides.length - 1)) * 100;
         progressBar.style.width = percent + '%';
 
-        prevBtn.style.visibility = (currentSlide === 0) ? 'hidden' : 'visible';
+        prevBtn.style.display = (currentSlide === 0) ? 'none' : 'flex';
         nextBtn.style.display = (currentSlide === slides.length - 1) ? 'none' : 'flex';
         
         if(slides[currentSlide].classList.contains('drill-slide')) {
             setTimeout(() => {
-                let drillText = slides[currentSlide].querySelector('.slide-content-wrapper > div > div').innerText.replace('______', 'blank');
+                let drillText = slides[currentSlide].querySelector('.drill-sentence').innerText.replace('______', 'blank');
                 speak(drillText, 0.9);
             }, 400);
         }
