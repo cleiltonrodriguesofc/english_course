@@ -1,0 +1,501 @@
+{% extends 'base.html' %}
+{% block title %}Mastery Mission: The Routine Architect - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --rt-bg: #0d1a10;
+        --rt-primary: #00e676; /* Vibrant Green */
+        --rt-secondary: #00c853;
+        --rt-accent: #ffea00; /* Yellow highlight */
+        --rt-glass: rgba(0, 230, 118, 0.05);
+        --rt-border: rgba(0, 230, 118, 0.2);
+        --rt-text-pt: #94a3b8;
+        --rt-error: #ff5252;
+    }
+
+    .activity-wrapper {
+        min-height: 100vh;
+        background: radial-gradient(circle at center, #1b3320 0%, var(--rt-bg) 100%);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .mission-container {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: var(--rt-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--rt-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 0 40px rgba(0, 230, 118, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .subtitle-pt {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--rt-text-pt);
+        margin-top: 0.25rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-step {
+        display: none;
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .mission-step.active {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Verb Engines Grid */
+    .engine-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .engine-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--rt-border);
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    .engine-item:hover {
+        background: rgba(0, 230, 118, 0.1);
+        border-color: var(--rt-primary);
+        transform: translateY(-5px);
+    }
+    .engine-emoji { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .engine-name { font-weight: bold; color: var(--rt-primary); font-size: 1.1rem; }
+
+    /* Builder Box */
+    .builder-box {
+        background: rgba(0,0,0,0.5);
+        border-left: 5px solid var(--rt-primary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .logic-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    @media (min-width: 600px) {
+        .logic-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .logic-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--rt-border);
+        padding: 1.5rem;
+        border-radius: 15px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100px;
+    }
+    .logic-item.correct { border-color: var(--rt-primary); background: rgba(0, 230, 118, 0.2); }
+    .logic-item.wrong { border-color: var(--rt-error); background: rgba(255, 82, 82, 0.2); }
+
+    .rt-btn {
+        background: var(--rt-primary);
+        color: #000;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-size: 1rem;
+    }
+    .rt-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--rt-primary); }
+
+    .progress-hud {
+        position: sticky;
+        top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    .hud-stat {
+        background: rgba(0,0,0,0.8);
+        border: 1px solid var(--rt-border);
+        padding: 5px 20px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        color: var(--rt-primary);
+        pointer-events: auto;
+    }
+
+    .full-screen-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--rt-primary);
+        color: #000;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        z-index: 1100;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activity-wrapper" id="master-container">
+    
+    <div class="progress-hud">
+        <div class="hud-stat">STATUS: <span id="mission-status-text">INIT</span></div>
+        <div class="hud-stat">SCORE: <span id="current-score">0000</span></div>
+    </div>
+
+    <div class="mission-container">
+        
+        <!-- STEP 0: INTRO -->
+        <div class="mission-step active" id="step-0">
+            <div class="glass-panel text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🏗️</div>
+                <h1>The Routine Architect</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Protocolo: Arquiteto de Rotinas</span>
+                <p style="margin-top: 1.5rem; color: #a0aec0;">
+                    Sua missão é construir uma rotina impecável em inglês.<br>
+                    <span class="subtitle-pt">Lembre-se: Verbos de ação são blocos fixos. O "Don't" é sua barreira negativa.</span>
+                </p>
+                <div style="margin-top: 2rem; background: rgba(0,230,118,0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--rt-border);">
+                    <p style="font-size: 0.9rem; margin: 0; color: var(--rt-primary);"><b>ESTRATÉGIA DE FLUXO</b></p>
+                    <p class="subtitle-pt">O inglês é o idioma mais fácil do mundo para rotina. Basta encaixar o verbo!</p>
+                </div>
+                <button class="rt-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Calibrar Motores ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: VERB ENGINES -->
+        <div class="mission-step" id="step-1">
+            <div class="glass-panel">
+                <h2>1. The 6 Core Engines ⚙️</h2>
+                <span class="subtitle-pt">Identifique e sinta os verbos fundamentais.</span>
+                
+                <div class="engine-grid">
+                    <div class="engine-item" onclick="speakVerb('Wake up', 'Acordar')">
+                        <div class="engine-emoji">⏰</div>
+                        <div class="engine-name">Wake up</div>
+                    </div>
+                    <div class="engine-item" onclick="speakVerb('Eat', 'Comer')">
+                        <div class="engine-emoji">🍽️</div>
+                        <div class="engine-name">Eat</div>
+                    </div>
+                    <div class="engine-item" onclick="speakVerb('Work', 'Trabalhar')">
+                        <div class="engine-emoji">💻</div>
+                        <div class="engine-name">Work</div>
+                    </div>
+                    <div class="engine-item" onclick="speakVerb('Study', 'Estudar')">
+                        <div class="engine-emoji">📚</div>
+                        <div class="engine-name">Study</div>
+                    </div>
+                    <div class="engine-item" onclick="speakVerb('Play', 'Jogar/Brincar')">
+                        <div class="engine-emoji">🎮</div>
+                        <div class="engine-name">Play</div>
+                    </div>
+                    <div class="engine-item" onclick="speakVerb('Sleep', 'Dormir')">
+                        <div class="engine-emoji">🛏️</div>
+                        <div class="engine-name">Sleep</div>
+                    </div>
+                </div>
+
+                <div id="verb-feedback" style="margin-top: 2rem; text-align: center; color: var(--rt-accent); font-weight: bold; min-height: 25px;"></div>
+                <button class="rt-btn" id="proceed-btn" style="width:100%; margin-top: 2rem; display:none;" onclick="nextStep(2)">Iniciar Construção ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: ACTION BUILDER -->
+        <div class="mission-step" id="step-2">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>2. The Action Builder 🧱</h3>
+                    <div style="font-weight: bold; color: var(--rt-primary);">Rodada <span id="round-count-2">1</span>/15</div>
+                </div>
+                <span class="subtitle-pt">Encaixe o bloco de ação correto na frase.</span>
+                
+                <div class="builder-box">
+                    <div id="scenario-text-2" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-2" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">I ______ coffee.</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem;" onclick="speakCurrentScenario(2)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-2"></div>
+                <div id="feedback-2" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-2" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(2)">PRÓXIMO BLOCO ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: DON'T MACHINE -->
+        <div class="mission-step" id="step-3">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>3. The Don't Machine 🚫</h3>
+                    <div style="font-weight: bold; color: var(--rt-error);">Rodada <span id="round-count-3">1</span>/15</div>
+                </div>
+                <span class="subtitle-pt">CUIDADO! Negue a ação corretamente (Don't vs Not).</span>
+                
+                <div class="builder-box" style="border-color: var(--rt-error);">
+                    <div id="scenario-text-3" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-3" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">I ______ English.</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem; background: var(--rt-error); color: white;" onclick="speakCurrentScenario(3)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-3"></div>
+                <div id="feedback-3" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-3" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(3)">PRÓXIMA NEGATIVA ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: RESULT -->
+        <div class="mission-step" id="step-4">
+            <div class="glass-panel text-center">
+                <div style="font-size: 6rem;">🎖️</div>
+                <h1 style="color: var(--rt-primary);">Arquiteto Certificado</h1>
+                <span class="subtitle-pt" style="font-size: 1.2rem;">Sua rotina está sólida e calibrada.</span>
+                
+                <div style="margin: 2rem 0; padding: 2.5rem; background: rgba(0,230,118,0.1); border-radius: 15px; border: 1px solid var(--rt-border);">
+                    <h3>PONTUAÇÃO TOTAL: <span id="final-score" style="color: var(--rt-primary);">0</span></h3>
+                    <p id="rank-text" style="color: #a0aec0; margin-top: 10px; font-weight: bold;">RANK: ---</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="{% url 'dashboard' %}" class="rt-btn" style="text-decoration: none;">MENU DASHBOARD</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="full-screen-btn" onclick="toggleFullScreen()" title="Full Screen">⛶</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let score = 0;
+    let currentStep = 0;
+    let round2 = 0;
+    let round3 = 0;
+    const TOTAL_ROUNDS = 15;
+
+    /* --- DATA --- */
+    const builderData = [
+        { scenario: "De manhã cedo:", phrase: "I ______ up at 6 AM.", correct: "wake", options: ["wake", "sleep"], pt: "Eu acordo às 6 da manhã." },
+        { scenario: "No café da manhã:", phrase: "You ______ bread.", correct: "eat", options: ["eat", "work"], pt: "Você come pão." },
+        { scenario: "Como estudantes:", phrase: "We ______ English every day.", correct: "study", options: ["study", "play"], pt: "Nós estudamos inglês todo dia." },
+        { scenario: "Em uma grande empresa:", phrase: "They ______ at a big company.", correct: "work", options: ["work", "eat"], pt: "Eles trabalham em uma grande empresa." },
+        { scenario: "No fim de semana:", phrase: "I ______ video games.", correct: "play", options: ["play", "study"], pt: "Eu jogo videogame." },
+        { scenario: "Cansado à noite:", phrase: "You ______ early.", correct: "sleep", options: ["sleep", "wake"], pt: "Você dorme cedo." },
+        { scenario: "No jantar da família:", phrase: "We ______ pizza on Fridays.", correct: "eat", options: ["eat", "sleep"], pt: "Nós comemos pizza às sextas." },
+        { scenario: "Na faculdade:", phrase: "They ______ at the university.", correct: "study", options: ["study", "work"], pt: "Eles estudam na universidade." },
+        { scenario: "No Home Office:", phrase: "I ______ from home.", correct: "work", options: ["work", "play"], pt: "Eu trabalho de casa." },
+        { scenario: "Hobby musical:", phrase: "You ______ the guitar.", correct: "play", options: ["play", "study"], pt: "Você toca violão." },
+        { scenario: "Domingo de manhã:", phrase: "We ______ late on Sundays.", correct: "sleep", options: ["sleep", "wake"], pt: "Nós dormimos até tarde aos domingos." },
+        { scenario: "Dieta saudável:", phrase: "They ______ healthy food.", correct: "eat", options: ["eat", "work"], pt: "Eles comem comida saudável." },
+        { scenario: "Primeira aula:", phrase: "I ______ math in the morning.", correct: "study", options: ["study", "sleep"], pt: "Eu estudo matemática de manhã." },
+        { scenario: "Local de trabalho:", phrase: "You ______ in an office.", correct: "work", options: ["work", "play"], pt: "Você trabalha em um escritório." },
+        { scenario: "Acordando bem:", phrase: "We ______ up happy.", correct: "wake", options: ["wake", "eat"], pt: "Nós acordamos felizes." }
+    ];
+
+    const negativeData = [
+        { scenario: "Não sou madrugador:", phrase: "I ______ up at 5 AM.", correct: "don't wake", options: ["don't wake", "am not wake"], pt: "Eu não acordo às 5 da manhã." },
+        { scenario: "Alergia a cebola:", phrase: "You ______ eat onions.", correct: "don't", options: ["don't", "not"], pt: "Você não come cebola." },
+        { scenario: "Foco no inglês:", phrase: "We ______ study Spanish.", correct: "don't", options: ["don't", "are not"], pt: "Nós não estudamos espanhol." },
+        { scenario: "Sábado de folga:", phrase: "They ______ work on Saturdays.", correct: "don't", options: ["don't", "not"], pt: "Eles não trabalham aos sábados." },
+        { scenario: "Não gosto de esportes:", phrase: "I ______ play soccer.", correct: "don't", options: ["don't", "am not"], pt: "Eu não jogo futebol." },
+        { scenario: "Energia total à tarde:", phrase: "You ______ sleep in the afternoon.", correct: "don't", options: ["don't", "not"], pt: "Você não dorme à tarde." },
+        { scenario: "Vegetarianos:", phrase: "We ______ eat meat.", correct: "don't", options: ["don't", "not"], pt: "Nós não comemos carne." },
+        { scenario: "Estudo diurno:", phrase: "They ______ study at night.", correct: "don't", options: ["don't", "are not"], pt: "Eles não estudam à noite." },
+        { scenario: "Empresa rival:", phrase: "I ______ work for them.", correct: "don't", options: ["don't", "not"], pt: "Eu não trabalho para eles." },
+        { scenario: "Não sei jogar:", phrase: "You ______ play chess.", correct: "don't", options: ["don't", "not"], pt: "Você não joga xadrez." },
+        { scenario: "Foco total na aula:", phrase: "We ______ sleep in class.", correct: "don't", options: ["don't", "are not"], pt: "Nós não dormimos na aula." },
+        { scenario: "Saúde em primeiro lugar:", phrase: "They ______ eat fast food.", correct: "don't", options: ["don't", "not"], pt: "Eles não comem fast food." },
+        { scenario: "Estudo em grupo:", phrase: "I ______ study alone.", correct: "don't", options: ["don't", "am not"], pt: "Eu não estudo sozinho." },
+        { scenario: "Trabalho leve:", phrase: "You ______ work hard.", correct: "don't", options: ["don't", "are not"], pt: "Você não trabalha pesado." },
+        { scenario: "Rotina regrada:", phrase: "We ______ wake up late.", correct: "don't", options: ["don't", "not"], pt: "Nós não acordamos tarde." }
+    ];
+
+    /* --- CORE LOGIC --- */
+    function addScore(pts) {
+        score += pts;
+        document.getElementById('current-score').innerText = String(score).padStart(4, '0');
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${step}`).classList.add('active');
+        currentStep = step;
+        
+        const protocols = ["INIT", "ENGENHARIA", "CONSTRUÇÃO", "FILTRO_NEGATIVO", "FINALIZADO"];
+        document.getElementById('mission-status-text').innerText = protocols[step];
+
+        if(step === 2) nextRound(2);
+        if(step === 3) nextRound(3);
+        if(step === 4) {
+            document.getElementById('final-score').innerText = score;
+            let rank = "APRENDIZ";
+            if(score > 1000) rank = "CONSTRUTOR";
+            if(score > 2500) rank = "ARQUITETO ELITE";
+            document.getElementById('rank-text').innerText = `RANK: ${rank}`;
+        }
+    }
+
+    /* --- STEP 1 --- */
+    let clickedVerbs = new Set();
+    function speakVerb(verb, trans) {
+        speakText(verb);
+        clickedVerbs.add(verb);
+        document.getElementById('verb-feedback').innerText = `${verb.toUpperCase()} = ${trans.toUpperCase()}`;
+        if(clickedVerbs.size === 6) {
+            document.getElementById('proceed-btn').style.display = 'block';
+        }
+    }
+
+    /* --- STEP 2 & 3 --- */
+    let currentData = null;
+
+    function nextRound(stepNum) {
+        let isStep2 = stepNum === 2;
+        let r = isStep2 ? round2 : round3;
+        let db = isStep2 ? builderData : negativeData;
+
+        if(r >= TOTAL_ROUNDS) {
+            nextStep(stepNum + 1);
+            return;
+        }
+
+        if(isStep2) round2++; else round3++;
+        document.getElementById(`round-count-${stepNum}`).innerText = isStep2 ? round2 : round3;
+        document.getElementById(`feedback-${stepNum}`).innerText = "";
+        document.getElementById(`next-btn-${stepNum}`).style.display = "none";
+        
+        currentData = db[r];
+        document.getElementById(`scenario-text-${stepNum}`).innerText = `SITUAÇÃO: ${currentData.scenario}`;
+        document.getElementById(`phrase-display-${stepNum}`).innerText = currentData.phrase;
+        
+        const grid = document.getElementById(`options-grid-${stepNum}`);
+        grid.innerHTML = "";
+
+        const shades = ["#00e676", "#ffea00"];
+        currentData.options.sort(() => Math.random() - 0.5).forEach((opt, idx) => {
+            const btn = document.createElement("div");
+            btn.className = "logic-item";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt, currentData.correct, stepNum);
+            grid.appendChild(btn);
+        });
+
+        speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function checkAnswer(el, chosen, correct, stepNum) {
+        const grid = document.getElementById(`options-grid-${stepNum}`);
+        const fb = document.getElementById(`feedback-${stepNum}`);
+        const nextBtn = document.getElementById(`next-btn-${stepNum}`);
+        
+        // Disable all
+        grid.querySelectorAll('.logic-item').forEach(b => b.style.pointerEvents = "none");
+
+        const fullPhrase = currentData.phrase.replace("______", correct);
+
+        if(chosen === correct) {
+            el.classList.add('correct');
+            fb.innerHTML = `<span style="color:var(--rt-primary);">CORRETO! +100 Pontos</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
+            addScore(100);
+            speakSequence(fullPhrase);
+        } else {
+            el.classList.add('wrong');
+            fb.innerHTML = `<span style="color:var(--rt-error);">ERRO! A resposta era: ${correct}</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
+            speakText(`Wrong. The correct is ${correct}.`);
+        }
+        
+        document.getElementById(`phrase-display-${stepNum}`).innerHTML = fullPhrase.replace(correct, `<span style="color:var(--rt-primary);">${correct}</span>`);
+        nextBtn.style.display = "block";
+    }
+
+    /* --- UTILS --- */
+    function speakText(text) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.85;
+        window.speechSynthesis.speak(u);
+    }
+
+    function speakSequence(text) {
+        window.speechSynthesis.cancel();
+        const r1 = new SpeechSynthesisUtterance(text); r1.rate = 0.5; r1.lang = 'en-US';
+        const r2 = new SpeechSynthesisUtterance(text); r2.rate = 0.8; r2.lang = 'en-US';
+        const r3 = new SpeechSynthesisUtterance(text); r3.rate = 1.0; r3.lang = 'en-US';
+        window.speechSynthesis.speak(r1);
+        window.speechSynthesis.speak(r2);
+        window.speechSynthesis.speak(r3);
+    }
+
+    function speakCurrentScenario(step) {
+        if(currentData) speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function toggleFullScreen() {
+        const elem = document.getElementById("master-container");
+        if (!document.fullscreenElement) elem.requestFullscreen();
+        else document.exitFullscreen();
+    }
+</script>
+{% endblock %}
