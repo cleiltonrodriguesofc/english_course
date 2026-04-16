@@ -179,6 +179,12 @@ def activity_review_2(request):
 
 
 @login_required
+def activity_review_3(request):
+    log_activity(request.user, "Started Activity Review 3: The Routine Architect")
+    return render(request, "activity_review_3.html")
+
+
+@login_required
 def quiz_view(request):
     return render(request, "quiz.html")
 
