@@ -307,7 +307,7 @@
 
     function nextStep(step) {
         document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
-        document.getElementById(\`step-\${step}\`).classList.add('active');
+        document.getElementById(`step-${step}`).classList.add('active');
         currentStep = step;
         
         const protocols = ["INIT", "CONSTRUÇÃO_ATIVA", "FILTRO_NEGATIVO", "FINALIZADO"];
@@ -322,7 +322,7 @@
             let rank = "APRENDIZ";
             if(score > 1000) rank = "CONSTRUTOR DO S";
             if(score > 1800) rank = "WALL BREAKER ÉLITE";
-            document.getElementById('rank-text').innerText = \`RANK: \${rank}\`;
+            document.getElementById('rank-text').innerText = `RANK: ${rank}`;
         }
     }
 
@@ -340,15 +340,15 @@
         }
 
         if(isStep1) round1++; else round2++;
-        document.getElementById(\`round-count-\${stepNum}\`).innerText = isStep1 ? round1 : round2;
-        document.getElementById(\`feedback-\${stepNum}\`).innerText = "";
-        document.getElementById(\`next-btn-\${stepNum}\`).style.display = "none";
+        document.getElementById(`round-count-${stepNum}`).innerText = isStep1 ? round1 : round2;
+        document.getElementById(`feedback-${stepNum}`).innerText = "";
+        document.getElementById(`next-btn-${stepNum}`).style.display = "none";
         
         currentData = db[r];
-        document.getElementById(\`scenario-text-\${stepNum}\`).innerText = \`SITUAÇÃO: \${currentData.scenario}\`;
-        document.getElementById(\`phrase-display-\${stepNum}\`).innerText = currentData.phrase;
+        document.getElementById(`scenario-text-${stepNum}`).innerText = `SITUAÇÃO: ${currentData.scenario}`;
+        document.getElementById(`phrase-display-${stepNum}`).innerText = currentData.phrase;
         
-        const grid = document.getElementById(\`options-grid-\${stepNum}\`);
+        const grid = document.getElementById(`options-grid-${stepNum}`);
         grid.innerHTML = "";
 
         // shuffle options
@@ -367,9 +367,9 @@
     }
 
     function checkAnswer(el, chosen, correct, stepNum) {
-        const grid = document.getElementById(\`options-grid-\${stepNum}\`);
-        const fb = document.getElementById(\`feedback-\${stepNum}\`);
-        const nextBtn = document.getElementById(\`next-btn-\${stepNum}\`);
+        const grid = document.getElementById(`options-grid-${stepNum}`);
+        const fb = document.getElementById(`feedback-${stepNum}`);
+        const nextBtn = document.getElementById(`next-btn-${stepNum}`);
         
         // Disable all
         grid.querySelectorAll('.logic-item').forEach(b => b.style.pointerEvents = "none");
@@ -378,13 +378,13 @@
 
         if(chosen === correct) {
             el.classList.add('correct');
-            fb.innerHTML = \`<span style="color:var(--rt-accent);">CORRETO! +100 Pontos</span><br><span style="font-size:0.9rem; color:#aaa;">\${currentData.pt}</span>\`;
+            fb.innerHTML = `<span style="color:var(--rt-accent);">CORRETO! +100 Pontos</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
             addScore(100);
             speakSequence(fullPhrase);
         } else {
             el.classList.add('wrong');
-            fb.innerHTML = \`<span style="color:var(--rt-error);">ERRO! A resposta era: \${correct}</span><br><span style="font-size:0.9rem; color:#aaa;">\${currentData.pt}</span>\`;
-            speakText(\`Wrong. The correct is \${correct}.\`);
+            fb.innerHTML = `<span style="color:var(--rt-error);">ERRO! A resposta era: ${correct}</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
+            speakText(`Wrong. The correct is ${correct}.`);
             
             // show the correct one as well
             grid.querySelectorAll('.logic-item').forEach(b => {
@@ -392,7 +392,7 @@
             });
         }
         
-        document.getElementById(\`phrase-display-\${stepNum}\`).innerHTML = fullPhrase.replace(correct, \`<span style="color:var(--rt-accent);">\${correct}</span>\`);
+        document.getElementById(`phrase-display-${stepNum}`).innerHTML = fullPhrase.replace(correct, `<span style="color:var(--rt-accent);">${correct}</span>`);
         nextBtn.style.display = "block";
     }
 

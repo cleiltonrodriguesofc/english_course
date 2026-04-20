@@ -370,7 +370,7 @@
             btnElement.style.background = 'var(--rv4-error)'; 
             btnElement.style.color = '#fff';
             
-            feedback.innerHTML = \`❌ WRONG! A resposta correta era <b>\${correct}</b>.\`;
+            feedback.innerHTML = `❌ WRONG! A resposta correta era <b>${correct}</b>.`;
             feedback.style.color = "var(--rv4-error)";
             
             allBtns.forEach(b => {
@@ -379,7 +379,7 @@
         }
         
         container.querySelector('.drill-controls').style.display = 'flex';
-        sentenceBox.innerHTML = fullSentenceStr.replace(correct, \`<span style="color:var(--rv4-accent);">\${correct}</span>\`);
+        sentenceBox.innerHTML = fullSentenceStr.replace(correct, `<span style="color:var(--rv4-accent);">${correct}</span>`);
         speakSequence(fullSentenceStr);
     }
 
