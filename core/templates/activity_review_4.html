@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% block title %}Mastery Mission: The 3rd Person Wall - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --rt-bg: #1a0e22;
+        --rt-primary: #ff4081; /* Vibrant Pink/Red */
+        --rt-secondary: #c51162;
+        --rt-accent: #00e5ff; /* Cyan highlight */
+        --rt-glass: rgba(255, 64, 129, 0.05);
+        --rt-border: rgba(255, 64, 129, 0.2);
+        --rt-text-pt: #94a3b8;
+        --rt-error: #ff5252;
+    }
+
+    .activity-wrapper {
+        min-height: 100vh;
+        background: radial-gradient(circle at center, #2d1b3d 0%, var(--rt-bg) 100%);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .mission-container {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: var(--rt-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--rt-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 0 40px rgba(255, 64, 129, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .subtitle-pt {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--rt-text-pt);
+        margin-top: 0.25rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-step {
+        display: none;
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .mission-step.active {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Builder Box */
+    .builder-box {
+        background: rgba(0,0,0,0.5);
+        border-left: 5px solid var(--rt-primary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .logic-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    @media (min-width: 600px) {
+        .logic-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .logic-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--rt-border);
+        padding: 1.5rem;
+        border-radius: 15px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100px;
+    }
+    .logic-item.correct { border-color: var(--rt-accent); background: rgba(0, 229, 255, 0.2); }
+    .logic-item.wrong { border-color: var(--rt-error); background: rgba(255, 82, 82, 0.2); }
+
+    .rt-btn {
+        background: var(--rt-primary);
+        color: #fff;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-size: 1rem;
+    }
+    .rt-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--rt-primary); color: #fff;}
+
+    .progress-hud {
+        position: sticky;
+        top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    .hud-stat {
+        background: rgba(0,0,0,0.8);
+        border: 1px solid var(--rt-border);
+        padding: 5px 20px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        color: var(--rt-accent);
+        pointer-events: auto;
+    }
+
+    .full-screen-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--rt-primary);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        z-index: 1100;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activity-wrapper" id="master-container">
+    
+    <div class="progress-hud">
+        <div class="hud-stat">STATUS: <span id="mission-status-text">INIT</span></div>
+        <div class="hud-stat">SCORE: <span id="current-score">0000</span></div>
+    </div>
+
+    <div class="mission-container">
+        
+        <!-- STEP 0: INTRO -->
+        <div class="mission-step active" id="step-0">
+            <div class="glass-panel text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🛡️</div>
+                <h1>The 3rd Person Wall</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Protocolo: Quebrando a Barreira do S</span>
+                <p style="margin-top: 1.5rem; color: #a0aec0;">
+                    Sua missão é dominar a alteração verbal para He, She e It (Ele ou Ela).<br>
+                    <span class="subtitle-pt">Lembre-se: Verbos ganham "S" (ou es/ies) para Ele/Ela, e a negativa usa "Doesn't".</span>
+                </p>
+                <div style="margin-top: 2rem; background: rgba(255,64,129,0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--rt-border);">
+                    <p style="font-size: 0.9rem; margin: 0; color: var(--rt-primary);"><b>ESTRATÉGIA DE FLUXO</b></p>
+                    <p class="subtitle-pt">Se o sujeito é Ele (He), Ela (She) ou um Objeto/Animal (It), aplique a regra!</p>
+                </div>
+                <button class="rt-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Iniciar Missão ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: AFIRMATIVA - ACTION BUILDER -->
+        <div class="mission-step" id="step-1">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>1. Afirmativas: O Muro do S 🧱</h3>
+                    <div style="font-weight: bold; color: var(--rt-accent);">Rodada <span id="round-count-1">1</span>/10</div>
+                </div>
+                <span class="subtitle-pt">Preste atenção ao sujeito! I/You/We/They (sem S) vs He/She/It (com S).</span>
+                
+                <div class="builder-box">
+                    <div id="scenario-text-1" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-1" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">He ______ coffee.</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem; background:#4caf50;" onclick="speakCurrentScenario(1)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-1"></div>
+                <div id="feedback-1" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-1" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(1)">VERIFICAR PRÓXIMO ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: DOESN'T MACHINE -->
+        <div class="mission-step" id="step-2">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>2. The DOESN'T Machine 🚫</h3>
+                    <div style="font-weight: bold; color: var(--rt-error);">Rodada <span id="round-count-2">1</span>/10</div>
+                </div>
+                <span class="subtitle-pt">CUIDADO! Negativas para He/She/It usam DOESN'T (e o verbo volta ao normal).</span>
+                
+                <div class="builder-box" style="border-color: var(--rt-error);">
+                    <div id="scenario-text-2" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-2" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">She ______ English.</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem; background: var(--rt-error); color: white;" onclick="speakCurrentScenario(2)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-2"></div>
+                <div id="feedback-2" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-2" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(2)">PRÓXIMA REJEIÇÃO ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: RESULT -->
+        <div class="mission-step" id="step-3">
+            <div class="glass-panel text-center">
+                <div style="font-size: 6rem;">🎖️</div>
+                <h1 style="color: var(--rt-accent);">Muro Destruído</h1>
+                <span class="subtitle-pt" style="font-size: 1.2rem;">Você dominou a arte da 3ª Pessoa do Singular!</span>
+                
+                <div style="margin: 2rem 0; padding: 2.5rem; background: rgba(0, 229, 255, 0.1); border-radius: 15px; border: 1px solid var(--rt-accent);">
+                    <h3>PONTUAÇÃO TOTAL: <span id="final-score" style="color: var(--rt-accent);">0</span></h3>
+                    <p id="rank-text" style="color: #a0aec0; margin-top: 10px; font-weight: bold;">RANK: ---</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="{% url 'dashboard' %}" class="rt-btn" style="text-decoration: none;">MENU DASHBOARD</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="full-screen-btn" onclick="toggleFullScreen()" title="Full Screen">⛶</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let score = 0;
+    let currentStep = 0;
+    let round1 = 0;
+    let round2 = 0;
+    const TOTAL_ROUNDS = 10;
+
+    /* --- DATA --- */
+    const builderData = [
+        { scenario: "Seu irmão trabalha:", phrase: "He ______ hard.", correct: "works", options: ["works", "work"], pt: "Ele trabalha duro." },
+        { scenario: "Sua irmã estuda espanhol:", phrase: "She ______ Spanish.", correct: "studies", options: ["studies", "study"], pt: "Ela estuda espanhol." },
+        { scenario: "Mas VOCÊ estuda inglês (1ª pessoa):", phrase: "I ______ English.", correct: "study", options: ["study", "studies"], pt: "Eu estudo inglês." },
+        { scenario: "O cachorro dorme muito:", phrase: "It ______ a lot.", correct: "sleeps", options: ["sleeps", "sleep"], pt: "Isso (ele/ela - animal) dorme muito." },
+        { scenario: "Mãe preparando comida:", phrase: "My mom ______ pizza.", correct: "makes", options: ["makes", "make"], pt: "Minha mãe faz pizza." },
+        { scenario: "Nós (1ª pessoa plural):", phrase: "We ______ video games.", correct: "play", options: ["play", "plays"], pt: "Nós jogamos videogame." },
+        { scenario: "Seu pai joga futebol:", phrase: "My dad ______ soccer.", correct: "plays", options: ["plays", "play"], pt: "Meu pai joga futebol." },
+        { scenario: "O colega de quarto (Ele):", phrase: "He ______ up early.", correct: "wakes", options: ["wakes", "wake"], pt: "Ele acorda cedo." },
+        { scenario: "O aluno come maçã:", phrase: "The student ______ apples.", correct: "eats", options: ["eats", "eat"], pt: "O aluno come maçãs." },
+        { scenario: "Eles (3ª pessoa plural):", phrase: "They ______ every day.", correct: "work", options: ["work", "works"], pt: "Eles trabalham todos os dias (They não pega S)." }
+    ];
+
+    const negativeData = [
+        { scenario: "Ela não gosta de brócolis:", phrase: "She ______ like broccoli.", correct: "doesn't", options: ["doesn't", "don't"], pt: "Ela não gosta de brócolis." },
+        { scenario: "Ele não trabalha aos domingos:", phrase: "He ______ work on Sundays.", correct: "doesn't", options: ["doesn't", "don't"], pt: "Ele não trabalha aos domingos." },
+        { scenario: "Eu não bebo café:", phrase: "I ______ drink coffee.", correct: "don't", options: ["don't", "doesn't"], pt: "Eu não bebo café." },
+        { scenario: "O carro não funciona:", phrase: "The car (It) ______ work.", correct: "doesn't", options: ["doesn't", "don't"], pt: "O carro não funciona." },
+        { scenario: "Ela não joga xadrez:", phrase: "She doesn't ______ chess.", correct: "play", options: ["play", "plays"], pt: "Ela não joga xadrez. (Atenção: o 's' já está no doesn't!)" },
+        { scenario: "Ele não estuda francês:", phrase: "He doesn't ______ French.", correct: "study", options: ["study", "studies"], pt: "Ele não estuda francês." },
+        { scenario: "Nós não mentimos:", phrase: "We ______ lie.", correct: "don't", options: ["don't", "doesn't"], pt: "Nós não mentimos." },
+        { scenario: "Ela não acorda tarde:", phrase: "She ______ wake up late.", correct: "doesn't", options: ["doesn't", "don't"], pt: "Ela não acorda tarde." },
+        { scenario: "A máquina não liga:", phrase: "It ______ start.", correct: "doesn't", options: ["doesn't", "don't"], pt: "A máquina não liga." },
+        { scenario: "Eles não comem carne:", phrase: "They ______ eat meat.", correct: "don't", options: ["don't", "doesn't"], pt: "Eles não comem carne." }
+    ];
+
+    /* --- CORE LOGIC --- */
+    function addScore(pts) {
+        score += pts;
+        document.getElementById('current-score').innerText = String(score).padStart(4, '0');
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(\`step-\${step}\`).classList.add('active');
+        currentStep = step;
+        
+        const protocols = ["INIT", "CONSTRUÇÃO_ATIVA", "FILTRO_NEGATIVO", "FINALIZADO"];
+        if(step < protocols.length) {
+            document.getElementById('mission-status-text').innerText = protocols[step];
+        }
+
+        if(step === 1) nextRound(1);
+        if(step === 2) nextRound(2);
+        if(step === 3) {
+            document.getElementById('final-score').innerText = score;
+            let rank = "APRENDIZ";
+            if(score > 1000) rank = "CONSTRUTOR DO S";
+            if(score > 1800) rank = "WALL BREAKER ÉLITE";
+            document.getElementById('rank-text').innerText = \`RANK: \${rank}\`;
+        }
+    }
+
+    /* --- STEPS --- */
+    let currentData = null;
+
+    function nextRound(stepNum) {
+        let isStep1 = stepNum === 1;
+        let r = isStep1 ? round1 : round2;
+        let db = isStep1 ? builderData : negativeData;
+
+        if(r >= TOTAL_ROUNDS) {
+            nextStep(stepNum + 1);
+            return;
+        }
+
+        if(isStep1) round1++; else round2++;
+        document.getElementById(\`round-count-\${stepNum}\`).innerText = isStep1 ? round1 : round2;
+        document.getElementById(\`feedback-\${stepNum}\`).innerText = "";
+        document.getElementById(\`next-btn-\${stepNum}\`).style.display = "none";
+        
+        currentData = db[r];
+        document.getElementById(\`scenario-text-\${stepNum}\`).innerText = \`SITUAÇÃO: \${currentData.scenario}\`;
+        document.getElementById(\`phrase-display-\${stepNum}\`).innerText = currentData.phrase;
+        
+        const grid = document.getElementById(\`options-grid-\${stepNum}\`);
+        grid.innerHTML = "";
+
+        // shuffle options
+        let opts = [...currentData.options];
+        if(Math.random() > 0.5) opts.reverse();
+
+        opts.forEach((opt) => {
+            const btn = document.createElement("div");
+            btn.className = "logic-item";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt, currentData.correct, stepNum);
+            grid.appendChild(btn);
+        });
+
+        speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function checkAnswer(el, chosen, correct, stepNum) {
+        const grid = document.getElementById(\`options-grid-\${stepNum}\`);
+        const fb = document.getElementById(\`feedback-\${stepNum}\`);
+        const nextBtn = document.getElementById(\`next-btn-\${stepNum}\`);
+        
+        // Disable all
+        grid.querySelectorAll('.logic-item').forEach(b => b.style.pointerEvents = "none");
+
+        const fullPhrase = currentData.phrase.replace("______", correct);
+
+        if(chosen === correct) {
+            el.classList.add('correct');
+            fb.innerHTML = \`<span style="color:var(--rt-accent);">CORRETO! +100 Pontos</span><br><span style="font-size:0.9rem; color:#aaa;">\${currentData.pt}</span>\`;
+            addScore(100);
+            speakSequence(fullPhrase);
+        } else {
+            el.classList.add('wrong');
+            fb.innerHTML = \`<span style="color:var(--rt-error);">ERRO! A resposta era: \${correct}</span><br><span style="font-size:0.9rem; color:#aaa;">\${currentData.pt}</span>\`;
+            speakText(\`Wrong. The correct is \${correct}.\`);
+            
+            // show the correct one as well
+            grid.querySelectorAll('.logic-item').forEach(b => {
+                if(b.innerText === correct) b.classList.add('correct');
+            });
+        }
+        
+        document.getElementById(\`phrase-display-\${stepNum}\`).innerHTML = fullPhrase.replace(correct, \`<span style="color:var(--rt-accent);">\${correct}</span>\`);
+        nextBtn.style.display = "block";
+    }
+
+    /* --- UTILS --- */
+    function speakText(text) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.85;
+        window.speechSynthesis.speak(u);
+    }
+
+    function speakSequence(text) {
+        window.speechSynthesis.cancel();
+        const r1 = new SpeechSynthesisUtterance(text); r1.rate = 0.5; r1.lang = 'en-US';
+        const r2 = new SpeechSynthesisUtterance(text); r2.rate = 0.8; r2.lang = 'en-US';
+        const r3 = new SpeechSynthesisUtterance(text); r3.rate = 1.0; r3.lang = 'en-US';
+        window.speechSynthesis.speak(r1);
+        window.speechSynthesis.speak(r2);
+        window.speechSynthesis.speak(r3);
+    }
+
+    function speakCurrentScenario(step) {
+        if(currentData) speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function toggleFullScreen() {
+        const elem = document.getElementById("master-container");
+        if (!document.fullscreenElement) elem.requestFullscreen();
+        else document.exitFullscreen();
+    }
+</script>
+{% endblock %}
