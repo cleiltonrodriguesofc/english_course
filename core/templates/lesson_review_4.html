@@ -277,7 +277,12 @@
         { scenario: 'Ele joga futebol:', text: 'He ______ soccer every weekend.', correct: 'plays', wrong: 'play' },
         { scenario: 'Atenção! Negativa com "Doesn\'t"', text: 'She doesn\'t ______ pizza.', correct: 'like', wrong: 'likes' },
         { scenario: 'Negativa na 3ª pessoa:', text: 'He doesn\'t ______ TV.', correct: 'watch', wrong: 'watches' },
-        { scenario: 'O gato (It) come peixe:', text: 'It ______ fish.', correct: 'eats', wrong: 'eat' }
+        { scenario: 'O gato (It) come peixe:', text: 'It ______ fish.', correct: 'eats', wrong: 'eat' },
+        { scenario: 'Falando da rotina de Maria:', text: 'Maria ______ at 6 AM.', correct: 'wakes', wrong: 'wake' },
+        { scenario: 'Falando do seu professor:', text: 'He ______ Spanish very well.', correct: 'speaks', wrong: 'speak' },
+        { scenario: 'O computador quebrou (Negativa):', text: 'It ______ work.', correct: "doesn't", wrong: "don't" },
+        { scenario: 'Atenção ao Y: Ela voa para Paris:', text: 'She ______ to Paris.', correct: 'flies', wrong: 'fly' },
+        { scenario: 'Ele não joga videogame:', text: 'He doesn\'t ______ video games.', correct: 'play', wrong: 'plays' }
     ];
 
     const finalSlide = document.getElementById('finalSlide');
@@ -295,9 +300,10 @@
     let drillCounter = 0;
     let currentScore = 0;
 
-    let roundData = shuffleArray([...drillData]);
-    
-    roundData.forEach(data => {
+    for(let i=0; i<2; i++) {
+        let roundData = shuffleArray([...drillData]);
+        
+        roundData.forEach(data => {
         drillCounter++;
         let opt1 = Math.random() > 0.5 ? data.correct : data.wrong;
         let opt2 = opt1 === data.correct ? data.wrong : data.correct;
@@ -334,7 +340,8 @@
             </div>
         </div>`;
         finalSlide.insertAdjacentHTML('beforebegin', slideHtml);
-    });
+        });
+    }
 
     function speakSequence(textToSpeak) {
         window.speechSynthesis.cancel();

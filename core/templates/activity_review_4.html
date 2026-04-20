@@ -203,7 +203,7 @@
             <div class="glass-panel">
                 <div style="display: flex; justify-content: space-between;">
                     <h3>1. Afirmativas: O Muro do S 🧱</h3>
-                    <div style="font-weight: bold; color: var(--rt-accent);">Rodada <span id="round-count-1">1</span>/10</div>
+                    <div style="font-weight: bold; color: var(--rt-accent);">Rodada <span id="round-count-1">1</span>/15</div>
                 </div>
                 <span class="subtitle-pt">Preste atenção ao sujeito! I/You/We/They (sem S) vs He/She/It (com S).</span>
                 
@@ -224,7 +224,7 @@
             <div class="glass-panel">
                 <div style="display: flex; justify-content: space-between;">
                     <h3>2. The DOESN'T Machine 🚫</h3>
-                    <div style="font-weight: bold; color: var(--rt-error);">Rodada <span id="round-count-2">1</span>/10</div>
+                    <div style="font-weight: bold; color: var(--rt-error);">Rodada <span id="round-count-2">1</span>/15</div>
                 </div>
                 <span class="subtitle-pt">CUIDADO! Negativas para He/She/It usam DOESN'T (e o verbo volta ao normal).</span>
                 
@@ -270,7 +270,7 @@
     let currentStep = 0;
     let round1 = 0;
     let round2 = 0;
-    const TOTAL_ROUNDS = 10;
+    const TOTAL_ROUNDS = 15;
 
     /* --- DATA --- */
     const builderData = [
@@ -283,7 +283,12 @@
         { scenario: "Seu pai joga futebol:", phrase: "My dad ______ soccer.", correct: "plays", options: ["plays", "play"], pt: "Meu pai joga futebol." },
         { scenario: "O colega de quarto (Ele):", phrase: "He ______ up early.", correct: "wakes", options: ["wakes", "wake"], pt: "Ele acorda cedo." },
         { scenario: "O aluno come maçã:", phrase: "The student ______ apples.", correct: "eats", options: ["eats", "eat"], pt: "O aluno come maçãs." },
-        { scenario: "Eles (3ª pessoa plural):", phrase: "They ______ every day.", correct: "work", options: ["work", "works"], pt: "Eles trabalham todos os dias (They não pega S)." }
+        { scenario: "Eles (3ª pessoa plural):", phrase: "They ______ every day.", correct: "work", options: ["work", "works"], pt: "Eles trabalham todos os dias (They não pega S)." },
+        { scenario: "Ela escuta música:", phrase: "She ______ to music.", correct: "listens", options: ["listens", "listen"], pt: "Ela escuta música." },
+        { scenario: "Ele corre no parque:", phrase: "He ______ in the park.", correct: "runs", options: ["runs", "run"], pt: "Ele corre no parque." },
+        { scenario: "A TV liga sozinha:", phrase: "It ______ on by itself.", correct: "turns", options: ["turns", "turn"], pt: "Ela (a TV) liga sozinha." },
+        { scenario: "Minha amiga lê livros:", phrase: "My friend ______ books.", correct: "reads", options: ["reads", "read"], pt: "Minha amiga lê livros." },
+        { scenario: "Nós caminhamos no parque:", phrase: "We ______ every morning.", correct: "walk", options: ["walk", "walks"], pt: "Nós caminhamos (We não pega S)." }
     ];
 
     const negativeData = [
@@ -296,7 +301,12 @@
         { scenario: "Nós não mentimos:", phrase: "We ______ lie.", correct: "don't", options: ["don't", "doesn't"], pt: "Nós não mentimos." },
         { scenario: "Ela não acorda tarde:", phrase: "She ______ wake up late.", correct: "doesn't", options: ["doesn't", "don't"], pt: "Ela não acorda tarde." },
         { scenario: "A máquina não liga:", phrase: "It ______ start.", correct: "doesn't", options: ["doesn't", "don't"], pt: "A máquina não liga." },
-        { scenario: "Eles não comem carne:", phrase: "They ______ eat meat.", correct: "don't", options: ["don't", "doesn't"], pt: "Eles não comem carne." }
+        { scenario: "Eles não comem carne:", phrase: "They ______ eat meat.", correct: "don't", options: ["don't", "doesn't"], pt: "Eles não comem carne." },
+        { scenario: "O João não assiste TV:", phrase: "John ______ watch TV.", correct: "doesn't", options: ["doesn't", "don't"], pt: "O João não assiste TV." },
+        { scenario: "Ela não sabe a resposta:", phrase: "She doesn't ______ the answer.", correct: "know", options: ["know", "knows"], pt: "Ela não sabe a resposta." },
+        { scenario: "O gato não bebe leite:", phrase: "It ______ drink milk.", correct: "doesn't", options: ["doesn't", "don't"], pt: "O gato não bebe leite." },
+        { scenario: "Eu não fico cansado:", phrase: "I ______ get tired.", correct: "don't", options: ["don't", "doesn't"], pt: "Eu não fico cansado." },
+        { scenario: "A Maria não quer ir:", phrase: "Maria doesn't ______ to go.", correct: "want", options: ["want", "wants"], pt: "A Maria não quer ir." }
     ];
 
     /* --- CORE LOGIC --- */
