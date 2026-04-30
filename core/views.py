@@ -191,6 +191,12 @@ def activity_review_4(request):
 
 
 @login_required
+def activity_review_5(request):
+    log_activity(request.user, "Started Activity Review 5: Simple Inquiries")
+    return render(request, "activity_review_5.html")
+
+
+@login_required
 def quiz_view(request):
     return render(request, "quiz.html")
 
