@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+{% block title %}Mastery Mission: Question Makers - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --rt-bg: #1a0f00;
+        --rt-primary: #ff9800; /* Vibrant Orange */
+        --rt-secondary: #e65100;
+        --rt-accent: #ffd600; /* Yellow highlight */
+        --rt-glass: rgba(255, 152, 0, 0.05);
+        --rt-border: rgba(255, 152, 0, 0.2);
+        --rt-text-pt: #94a3b8;
+        --rt-error: #ff5252;
+    }
+
+    .activity-wrapper {
+        min-height: 100vh;
+        background: radial-gradient(circle at center, #3d2300 0%, var(--rt-bg) 100%);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+
+    .mission-container {
+        width: 100%;
+        max-width: 900px;
+        position: relative;
+    }
+
+    .glass-panel {
+        background: var(--rt-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--rt-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 0 40px rgba(255, 152, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .subtitle-pt {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--rt-text-pt);
+        margin-top: 0.25rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .mission-step {
+        display: none;
+        animation: slideIn 0.4s ease-out forwards;
+    }
+
+    .mission-step.active {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Builder Box */
+    .builder-box {
+        background: rgba(0,0,0,0.5);
+        border-left: 5px solid var(--rt-primary);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-top: 1.5rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .logic-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    @media (min-width: 600px) {
+        .logic-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .logic-item {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--rt-border);
+        padding: 1.5rem;
+        border-radius: 15px;
+        cursor: pointer;
+        text-align: center;
+        font-size: 1.3rem;
+        font-weight: bold;
+        transition: 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 100px;
+    }
+    .logic-item.correct { border-color: var(--rt-accent); background: rgba(255, 214, 0, 0.2); }
+    .logic-item.wrong { border-color: var(--rt-error); background: rgba(255, 82, 82, 0.2); }
+
+    .rt-btn {
+        background: var(--rt-primary);
+        color: #000;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-size: 1rem;
+    }
+    .rt-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px var(--rt-primary); color: #000;}
+
+    .progress-hud {
+        position: sticky;
+        top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        z-index: 1000;
+        pointer-events: none;
+    }
+    .hud-stat {
+        background: rgba(0,0,0,0.8);
+        border: 1px solid var(--rt-border);
+        padding: 5px 20px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-family: monospace;
+        color: var(--rt-accent);
+        pointer-events: auto;
+    }
+
+    .full-screen-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--rt-primary);
+        color: #000;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        z-index: 1100;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="activity-wrapper" id="master-container">
+    
+    <div class="progress-hud">
+        <div class="hud-stat">STATUS: <span id="mission-status-text">INIT</span></div>
+        <div class="hud-stat">SCORE: <span id="current-score">0000</span></div>
+    </div>
+
+    <div class="mission-container">
+        
+        <!-- STEP 0: INTRO -->
+        <div class="mission-step active" id="step-0">
+            <div class="glass-panel text-center">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">❓</div>
+                <h1>The Interrogator</h1>
+                <span class="subtitle-pt" style="font-size: 1.1rem;">Protocolo: O Domínio Completo das Perguntas</span>
+                <p style="margin-top: 1.5rem; color: #a0aec0;">
+                    Sua missão é criar perguntas diretas perfeitas usando todo o arsenal: Do, Does, Are, Is, Can e Would. Em seguida, você deve dar a resposta curta apropriada para cada tipo de pergunta.<br>
+                    <span class="subtitle-pt">Lembre-se: O auxiliar da pergunta geralmente é o mesmo auxiliar usado na resposta curta!</span>
+                </p>
+                <div style="margin-top: 2rem; background: rgba(255,152,0,0.1); padding: 15px; border-radius: 10px; border: 1px solid var(--rt-border);">
+                    <p style="font-size: 0.9rem; margin: 0; color: var(--rt-primary);"><b>ESTRATÉGIA DE FLUXO</b></p>
+                    <p class="subtitle-pt">Analise a situação: É rotina? (Do/Does). É estado? (Am/Is/Are). É habilidade? (Can). É convite? (Would). A resposta segue a mesma regra.</p>
+                </div>
+                <button class="rt-btn" style="margin-top: 2rem;" onclick="nextStep(1)">Iniciar Missão ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 1: DO MACHINE -->
+        <div class="mission-step" id="step-1">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>1. The Maker Machine ⚙️</h3>
+                    <div style="font-weight: bold; color: var(--rt-accent);">Rodada <span id="round-count-1">1</span>/40</div>
+                </div>
+                <span class="subtitle-pt">Escolha o auxiliar correto para começar a pergunta com base no contexto.</span>
+                
+                <div class="builder-box">
+                    <div id="scenario-text-1" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-1" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">______ you like coffee?</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem; background:#4caf50;" onclick="speakCurrentScenario(1)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-1"></div>
+                <div id="feedback-1" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-1" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(1)">VERIFICAR PRÓXIMO ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: SHORT ANSWERS -->
+        <div class="mission-step" id="step-2">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <h3>2. Short Answers (O Espelho) 🪞</h3>
+                    <div style="font-weight: bold; color: var(--rt-accent);">Rodada <span id="round-count-2">1</span>/40</div>
+                </div>
+                <span class="subtitle-pt">Nunca responda só Yes ou No. Use o espelho: Are you? ➔ Yes, I am. Do you? ➔ Yes, I do.</span>
+                
+                <div class="builder-box" style="border-color: #4caf50;">
+                    <div id="scenario-text-2" style="font-size: 0.9rem; color: var(--rt-accent); margin-bottom: 0.5rem;">SITUAÇÃO: ---</div>
+                    <div id="phrase-display-2" style="font-size: 2rem; font-weight: 800; margin-bottom: 1rem;">Yes, I ______.</div>
+                    <button class="rt-btn" style="padding: 5px 15px; font-size: 0.7rem; background: #4caf50; color: white;" onclick="speakCurrentScenario(2)">🔊 OUVIR</button>
+                </div>
+
+                <div class="logic-grid" id="options-grid-2"></div>
+                <div id="feedback-2" style="margin-top: 1.5rem; text-align: center; font-weight: bold; min-height: 25px;"></div>
+                <button id="next-btn-2" class="rt-btn" style="display: none; width: 100%; margin-top: 1.5rem;" onclick="nextRound(2)">PRÓXIMA RESPOSTA ➔</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: RESULT -->
+        <div class="mission-step" id="step-3">
+            <div class="glass-panel text-center">
+                <div style="font-size: 6rem;">🎯</div>
+                <h1 style="color: var(--rt-accent);">Inquérito Completo</h1>
+                <span class="subtitle-pt" style="font-size: 1.2rem;">Você dominou a arte de fazer perguntas com todos os auxiliares!</span>
+                
+                <div style="margin: 2rem 0; padding: 2.5rem; background: rgba(255, 214, 0, 0.1); border-radius: 15px; border: 1px solid var(--rt-accent);">
+                    <h3>PONTUAÇÃO TOTAL: <span id="final-score" style="color: var(--rt-accent);">0</span></h3>
+                    <p id="rank-text" style="color: #a0aec0; margin-top: 10px; font-weight: bold;">RANK: ---</p>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="{% url 'dashboard' %}" class="rt-btn" style="text-decoration: none;">MENU DASHBOARD</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <button class="full-screen-btn" onclick="toggleFullScreen()" title="Full Screen">⛶</button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let score = 0;
+    let currentStep = 0;
+    let round1 = 0;
+    let round2 = 0;
+    const TOTAL_ROUNDS = 40;
+
+    /* --- DATA --- */
+    const interrogatorData = [
+        // Do / Does (Rotina / Ação)
+        { scenario: "Gostar de pizza", phrase: "______ you like pizza?", correct: "Do", options: ["Do", "Are"], pt: "Você gosta de pizza?" },
+        { scenario: "Trabalhar aqui (Ela)", phrase: "______ she work here?", correct: "Does", options: ["Does", "Is"], pt: "Ela trabalha aqui?" },
+        { scenario: "Falar inglês (Eles)", phrase: "______ they speak English?", correct: "Do", options: ["Do", "Are"], pt: "Eles falam inglês?" },
+        { scenario: "Morar em Nova York (Ele)", phrase: "______ he live in New York?", correct: "Does", options: ["Does", "Do"], pt: "Ele mora em Nova York?" },
+        { scenario: "Acordar cedo", phrase: "______ you wake up early?", correct: "Do", options: ["Do", "Are"], pt: "Você acorda cedo?" },
+        { scenario: "Assistir TV (Ela)", phrase: "______ she watch TV?", correct: "Does", options: ["Does", "Is"], pt: "Ela assiste TV?" },
+        { scenario: "Jogar futebol (Eles)", phrase: "______ they play soccer?", correct: "Do", options: ["Do", "Can"], pt: "Eles jogam futebol?" },
+        { scenario: "Querer café", phrase: "______ you want coffee?", correct: "Do", options: ["Do", "Are"], pt: "Você quer café?" },
+        { scenario: "Entender", phrase: "______ you understand?", correct: "Do", options: ["Do", "Are"], pt: "Você entende?" },
+        { scenario: "Precisar de ajuda (Ele)", phrase: "______ he need help?", correct: "Does", options: ["Does", "Is"], pt: "Ele precisa de ajuda?" },
+
+        // Are / Is / Am (Estado / Identidade / Ser e Estar)
+        { scenario: "Estar pronto", phrase: "______ you ready?", correct: "Are", options: ["Are", "Do"], pt: "Você está pronto?" },
+        { scenario: "Estar feliz (Ela)", phrase: "______ she happy?", correct: "Is", options: ["Is", "Does"], pt: "Ela está feliz?" },
+        { scenario: "Ser um estudante", phrase: "______ you a student?", correct: "Are", options: ["Are", "Do"], pt: "Você é estudante?" },
+        { scenario: "Estar atrasado (Eles)", phrase: "______ they late?", correct: "Are", options: ["Are", "Do"], pt: "Eles estão atrasados?" },
+        { scenario: "Ser médico (Ele)", phrase: "______ he a doctor?", correct: "Is", options: ["Is", "Does"], pt: "Ele é médico?" },
+        { scenario: "Estar com fome", phrase: "______ you hungry?", correct: "Are", options: ["Are", "Do"], pt: "Você está com fome?" },
+        { scenario: "Estar chovendo", phrase: "______ it raining?", correct: "Is", options: ["Is", "Does"], pt: "Está chovendo?" },
+        { scenario: "Estar ocupada (Ela)", phrase: "______ she busy?", correct: "Is", options: ["Is", "Does"], pt: "Ela está ocupada?" },
+        { scenario: "Ser de São Paulo", phrase: "______ you from São Paulo?", correct: "Are", options: ["Are", "Do"], pt: "Você é de São Paulo?" },
+        { scenario: "Estar aberto (O parque)", phrase: "______ the park open?", correct: "Is", options: ["Is", "Does"], pt: "O parque está aberto?" },
+
+        // Can (Habilidade / Possibilidade)
+        { scenario: "Habilidade: Nadar", phrase: "______ you swim?", correct: "Can", options: ["Can", "Are"], pt: "Você sabe nadar?" },
+        { scenario: "Possibilidade: Ajudar", phrase: "______ you help me?", correct: "Can", options: ["Can", "Do"], pt: "Você pode me ajudar?" },
+        { scenario: "Habilidade: Falar chinês (Ela)", phrase: "______ she speak Chinese?", correct: "Can", options: ["Can", "Does"], pt: "Ela sabe falar chinês?" },
+        { scenario: "Habilidade: Dirigir", phrase: "______ you drive a car?", correct: "Can", options: ["Can", "Are"], pt: "Você sabe dirigir?" },
+        { scenario: "Possibilidade: Vir (Eles)", phrase: "______ they come?", correct: "Can", options: ["Can", "Do"], pt: "Eles podem vir?" },
+        { scenario: "Habilidade: Tocar violão (Ele)", phrase: "______ he play guitar?", correct: "Can", options: ["Can", "Is"], pt: "Ele sabe tocar violão?" },
+        { scenario: "Habilidade: Voar (Pássaro)", phrase: "______ it fly?", correct: "Can", options: ["Can", "Does"], pt: "Ele (o pássaro) sabe voar?" },
+        { scenario: "Habilidade: Cozinhar", phrase: "______ you cook well?", correct: "Can", options: ["Can", "Do"], pt: "Você sabe cozinhar bem?" },
+        { scenario: "Possibilidade: Ouvir", phrase: "______ you hear me?", correct: "Can", options: ["Can", "Are"], pt: "Você consegue me ouvir?" },
+        { scenario: "Habilidade: Correr rápido", phrase: "______ you run fast?", correct: "Can", options: ["Can", "Do"], pt: "Você consegue correr rápido?" },
+
+        // Would (Convite / Condicional)
+        { scenario: "Convite: Gostaria de café?", phrase: "______ you like some coffee?", correct: "Would", options: ["Would", "Do"], pt: "Você gostaria de um pouco de café?" },
+        { scenario: "Convite: Gostaria de dançar?", phrase: "______ you like to dance?", correct: "Would", options: ["Would", "Are"], pt: "Você gostaria de dançar?" },
+        { scenario: "Convite: Gostaria de ir (Eles)?", phrase: "______ they like to go?", correct: "Would", options: ["Would", "Can"], pt: "Eles gostariam de ir?" },
+        { scenario: "Condicional: Você ajudaria?", phrase: "______ you help me with this?", correct: "Would", options: ["Would", "Are"], pt: "Você me ajudaria com isso?" },
+        { scenario: "Convite: Gostaria de água?", phrase: "______ you like water?", correct: "Would", options: ["Would", "Do"], pt: "Você gostaria de água?" },
+        { scenario: "Condicional: Ela compraria (Ela)?", phrase: "______ she buy this?", correct: "Would", options: ["Would", "Does"], pt: "Ela compraria isso?" },
+        { scenario: "Convite: Gostaria de ver?", phrase: "______ you like to see?", correct: "Would", options: ["Would", "Can"], pt: "Você gostaria de ver?" },
+        { scenario: "Condicional: Ele viria (Ele)?", phrase: "______ he come to the party?", correct: "Would", options: ["Would", "Is"], pt: "Ele viria para a festa?" },
+        { scenario: "Convite: Gostaria de sentar?", phrase: "______ you like to sit down?", correct: "Would", options: ["Would", "Do"], pt: "Você gostaria de sentar?" },
+        { scenario: "Condicional: Eles gostariam (Eles)?", phrase: "______ they prefer tea?", correct: "Would", options: ["Would", "Are"], pt: "Eles prefeririam chá?" }
+    ];
+
+    const shortAnswerData = [
+        // Do / Does
+        { scenario: "Do you like coffee?", phrase: "Yes, I ______.", correct: "do", options: ["do", "am"], pt: "Sim, eu gosto." },
+        { scenario: "Do you work here?", phrase: "No, I ______.", correct: "don't", options: ["don't", "am not"], pt: "Não, eu não trabalho." },
+        { scenario: "Does she play tennis?", phrase: "Yes, she ______.", correct: "does", options: ["does", "is"], pt: "Sim, ela joga." },
+        { scenario: "Does he speak English?", phrase: "No, he ______.", correct: "doesn't", options: ["doesn't", "isn't"], pt: "Não, ele não fala." },
+        { scenario: "Do they live here?", phrase: "Yes, they ______.", correct: "do", options: ["do", "are"], pt: "Sim, eles moram." },
+        { scenario: "Do you understand?", phrase: "No, I ______.", correct: "don't", options: ["don't", "can't"], pt: "Não, eu não entendo." },
+        { scenario: "Does the car work?", phrase: "Yes, it ______.", correct: "does", options: ["does", "is"], pt: "Sim, ele funciona." },
+        { scenario: "Do we need money?", phrase: "Yes, we ______.", correct: "do", options: ["do", "are"], pt: "Sim, precisamos." },
+        
+        // Are / Is / Am
+        { scenario: "Are you okay?", phrase: "Yes, I ______.", correct: "am", options: ["am", "do"], pt: "Sim, eu estou. (Are you -> I am)" },
+        { scenario: "Are you a student?", phrase: "No, I ______.", correct: "am not", options: ["am not", "don't"], pt: "Não, eu não sou." },
+        { scenario: "Is she your sister?", phrase: "Yes, she ______.", correct: "is", options: ["is", "does"], pt: "Sim, ela é." },
+        { scenario: "Is he at home?", phrase: "No, he ______.", correct: "isn't", options: ["isn't", "doesn't"], pt: "Não, ele não está." },
+        { scenario: "Are they happy?", phrase: "Yes, they ______.", correct: "are", options: ["are", "do"], pt: "Sim, eles estão." },
+        { scenario: "Are we late?", phrase: "No, we ______.", correct: "aren't", options: ["aren't", "don't"], pt: "Não, não estamos." },
+        { scenario: "Is it hot today?", phrase: "Yes, it ______.", correct: "is", options: ["is", "does"], pt: "Sim, está." },
+        { scenario: "Are you ready?", phrase: "Yes, I ______.", correct: "am", options: ["am", "do"], pt: "Sim, eu estou." },
+
+        // Can
+        { scenario: "Can you help me?", phrase: "Yes, I ______.", correct: "can", options: ["can", "do"], pt: "Sim, eu posso." },
+        { scenario: "Can you swim?", phrase: "No, I ______.", correct: "can't", options: ["can't", "don't"], pt: "Não, eu não sei nadar." },
+        { scenario: "Can she speak French?", phrase: "Yes, she ______.", correct: "can", options: ["can", "does"], pt: "Sim, ela sabe." },
+        { scenario: "Can he drive?", phrase: "No, he ______.", correct: "can't", options: ["can't", "isn't"], pt: "Não, ele não sabe dirigir." },
+        { scenario: "Can they come to the party?", phrase: "Yes, they ______.", correct: "can", options: ["can", "are"], pt: "Sim, eles podem." },
+        { scenario: "Can it fly?", phrase: "No, it ______.", correct: "can't", options: ["can't", "doesn't"], pt: "Não, ele não pode voar." },
+        { scenario: "Can we go now?", phrase: "Yes, we ______.", correct: "can", options: ["can", "do"], pt: "Sim, nós podemos." },
+        { scenario: "Can you hear me?", phrase: "No, I ______.", correct: "can't", options: ["can't", "am not"], pt: "Não, não consigo." },
+
+        // Would
+        { scenario: "Would you like tea?", phrase: "Yes, I ______.", correct: "would", options: ["would", "do"], pt: "Sim, eu gostaria." },
+        { scenario: "Would you go with me?", phrase: "No, I ______.", correct: "wouldn't", options: ["wouldn't", "don't"], pt: "Não, eu não iria." },
+        { scenario: "Would she like a coffee?", phrase: "Yes, she ______.", correct: "would", options: ["would", "does"], pt: "Sim, ela gostaria." },
+        { scenario: "Would he come?", phrase: "No, he ______.", correct: "wouldn't", options: ["wouldn't", "isn't"], pt: "Não, ele não viria." },
+        { scenario: "Would they prefer water?", phrase: "Yes, they ______.", correct: "would", options: ["would", "are"], pt: "Sim, eles prefeririam." },
+        { scenario: "Would you like to dance?", phrase: "Yes, I ______.", correct: "would", options: ["would", "can"], pt: "Sim, eu gostaria." },
+        { scenario: "Would she mind?", phrase: "No, she ______.", correct: "wouldn't", options: ["wouldn't", "doesn't"], pt: "Não, ela não se importaria." },
+        { scenario: "Would you help him?", phrase: "Yes, I ______.", correct: "would", options: ["would", "do"], pt: "Sim, eu ajudaria." },
+
+        // Misturados Rápidos
+        { scenario: "Are you Brazilian?", phrase: "Yes, I ______.", correct: "am", options: ["am", "do"], pt: "Sim, eu sou." },
+        { scenario: "Do you have a car?", phrase: "No, I ______.", correct: "don't", options: ["don't", "am not"], pt: "Não, eu não tenho." },
+        { scenario: "Can you cook?", phrase: "Yes, I ______.", correct: "can", options: ["can", "do"], pt: "Sim, eu sei cozinhar." },
+        { scenario: "Does it work?", phrase: "No, it ______.", correct: "doesn't", options: ["doesn't", "isn't"], pt: "Não, não funciona." },
+        { scenario: "Would you eat this?", phrase: "No, I ______.", correct: "wouldn't", options: ["wouldn't", "don't"], pt: "Não, eu não comeria." },
+        { scenario: "Are they your friends?", phrase: "Yes, they ______.", correct: "are", options: ["are", "do"], pt: "Sim, eles são." },
+        { scenario: "Is he your boss?", phrase: "Yes, he ______.", correct: "is", options: ["is", "does"], pt: "Sim, ele é." },
+        { scenario: "Can they win?", phrase: "No, they ______.", correct: "can't", options: ["can't", "don't"], pt: "Não, eles não podem." }
+    ];
+
+    /* --- CORE LOGIC --- */
+    function addScore(pts) {
+        score += pts;
+        document.getElementById('current-score').innerText = String(score).padStart(4, '0');
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.mission-step').forEach(s => s.classList.remove('active'));
+        document.getElementById(`step-${step}`).classList.add('active');
+        currentStep = step;
+        
+        const protocols = ["INIT", "CONSTRUÇÃO_PERGUNTA", "RESPOSTA_CURTA", "FINALIZADO"];
+        if(step < protocols.length) {
+            document.getElementById('mission-status-text').innerText = protocols[step];
+        }
+
+        if(step === 1) nextRound(1);
+        if(step === 2) nextRound(2);
+        if(step === 3) {
+            document.getElementById('final-score').innerText = score;
+            let rank = "INICIANTE DA PERGUNTA";
+            if(score > 1000) rank = "QUESTIONADOR MASTER";
+            if(score > 1800) rank = "MESTRE DO INQUÉRITO ELITE";
+            document.getElementById('rank-text').innerText = `RANK: ${rank}`;
+        }
+    }
+
+    /* --- STEPS --- */
+    let currentData = null;
+
+    // Aleatorizar as arrays logo de início para evitar que as questões venham em ordem:
+    function shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+        while (currentIndex != 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+    
+    // Embaralhamos para as 40 rodadas ficarem diversificadas entre Do, Does, Are, Can, Would
+    const shuffledInterrogator = shuffle([...interrogatorData]);
+    const shuffledShortAnswer = shuffle([...shortAnswerData]);
+
+    function nextRound(stepNum) {
+        let isStep1 = stepNum === 1;
+        let r = isStep1 ? round1 : round2;
+        let db = isStep1 ? shuffledInterrogator : shuffledShortAnswer;
+
+        if(r >= TOTAL_ROUNDS) {
+            nextStep(stepNum + 1);
+            return;
+        }
+
+        if(isStep1) round1++; else round2++;
+        document.getElementById(`round-count-${stepNum}`).innerText = isStep1 ? round1 : round2;
+        document.getElementById(`feedback-${stepNum}`).innerText = "";
+        document.getElementById(`next-btn-${stepNum}`).style.display = "none";
+        
+        currentData = db[r];
+        document.getElementById(`scenario-text-${stepNum}`).innerText = `SITUAÇÃO: ${currentData.scenario}`;
+        document.getElementById(`phrase-display-${stepNum}`).innerText = currentData.phrase;
+        
+        const grid = document.getElementById(`options-grid-${stepNum}`);
+        grid.innerHTML = "";
+
+        // shuffle options
+        let opts = [...currentData.options];
+        if(Math.random() > 0.5) opts.reverse();
+
+        opts.forEach((opt) => {
+            const btn = document.createElement("div");
+            btn.className = "logic-item";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(btn, opt, currentData.correct, stepNum);
+            grid.appendChild(btn);
+        });
+
+        speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function checkAnswer(el, chosen, correct, stepNum) {
+        const grid = document.getElementById(`options-grid-${stepNum}`);
+        const fb = document.getElementById(`feedback-${stepNum}`);
+        const nextBtn = document.getElementById(`next-btn-${stepNum}`);
+        
+        // Disable all
+        grid.querySelectorAll('.logic-item').forEach(b => b.style.pointerEvents = "none");
+
+        const fullPhrase = currentData.phrase.replace("______", correct);
+
+        if(chosen === correct) {
+            el.classList.add('correct');
+            fb.innerHTML = `<span style="color:var(--rt-accent);">CORRETO! +100 Pontos</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
+            addScore(100);
+            speakSequence(fullPhrase);
+        } else {
+            el.classList.add('wrong');
+            fb.innerHTML = `<span style="color:var(--rt-error);">ERRO! A resposta era: ${correct}</span><br><span style="font-size:0.9rem; color:#aaa;">${currentData.pt}</span>`;
+            speakText(`Wrong. The correct is ${correct}.`);
+            
+            // show the correct one as well
+            grid.querySelectorAll('.logic-item').forEach(b => {
+                if(b.innerText === correct) b.classList.add('correct');
+            });
+        }
+        
+        document.getElementById(`phrase-display-${stepNum}`).innerHTML = fullPhrase.replace(correct, `<span style="color:var(--rt-accent);">${correct}</span>`);
+        nextBtn.style.display = "block";
+    }
+
+    /* --- UTILS --- */
+    function speakText(text) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US'; u.rate = 0.85;
+        window.speechSynthesis.speak(u);
+    }
+
+    function speakSequence(text) {
+        window.speechSynthesis.cancel();
+        const r1 = new SpeechSynthesisUtterance(text); r1.rate = 0.5; r1.lang = 'en-US';
+        const r2 = new SpeechSynthesisUtterance(text); r2.rate = 0.8; r2.lang = 'en-US';
+        const r3 = new SpeechSynthesisUtterance(text); r3.rate = 1.0; r3.lang = 'en-US';
+        window.speechSynthesis.speak(r1);
+        window.speechSynthesis.speak(r2);
+        window.speechSynthesis.speak(r3);
+    }
+
+    function speakCurrentScenario(step) {
+        if(currentData) speakText(currentData.phrase.replace("______", "blank"));
+    }
+
+    function toggleFullScreen() {
+        const elem = document.getElementById("master-container");
+        if (!document.fullscreenElement) elem.requestFullscreen();
+        else document.exitFullscreen();
+    }
+</script>
+{% endblock %}
