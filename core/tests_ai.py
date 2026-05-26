@@ -19,17 +19,17 @@ class AITutorTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'avatar_prototype.html')
 
-    @override_settings(OPENAI_API_KEY="test-key")
+    @patch.dict('os.environ', {'GEMINI_API_KEY': 'test-key'})
     @patch('requests.post')
     def test_ai_tutor_chat_proxy(self, mock_post):
         """Test the AI Chat proxy view."""
-        # Mocking the OpenAI API response
+        # Mocking the Gemini API response
         mock_post.return_value.json.return_value = {
-            "choices": [{"message": {"content": "Hello Word"}}]
+            "candidates": [{"content": {"parts": [{"text": "Hello Word"}]}}]
         }
         mock_post.return_value.status_code = 200
 
-        data = {"messages": [{"role": "user", "content": "Hi"}]}
+        data = {"prompt": "Hi"}
         response = self.client.post(
             reverse('ai_tutor_chat'),
             data=json.dumps(data),
@@ -37,7 +37,7 @@ class AITutorTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['choices'][0]['message']['content'], "Hello Word")
+        self.assertEqual(response.json()['candidates'][0]['content']['parts'][0]['text'], "Hello Word")
 
     @override_settings(OPENAI_API_KEY="test-key")
     @patch('requests.post')
