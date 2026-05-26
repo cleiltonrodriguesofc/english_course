@@ -360,35 +360,44 @@ def staff_student_detail(request, user_id):
 @csrf_exempt
 def ai_tutor_chat(request):
     """
-    Proxy for OpenAI Chat Completions API.
+    Proxy for Gemini Chat Completions API.
     """
     if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
     try:
         data = json.loads(request.body)
-        messages = data.get("messages", [])
+        prompt = data.get("prompt", "")
 
-        api_key = getattr(settings, "OPENAI_API_KEY", "")
+        from decouple import config
+        api_key = config("GEMINI_API_KEY", default="")
+        
         if not api_key:
-            return JsonResponse({"error": "API Key not configured"}, status=500)
+            return JsonResponse({"error": {"message": "GEMINI_API_KEY not configured"}})
 
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+        
         response = requests.post(
-            "https://api.openai.com/v1/chat/completions",
+            gemini_url,
             headers={
-                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
             },
             json={
-                "model": "gpt-4o",
-                "messages": messages,
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {
+                    "temperature": 0.2
+                }
             },
             timeout=30
         )
 
-        return JsonResponse(response.json())
+        if response.status_code == 200:
+            return JsonResponse(response.json())
+        else:
+            return JsonResponse({"error": {"message": f"Gemini API Error: {response.text}"}})
+
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return JsonResponse({"error": {"message": str(e)}})
 
 
 @login_required
@@ -437,3 +446,9 @@ def ai_tutor(request):
     Renders the AI Tutor (Maria) prototype page.
     """
     return render(request, "avatar_prototype.html")
+
+
+@login_required
+def activity_isabelle_chat(request):
+    log_activity(request.user, "Started Activity: Isabelle Conversation Game")
+    return render(request, "activity_isabelle_chat.html")

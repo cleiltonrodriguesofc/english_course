@@ -41,6 +41,7 @@ from .views import (
     ai_tutor,
     ai_tutor_chat,
     ai_tutor_tts,
+    activity_isabelle_chat,
 )
 
 urlpatterns = [
@@ -74,6 +75,7 @@ urlpatterns = [
     path("activity/review/3/", activity_review_3, name="activity_review_3"),
     path("activity/review/4/", activity_review_4, name="activity_review_4"),
     path("activity/review/5/", activity_review_5, name="activity_review_5"),
+    path("activity/isabelle-chat/", activity_isabelle_chat, name="activity_isabelle_chat"),
     path("quiz/", quiz_view, name="quiz"),
     path("register/", register, name="register"),
     path("login/", login_view, name="login"),
