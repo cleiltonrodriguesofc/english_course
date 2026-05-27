@@ -197,6 +197,42 @@ def activity_review_5(request):
 
 
 @login_required
+def activity_review_6(request):
+    log_activity(request.user, "Started Activity Review 6: Time Master")
+    return render(request, "activity_review_6.html")
+
+
+@login_required
+def activity_review_7(request):
+    log_activity(request.user, "Started Activity Review 7: The Routine Architect")
+    return render(request, "activity_review_7.html")
+
+
+@login_required
+def activity_review_8(request):
+    log_activity(request.user, "Started Activity Review 8: City Navigator")
+    return render(request, "activity_review_8.html")
+
+
+@login_required
+def activity_review_9(request):
+    log_activity(request.user, "Started Activity Review 9: Food & Fashion")
+    return render(request, "activity_review_9.html")
+
+
+@login_required
+def activity_review_10(request):
+    log_activity(request.user, "Started Activity Review 10: The House Explorer")
+    return render(request, "activity_review_10.html")
+
+
+@login_required
+def activity_conversation_2(request):
+    log_activity(request.user, "Started Advanced Conversation 2")
+    return render(request, "activity_conversation_2.html")
+
+
+@login_required
 def quiz_view(request):
     return render(request, "quiz.html")
 
