@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% block title %}Conversação 2 - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --conv2-bg: #1e1b4b;
+        --conv2-accent: #8b5cf6;
+        --conv2-secondary: #c4b5fd;
+    }
+    
+    body {
+        background: linear-gradient(135deg, var(--conv2-bg), #312e81);
+        color: white;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 85vh;
+        max-width: 1000px;
+        margin: 20px auto;
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    .chat-header {
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .avatar-wrapper { position: relative; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(45deg, var(--conv2-accent), var(--conv2-secondary)); padding: 3px; }
+    .avatar { width: 100%; height: 100%; border-radius: 50%; background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    
+    .status-dot { position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 2px solid #1e293b; }
+    .status-dot.listening { background: #ef4444; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+
+    .header-text h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #f8fafc; }
+    .header-text p { margin: 0; font-size: 0.9rem; color: #94a3b8; }
+    
+    .phase-badge { background: rgba(139, 92, 246, 0.2); border: 1px solid var(--conv2-accent); color: var(--conv2-secondary); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+
+    .chat-messages { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; scroll-behavior: smooth; }
+
+    .message { display: flex; flex-direction: column; max-width: 75%; animation: messageIn 0.3s ease forwards; opacity: 0; transform: translateY(10px); }
+    @keyframes messageIn { to { opacity: 1; transform: translateY(0); } }
+
+    .message.user { align-self: flex-end; }
+    .message.system { align-self: center; max-width: 90%; align-items: center; margin: 1rem 0; }
+
+    .message-content { padding: 1rem 1.5rem; border-radius: 16px; font-size: 1.1rem; line-height: 1.5; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    
+    .message.isabelle .message-content { background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 4px; display: flex; align-items: center; gap: 10px; }
+    .message.user .message-content { background: linear-gradient(135deg, var(--conv2-accent), #7c3aed); border-bottom-right-radius: 4px; }
+    .message.system .message-content { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fcd34d; font-size: 0.95rem; font-style: italic; text-align: center; border-radius: 8px; }
+
+    .speaker-name { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.25rem; margin-left: 0.5rem; }
+    .message.user .speaker-name { align-self: flex-end; margin-right: 0.5rem; margin-left: 0; }
+
+    .chat-controls { padding: 1.5rem; background: rgba(0, 0, 0, 0.3); border-top: 1px solid rgba(255, 255, 255, 0.1); min-height: 120px; display: flex; flex-direction: column; justify-content: center; }
+
+    .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; width: 100%; }
+    .option-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #e2e8f0; padding: 1rem; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 1.1rem; text-align: left; display: flex; align-items: center; gap: 10px; }
+    .option-btn:hover { background: rgba(139, 92, 246, 0.2); border-color: var(--conv2-accent); transform: translateY(-2px); }
+
+    .play-audio-btn { background: transparent; border: none; color: var(--conv2-accent); cursor: pointer; font-size: 1.2rem; padding: 5px; transition: 0.2s; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .play-audio-btn:hover { background: rgba(139, 92, 246, 0.2); }
+
+    .loading-dots { display: flex; gap: 4px; padding: 1rem; }
+    .dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <div class="header-info">
+            <div class="avatar-wrapper">
+                <div class="avatar">👩🏻</div>
+                <div class="status-dot" id="statusIndicator"></div>
+            </div>
+            <div class="header-text">
+                <h2>Isabelle</h2>
+                <p>Advanced Review (Routine & City)</p>
+            </div>
+        </div>
+        <div class="phase-badge" id="phaseBadge">Phase 1: Routine</div>
+    </div>
+
+    <div class="chat-messages" id="chatArea">
+        <div class="message system">
+            <span class="message-content">Nesta conversação avançada, você testará Routine, Clothes e Food. As opções sugeridas em inglês aparecerão embaixo, mas Isabelle avaliará sua resposta!</span>
+        </div>
+    </div>
+
+    <div class="chat-controls" id="controlsArea">
+        <!-- Options injected here by JS -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const chatArea = document.getElementById('chatArea');
+    const controlsArea = document.getElementById('controlsArea');
+    const phaseBadge = document.getElementById('phaseBadge');
+    
+    let currentPhase = 1;
+    let synth = window.speechSynthesis;
+
+    const phases = {
+        1: {
+            title: "Phase 1: Daily Routine",
+            systemPrompt: "You are Isabelle. The user is asking you about your daily routine. Respond in English naturally. Only accept answers related to routines (e.g., waking up, having breakfast). Validate if their English is correct. Reply with a short JSON string in this exact format: {\"reply\": \"Your English reply here.\", \"is_correct\": true/false, \"explanation\": \"Feedback in Portuguese explaining if they got it right or what they missed.\", \"next_phase\": false}. Do not use Markdown blocks.",
+            options: [
+                { text: "What time do you wake up?", pt: "A que horas você acorda?" },
+                { text: "Do you have breakfast?", pt: "Você toma café da manhã?" },
+                { text: "What time do you go to sleep?", pt: "A que horas você vai dormir?" }
+            ]
+        },
+        2: {
+            title: "Phase 2: Food & Drinks",
+            systemPrompt: "You are Isabelle. We are talking about food and drinks. The user asks what you like or what you want to eat. Respond naturally in English. Validate if their English is correct. Reply with JSON: {\"reply\": \"...\", \"is_correct\": true/false, \"explanation\": \"...\", \"next_phase\": false}.",
+            options: [
+                { text: "What do you like to eat?", pt: "O que você gosta de comer?" },
+                { text: "Would you like a pizza?", pt: "Você gostaria de uma pizza?" },
+                { text: "Do you like apples?", pt: "Você gosta de maçãs?" }
+            ]
+        },
+        3: {
+            title: "Phase 3: Clothes & City",
+            systemPrompt: "You are Isabelle. We are talking about clothes and places in the city. The user asks what you are wearing or where a place is. Validate if their English is correct. Reply with JSON: {\"reply\": \"...\", \"is_correct\": true/false, \"explanation\": \"...\", \"next_phase\": true}. If next_phase is true, the conversation ends.",
+            options: [
+                { text: "What are you wearing?", pt: "O que você está vestindo?" },
+                { text: "Where is the hospital?", pt: "Onde fica o hospital?" },
+                { text: "I am wearing a blue T-shirt.", pt: "Eu estou vestindo uma camiseta azul." }
+            ]
+        }
+    };
+
+    function appendMessage(sender, text, isAudioEnabled = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        
+        let speakerName = sender === 'isabelle' ? 'Isabelle' : (sender === 'user' ? 'You' : 'System');
+        
+        let audioBtn = '';
+        if (isAudioEnabled) {
+            audioBtn = `<button class="play-audio-btn" onclick="speakText('${text.replace(/'/g, "\\'")}')" aria-label="Play audio">
+                <i class="fas fa-volume-up"></i>
+            </button>`;
+        }
+
+        msgDiv.innerHTML = `
+            <span class="speaker-name">${speakerName}</span>
+            <div class="message-content">
+                <span>${text}</span>
+                ${audioBtn}
+            </div>
+        `;
+        chatArea.appendChild(msgDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+        
+        if (isAudioEnabled && sender === 'isabelle') {
+            speakText(text);
+        }
+    }
+
+    function speakText(text) {
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.2;
+        synth.speak(utterance);
+    }
+
+    function showTypingIndicator() {
+        const div = document.createElement('div');
+        div.className = 'message isabelle typing-indicator';
+        div.id = 'typingIndicator';
+        div.innerHTML = `
+            <span class="speaker-name">Isabelle</span>
+            <div class="message-content" style="background: transparent; border: none; box-shadow: none;">
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        `;
+        chatArea.appendChild(div);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.remove();
+    }
+
+    function renderOptions() {
+        controlsArea.innerHTML = '';
+        const phaseData = phases[currentPhase];
+        
+        if (!phaseData) {
+            controlsArea.innerHTML = `<div style="text-align: center; color: #10b981; font-weight: bold; font-size: 1.5rem;">🎉 Conversação Completa! Você dominou o Módulo 2 e 3!</div>
+            <div style="text-align: center; margin-top: 15px;"><a href="{% url 'dashboard' %}" class="option-btn" style="display: inline-block; width: auto; justify-content: center; font-weight: bold; padding: 10px 30px;">Voltar ao Dashboard</a></div>`;
+            return;
+        }
+
+        phaseBadge.innerText = phaseData.title;
+        
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+        
+        phaseData.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `
+                <div>
+                    <div style="font-weight: bold; margin-bottom: 5px;">${opt.text}</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8;">${opt.pt}</div>
+                </div>
+            `;
+            btn.onclick = () => sendMessage(opt.text);
+            grid.appendChild(btn);
+        });
+        
+        controlsArea.appendChild(grid);
+    }
+
+    async function sendMessage(text) {
+        appendMessage('user', text);
+        controlsArea.innerHTML = ''; // Hide options while waiting
+        showTypingIndicator();
+        
+        const phaseData = phases[currentPhase];
+        const fullPrompt = `${phaseData.systemPrompt}\nUser says: ${text}`;
+        
+        try {
+            const response = await fetch('/ai-tutor/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ prompt: fullPrompt })
+            });
+            
+            const data = await response.json();
+            removeTypingIndicator();
+            
+            if (data.error) {
+                appendMessage('system', 'Error connecting to AI: ' + JSON.stringify(data.error));
+                renderOptions();
+                return;
+            }
+
+            // Gemini specific parsing
+            let botText = "";
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                botText = data.candidates[0].content.parts[0].text;
+            } else {
+                botText = data.choices[0].message.content; // fallback for openai mock formats if any
+            }
+            
+            // Clean markdown blocks if present
+            botText = botText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            try {
+                const parsed = JSON.parse(botText);
+                appendMessage('isabelle', parsed.reply, true);
+                
+                setTimeout(() => {
+                    if (parsed.is_correct) {
+                        appendMessage('system', '✅ ' + parsed.explanation);
+                    } else {
+                        appendMessage('system', '❌ ' + parsed.explanation);
+                    }
+                    
+                    if (parsed.is_correct) {
+                        currentPhase++;
+                    }
+                    setTimeout(renderOptions, 2000);
+                }, 2500);
+
+            } catch(e) {
+                appendMessage('system', 'System Error: Received invalid format from AI.');
+                console.error(e, botText);
+                renderOptions();
+            }
+
+        } catch (error) {
+            removeTypingIndicator();
+            appendMessage('system', 'Connection error.');
+            renderOptions();
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initialize
+    window.onload = () => {
+        setTimeout(() => {
+            appendMessage('isabelle', "Hi! I am ready to practice. Let's talk about your daily routine first!", true);
+            setTimeout(renderOptions, 2000);
+        }, 1000);
+    };
+</script>
+{% endblock %}
