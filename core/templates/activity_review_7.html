@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% block title %}Missão 7: Routine Architect - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --c7-bg: #2e7d32;
+        --c7-accent: #4caf50;
+        --c7-text: #ffffff;
+        --c7-secondary: #ffeb3b;
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c7-bg) 0%, #1b5e20 100%);
+        color: var(--c7-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper { margin: auto 0; width: 100%; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: center; padding-bottom: 50px; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; z-index: 2; }
+
+    h1 { font-size: 3rem; color: #fff; margin: 0; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); }
+    h2 { font-size: 2rem; color: #fff; margin-bottom: 20px; border-bottom: 2px solid var(--c7-secondary); padding-bottom: 10px; display: inline-block; }
+    p { font-size: 1.2rem; color: #e8f5e9; max-width: 800px; margin-bottom: 20px; }
+
+    .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; width: 100%; max-width: 900px; margin-top: 20px; }
+    .item-card {
+        background: rgba(255, 255, 255, 0.15); padding: 15px; border-radius: 15px; cursor: pointer; transition: 0.3s;
+        display: flex; flex-direction: column; align-items: center; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .item-card:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+    .item-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; }
+    .item-subtitle { font-size: 0.9rem; color: #a5d6a7; }
+
+    .info-box { background: rgba(0, 0, 0, 0.4); padding: 15px 20px; border-radius: 15px; border-left: 5px solid var(--c7-secondary); max-width: 800px; text-align: left; margin-bottom: 15px; }
+    .info-box span { font-size: 1.1rem; }
+    
+    .controls { position: absolute; bottom: 20px; right: 30px; display: flex; gap: 15px; z-index: 100; }
+    .btn-control { background: rgba(255, 255, 255, 0.2); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; }
+    .btn-control:hover { background: #fff; color: var(--c7-accent); }
+    .btn-word { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; margin: 5px; }
+    .btn-word:hover { background: #fff; color: var(--c7-bg); transform: scale(1.05); }
+
+    .progress-bar { position: absolute; bottom: 0; left: 0; height: 5px; background: var(--c7-secondary); width: 0%; transition: width 0.3s; }
+    table { width: 100%; max-width: 800px; border-collapse: collapse; margin-top: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; }
+    th, td { padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: left; }
+    th { background: rgba(0, 0, 0, 0.4); color: var(--c7-secondary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>MISSÃO 7</h3>
+                <h1>The Routine Architect 🗓️</h1>
+                <div style="font-size: 6rem; margin: 30px;">🏃‍♀️🍎💤</div>
+                <p>Let's build your perfect day! Review your daily routine and talk about what you like and don't like.</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;" onclick="changeSlide(1)">START MISSION 🚀</button>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Daily Actions 🏃‍♂️</h2>
+                <div class="info-box">
+                    <span>💡 <b>Vocabulary:</b> These are the things we do every day! Click to listen.</span>
+                </div>
+                <div class="grid-container" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="item-card" onclick="speak('Wake up')">
+                        <div style="font-size: 2rem;">🥱</div>
+                        <div class="item-title">Wake up</div>
+                        <div class="item-subtitle">Acordar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Have breakfast')">
+                        <div style="font-size: 2rem;">🥐</div>
+                        <div class="item-title">Have breakfast</div>
+                        <div class="item-subtitle">Tomar café</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Brush my teeth')">
+                        <div style="font-size: 2rem;">🪥</div>
+                        <div class="item-title">Brush my teeth</div>
+                        <div class="item-subtitle">Escovar os dentes</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Go to school')">
+                        <div style="font-size: 2rem;">🎒</div>
+                        <div class="item-title">Go to school</div>
+                        <div class="item-subtitle">Ir para a escola</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Have lunch')">
+                        <div style="font-size: 2rem;">🍛</div>
+                        <div class="item-title">Have lunch</div>
+                        <div class="item-subtitle">Almoçar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Do homework')">
+                        <div style="font-size: 2rem;">📝</div>
+                        <div class="item-title">Do homework</div>
+                        <div class="item-subtitle">Fazer tarefa</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Have dinner')">
+                        <div style="font-size: 2rem;">🍲</div>
+                        <div class="item-title">Have dinner</div>
+                        <div class="item-subtitle">Jantar</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Go to sleep')">
+                        <div style="font-size: 2rem;">😴</div>
+                        <div class="item-title">Go to sleep</div>
+                        <div class="item-subtitle">Dormir</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>I like / I don't like 👍👎</h2>
+                <div class="info-box">
+                    <span>💡 <b>Tip:</b> When talking about an action you like doing, you can add <b>ING</b> (I like play<b>ing</b>).</span>
+                </div>
+                <table>
+                    <tr><th>English</th><th>Listen</th></tr>
+                    <tr><td>I <b>like</b> playing video games.</td><td><button class="btn-control" style="width: 30px; height: 30px;" onclick="speak('I like playing video games.')">🔊</button></td></tr>
+                    <tr><td>I <b>like</b> apples.</td><td><button class="btn-control" style="width: 30px; height: 30px;" onclick="speak('I like apples.')">🔊</button></td></tr>
+                    <tr><td>I <b>don't like</b> waking up early!</td><td><button class="btn-control" style="width: 30px; height: 30px;" onclick="speak('I dont like waking up early!')">🔊</button></td></tr>
+                    <tr><td>I <b>don't like</b> broccoli.</td><td><button class="btn-control" style="width: 30px; height: 30px;" onclick="speak('I dont like broccoli.')">🔊</button></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Exercise: Build the Routine ✍️</h2>
+                <div style="width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 10px; text-align: left; font-size: 1.2rem;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>1. In the morning, I <select id="ex1"><option value="?">?</option><option value="wake">wake up</option><option value="go">go to sleep</option></select>.</span>
+                        <span id="res1"></span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>2. I <select id="ex2"><option value="?">?</option><option value="brush">brush</option><option value="do">do</option></select> my teeth.</span>
+                        <span id="res2"></span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>3. I don't <select id="ex3"><option value="?">?</option><option value="like">like</option><option value="likes">likes</option></select> homework.</span>
+                        <span id="res3"></span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 15px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span>4. I go to sleep <select id="ex4"><option value="?">?</option><option value="in">in</option><option value="at">at</option></select> 10 o'clock.</span>
+                        <span id="res4"></span>
+                    </div>
+                </div>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 20px; background: #00e676; color: #000; font-weight: bold;" onclick="checkExercise()">Check Answers ✅</button>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (10 Questions) 🧠</h2>
+                <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; width: 100%; max-width: 700px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion" style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem;">Can you build the perfect routine?</h3>
+                    <div id="quizOptions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;"></div>
+                </div>
+                <p id="quizScore" style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c7-secondary);"></p>
+                <button class="btn-control" id="startQuizBtn" style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #ff512f; font-weight: bold;" onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Mission Complete! 🎉</h1>
+                <div style="font-size: 5rem;">🏆✅</div>
+                <p>You are officially a ROUTINE ARCHITECT!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;" onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => { s.classList.remove('active'); if (i === currentSlide) s.classList.add('active'); });
+        progressBar.style.width = (((currentSlide + 1) / slides.length) * 100) + '%';
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none'; else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) { currentSlide = next; updateUI(); }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) elem.requestFullscreen().catch(err => console.log(err));
+        else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    function checkExercise() {
+        let correctCount = 0;
+        if (document.getElementById('ex1').value === 'wake') { document.getElementById('res1').innerHTML = '✅'; correctCount++; } else { document.getElementById('res1').innerHTML = '❌'; }
+        if (document.getElementById('ex2').value === 'brush') { document.getElementById('res2').innerHTML = '✅'; correctCount++; } else { document.getElementById('res2').innerHTML = '❌'; }
+        if (document.getElementById('ex3').value === 'like') { document.getElementById('res3').innerHTML = '✅'; correctCount++; } else { document.getElementById('res3').innerHTML = '❌'; }
+        if (document.getElementById('ex4').value === 'at') { document.getElementById('res4').innerHTML = '✅'; correctCount++; } else { document.getElementById('res4').innerHTML = '❌'; }
+
+        if (correctCount === 4) speak("Excellent! All correct.");
+        else speak("Try again.");
+    }
+
+    const quizData = [
+        { q: "What is 'Escovar os dentes'?", options: ["Have breakfast", "Brush my teeth", "Go to sleep"], ans: 1 },
+        { q: "I _____ my homework at 4 pm.", options: ["do", "have", "brush"], ans: 0 },
+        { q: "I _____ like broccoli! 🥦", options: ["does not", "do not", "likes"], ans: 1 },
+        { q: "We have _____ in the morning.", options: ["dinner", "lunch", "breakfast"], ans: 2 },
+        { q: "I _____ to school every day.", options: ["wake", "go", "have"], ans: 1 },
+        { q: "Do you _____ playing soccer?", options: ["like", "likes", "don't"], ans: 0 },
+        { q: "She _____ to sleep at 10 pm.", options: ["go", "goes", "have"], ans: 1 },
+        { q: "What is 'Almoçar'?", options: ["Have lunch", "Have dinner", "Have breakfast"], ans: 0 },
+        { q: "I like _____ video games.", options: ["play", "playing", "plays"], ans: 1 },
+        { q: "What is 'Acordar'?", options: ["Go to sleep", "Have breakfast", "Wake up"], ans: 2 }
+    ];
+    
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of ten.");
+            
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify({ score: score, total: quizData.length, quiz_name: 'Activity 7 (Routine Architect)' })
+            }).catch(console.error);
+            return;
+        }
+
+        const q = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = (quizIdx + 1) + ". " + q.q;
+        speak(q.q);
+        
+        let html = '';
+        q.options.forEach((opt, i) => { html += `<button class="btn-word" onclick="checkAnswer(${i})">${opt}</button>`; });
+        document.getElementById('quizOptions').innerHTML = html;
+    }
+
+    function checkAnswer(selected) {
+        const q = quizData[quizIdx];
+        if (selected === q.ans) { score++; speak("Correct!"); } else { speak("Wrong. The correct answer is " + q.options[q.ans]); }
+        document.getElementById('quizScore').innerText = `Score: ${score} / 10`;
+        quizIdx++;
+        setTimeout(loadQuiz, 2000);
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

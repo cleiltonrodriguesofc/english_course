@@ -42,6 +42,12 @@ from .views import (
     ai_tutor_chat,
     ai_tutor_tts,
     activity_isabelle_chat,
+    activity_review_6,
+    activity_review_7,
+    activity_review_8,
+    activity_review_9,
+    activity_review_10,
+    activity_conversation_2,
 )
 
 urlpatterns = [
@@ -75,6 +81,12 @@ urlpatterns = [
     path("activity/review/3/", activity_review_3, name="activity_review_3"),
     path("activity/review/4/", activity_review_4, name="activity_review_4"),
     path("activity/review/5/", activity_review_5, name="activity_review_5"),
+    path("activity/review/6/", activity_review_6, name="activity_review_6"),
+    path("activity/review/7/", activity_review_7, name="activity_review_7"),
+    path("activity/review/8/", activity_review_8, name="activity_review_8"),
+    path("activity/review/9/", activity_review_9, name="activity_review_9"),
+    path("activity/review/10/", activity_review_10, name="activity_review_10"),
+    path("activity/conversation-2/", activity_conversation_2, name="activity_conversation_2"),
     path("activity/isabelle-chat/", activity_isabelle_chat, name="activity_isabelle_chat"),
     path("quiz/", quiz_view, name="quiz"),
     path("register/", register, name="register"),
