@@ -481,7 +481,16 @@ def ai_tutor(request):
     """
     Renders the AI Tutor (Maria) prototype page.
     """
-    return render(request, "avatar_prototype.html")
+    import os
+    from django.conf import settings
+    try:
+        img_path = os.path.join(settings.BASE_DIR, "core", "templates", "img_tag.txt")
+        with open(img_path, "r") as f:
+            avatar_img_tag = f.read().strip()
+    except Exception:
+        avatar_img_tag = "👩‍🏫"
+
+    return render(request, "avatar_prototype.html", {"avatar_img_tag": avatar_img_tag})
 
 
 @login_required

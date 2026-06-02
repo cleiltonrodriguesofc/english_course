@@ -1,681 +1,334 @@
-/**
- * AI Tutor - script_0.js
- * Core logic for the AI Avatar Tutor with bilingual support and live subtitles.
- * Integrated with avatar_prototype.html IDs and event handlers.
- */
 
-// 1. CONFIGURATION & ASSETS
-const config = window.AI_CONFIG || {
-    openai_api_key: "",
-    static_url: "/static/",
-    lesson_title: "General English",
-    student_name: "Student"
-};
+// ─── Avatar image (base64, loaded from template) ─────────────────────────────
+// AVATAR_SVG is injected by the HTML template via AI_CONFIG
 
-// API_KEY is now handled by the backend proxy.
-const API_KEY = "PROXY_MANAGED";
-
-const ASSETS = {
-    idle: `${config.static_url}img/tutor_idle.png`,
-    talk: `${config.static_url}img/tutor_talk.png`,
-    think: `${config.static_url}img/tutor_think.png`
-};
-
-// 2. STATE MANAGEMENT
-let isTalking = false;
-let isThinking = false;
+// ─── State ───────────────────────────────────────────────────────────────────
+let conv = [], lesson = { title: '', desc: '' }, mode = '';
+let timerSec = 0, timerIv = null, camStream = null;
+let isRec = false, recog = null, chatOpen = false, unreadN = 0;
+let mouthIv = null;
 let currentAudio = null;
-let recognition = null;
-let currentMode = 'voice'; // 'voice' or 'chat'
-let currentSessionId = null;
-let sessions = [];
-let chatHistory = [];
 
-const INDEX_KEY = 'ai_tutor_sessions';
-
-/**
- * Persist the session index
- */
-window.saveSessions = function() {
-    try {
-        localStorage.setItem(INDEX_KEY, JSON.stringify(sessions));
-    } catch (e) {
-        console.error("Failed to save session index:", e);
-    }
-};
-
-/**
- * Persist current history to localStorage for the active session
- */
-window.saveHistory = function () {
-    if (!currentSessionId) return;
-    try {
-        localStorage.setItem(`ai_tutor_msg_${currentSessionId}`, JSON.stringify(chatHistory));
-        
-        // Update last peek/date in index
-        const sess = sessions.find(s => s.id === currentSessionId);
-        if (sess) {
-            sess.lastPeek = new Date().toISOString();
-            const isGeneric = sess.title === "Nova Aula" || sess.title === "Prática de Inglês";
-            if (isGeneric) {
-                const userMsgs = chatHistory.filter(m => m.role === 'user');
-                const meaningful = userMsgs.find(m => {
-                    const clean = m.content.trim();
-                    const lower = clean.toLowerCase().replace(/[?!.,]/g, "");
-                    const trivial = [
-                        "hi", "hello", "oie", "oi", "ola", "olá", "bom dia", "boa tarde", "boa noite", 
-                        "how are you", "como vai", "tudo bem", "oie como vai", "oi tudo bem", "tudo certo"
-                    ];
-                    return !trivial.includes(lower) && clean.length > 3;
-                });
-                
-                if (meaningful) {
-                    const clean = meaningful.content.trim();
-                    sess.title = clean.substring(0, 30) + (clean.length > 30 ? "..." : "");
-                } else if (userMsgs.length > 0 && sess.title === "Nova Aula") {
-                    sess.title = "Prática de Inglês";
-                }
-            }
-            window.saveSessions();
-            window.renderSessionList();
-        }
-    } catch (e) {
-        console.error("Failed to save history:", e);
-    }
-};
-
-/**
- * Load a specific session's history and populate UI
- */
-window.loadHistory = function (sessionId) {
-    if (!sessionId) return false;
-    try {
-        const saved = localStorage.getItem(`ai_tutor_msg_${sessionId}`);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            chatHistory = parsed;
-            
-            // Clear current UI messages
-            ['callMsgs', 'chatMsgs'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = '';
-            });
-
-            // Re-render all messages (prevent re-saving while loading)
-            chatHistory.forEach(msg => {
-                if (msg.role !== 'system') {
-                    window.renderMsgUI(msg.role, msg.content);
-                }
-            });
-            return true;
-        }
-    } catch (e) {
-        console.error("Failed to load history:", e);
-    }
-    return false;
-};
-
-// 3. UI MAPPINGS
-const elements = {
-    get subtitle() { return document.getElementById('aiSubtitles'); },
-    get avatar() { return document.getElementById('main-tutor-img'); },
-    get statusText() { return document.getElementById('ntStatus'); },
-    get stateDot() { return document.getElementById('ntDot'); },
-    // Dynamic getters
-    get chatMsgs() { return document.getElementById(currentMode === 'chat' ? 'chatMsgs' : 'callMsgs'); },
-    get inputTxt() { return document.getElementById(currentMode === 'chat' ? 'chatTxt' : 'callTxt'); },
-    get micBtn() { return document.getElementById('micBtn'); },
-    get camBtn() { return document.getElementById('camBtn'); },
-    get chatOverlay() { return document.getElementById('chatOverlay'); },
-    get sCall() { return document.getElementById('sCall'); },
-    get modeSelection() { return document.getElementById('sSelect'); },
-    get userSubtitle() { return document.getElementById('userSubtitles'); }
-};
-
-// 4. CORE FUNCTIONS
-
-/**
- * Updates the visual state of the avatar and UI status.
- */
-window.setAvState = function (state) {
-    const wrap = document.getElementById('avWrap') || document.getElementById('avFloat');
-    const mainImg = document.getElementById('main-tutor-img');
-    const selImg = document.getElementById('selAvInner');
-    const typeBadge = document.getElementById('typeBadge');
-    
-    if (!wrap) return;
-
-    // Reset classes
-    wrap.classList.remove('talking', 'thinking');
-    if (typeBadge) typeBadge.classList.remove('on');
-
-    let imgSrc = ASSETS.idle;
-
-    switch (state) {
-        case 'talk':
-            wrap.classList.add('talking');
-            if (elements.stateDot) elements.stateDot.style.background = "var(--danger)";
-            if (elements.statusText) elements.statusText.textContent = "Professora is speaking...";
-            imgSrc = ASSETS.talk;
-            isTalking = true;
-            isThinking = false;
-            break;
-        case 'think':
-            wrap.classList.add('thinking');
-            if (typeBadge) typeBadge.classList.add('on');
-            if (elements.stateDot) elements.stateDot.style.background = "var(--accent-primary)";
-            if (elements.statusText) elements.statusText.textContent = "Professora is thinking...";
-            imgSrc = ASSETS.think;
-            isThinking = true;
-            isTalking = false;
-            break;
-        case 'idle':
-        default:
-            if (elements.stateDot) elements.stateDot.style.background = "var(--success)";
-            if (elements.statusText) elements.statusText.textContent = "Online • Ready to help";
-            imgSrc = ASSETS.idle;
-            isTalking = false;
-            isThinking = false;
-            break;
-    }
-
-    if (mainImg) mainImg.src = imgSrc;
-    if (selImg && selImg.querySelector('img')) selImg.querySelector('img').src = imgSrc;
-};
-
-/**
- * Simple markdown-like parser for bold and line breaks
- */
-function parseMarkdown(text) {
-    if (!text) return '';
-    return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-}
-
-/**
- * Pure UI function to render a message bubble
- */
-window.renderMsgUI = function (role, text) {
-    const name = role === 'assistant' ? 'Professora Maria' : (config.student_name || 'Você');
-    const msgClass = role === 'assistant' ? 'a' : 'u';
-    const formattedText = parseMarkdown(text);
-    
-    const msgHtml = `
-        <div class="msg ${msgClass}">
-            <div class="msg-name">${name}</div>
-            <div class="msg-bbl">${formattedText}</div>
-        </div>
-    `;
-    
-    // Support both callMsgs and chatMsgs
-    ['callMsgs', 'chatMsgs'].forEach(id => {
-        const container = document.getElementById(id);
-        if (container) {
-            const div = document.createElement('div');
-            div.innerHTML = msgHtml.trim();
-            const messageNode = div.firstChild;
-            if (messageNode) {
-                container.appendChild(messageNode.cloneNode(true));
-                container.scrollTop = container.scrollHeight;
-            }
-        }
-    });
-};
-
-/**
- * Adds a message to the chat container and persists it.
- */
-window.addMsg = function (role, text, skipSave = false) {
-    if (!skipSave) {
-        chatHistory.push({ role: role, content: text });
-        window.saveHistory();
-    }
-
-    window.renderMsgUI(role, text);
-
-    // Update unread count if overlay is closed
-    if (role === 'assistant' && elements.chatOverlay && !elements.chatOverlay.classList.contains('open')) {
-        const unread = document.getElementById('unread');
-        if (unread) {
-            let count = parseInt(unread.textContent) || 0;
-            unread.textContent = count + 1;
-            unread.style.display = 'flex';
-            unread.classList.add('on');
-        }
-    }
-};
-
-/**
- * TTS logic with subtitle overlay.
- */
-window.speak = async function (text) {
-    if (!text) return;
-
-    window.setAvState('talk');
-
-    // Show Subtitles
-    if (elements.subtitle) {
-        elements.subtitle.textContent = text;
-        elements.subtitle.style.display = 'block';
-        setTimeout(() => elements.subtitle.classList.add('active'), 10);
-    }
-
-    try {
-        const response = await fetch('/ai-tutor/tts/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                input: text
-            })
-        });
-
-        if (!response.ok) throw new Error('TTS failed');
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-
-        if (currentAudio) currentAudio.pause();
-        currentAudio = new Audio(url);
-
-        currentAudio.onended = () => {
-            window.setAvState('idle');
-            // Hide Subtitles
-            if (elements.subtitle) {
-                elements.subtitle.classList.remove('active');
-                setTimeout(() => {
-                    if (!elements.subtitle.classList.contains('active')) {
-                        elements.subtitle.style.display = 'none';
-                    }
-                }, 1000);
-            }
-        };
-
-        await currentAudio.play();
-    } catch (err) {
-        console.error("TTS Error:", err);
-        window.setAvState('idle');
-        if (elements.subtitle) elements.subtitle.style.display = 'none';
-    }
-};
-
-/**
- * AI Response generator (GPT-4).
- */
-window.getAIResponse = async function () {
-    window.setAvState('think');
-
-    try {
-        const response = await fetch('/ai-tutor/chat/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                messages: chatHistory
-            })
-        });
-
-        const data = await response.json();
-        const reply = data.choices[0].message.content;
-
-        window.addMsg('assistant', reply);
-        
-        // Only speak if not in chat mode
-        if (currentMode !== 'chat') {
-            await window.speak(reply);
-        }
-    } catch (err) {
-        console.error("AI Error:", err);
-        window.setAvState('idle');
-    }
-};
-
-// 5. EXPOSED UI HANDLERS
-
-window.toggleMic = function (mode) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Speech recognition is not supported in this browser.");
-        return;
-    }
-
-    if (recognition) {
-        recognition.stop();
-        recognition = null;
-        return;
-    }
-
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = true; // Enable live updates
-
-    recognition.onstart = () => {
-        const btns = document.querySelectorAll('.cb, .ib-mic');
-        btns.forEach(b => {
-            if (b.id === 'micBtn' || b.id === 'callMicIn' || b.id === 'chatMicBtn') {
-                b.classList.add('active');
-            }
-        });
-        if (elements.userSubtitle) {
-            elements.userSubtitle.textContent = "...";
-            elements.userSubtitle.style.display = 'block';
-            setTimeout(() => elements.userSubtitle.classList.add('active'), 10);
-        }
-    };
-    recognition.onresult = (event) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
-        
-        // Show interim transcript for user to see
-        if (elements.userSubtitle) {
-            elements.userSubtitle.textContent = transcript;
-        }
-
-        if (event.results[0].isFinal) {
-            if (elements.inputTxt) {
-                elements.inputTxt.value = transcript;
-                window.doSend(mode);
-            }
-            // Hide subtitle after a while
-            setTimeout(() => {
-                if (elements.userSubtitle) {
-                    elements.userSubtitle.classList.remove('active');
-                    setTimeout(() => elements.userSubtitle.style.display = 'none', 300);
-                }
-            }, 3000);
-        }
-    };
-    recognition.onend = () => {
-        const btns = document.querySelectorAll('.cb, .ib-mic');
-        btns.forEach(b => b.classList.remove('active'));
-        recognition = null;
-    };
-    recognition.start();
-};
-
-window.doSend = function (mode) {
-    console.log("doSend called with mode:", mode, "currentMode:", currentMode);
-    
-    // Explicitly find the active input
-    let input = (mode === 'chat' || currentMode === 'chat') ? document.getElementById('chatTxt') : document.getElementById('callTxt');
-    
-    if (!input) {
-        console.warn("Input not found by mode, trying fallback...");
-        input = elements.inputTxt;
-    }
-    
-    if (!input) {
-        console.error("Critical: Input element not found.");
-        return;
-    }
-    
-    const text = input.value.trim();
-    console.log("Input text:", text);
-    if (!text) return;
-
-    input.value = '';
-    input.style.height = 'auto'; 
-    
-    console.log("Appending message to UI...");
-    window.addMsg('user', text);
-    
-    console.log("Requesting AI response...");
-    window.getAIResponse();
-};
-
-window.toggleCam = function () {
-    const pipVid = document.getElementById('pipVid');
-    const pipPh = document.getElementById('pipPh');
-    if (!pipVid) return;
-
-    if (pipVid.style.display === 'none') {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                pipVid.srcObject = stream;
-                pipVid.style.display = 'block';
-                if (pipPh) pipPh.style.display = 'none';
-                if (elements.camBtn) elements.camBtn.classList.add('active');
-            })
-            .catch(err => {
-                console.error("Camera Error:", err);
-                alert("Could not access camera.");
-            });
-    } else {
-        const stream = pipVid.srcObject;
-        if (stream) stream.getTracks().forEach(track => track.stop());
-        pipVid.srcObject = null;
-        pipVid.style.display = 'none';
-        if (pipPh) pipPh.style.display = 'flex';
-        if (elements.camBtn) elements.camBtn.classList.remove('active');
-    }
-};
-
-window.toggleSidebar = function () {
-    const sidebar = document.getElementById('historySidebar');
-    const overlay = document.getElementById('sbOverlay');
-    if (sidebar) sidebar.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('active');
-    if (sidebar && sidebar.classList.contains('open')) {
-        window.renderSessionList();
-    }
-};
-
-window.createNewSession = function () {
-    const id = "sess_" + Date.now();
-    const newSession = {
-        id: id,
-        title: "Nova Aula",
-        date: new Date().toLocaleDateString(),
-        lastPeek: new Date().toISOString()
-    };
-    sessions.unshift(newSession);
-    currentSessionId = id;
-    
-    // Reset history with system prompt
-    chatHistory = [
-        {
-            role: "system",
-            content: `You are "Professora Maria", a friendly and professional bilingual AI English Tutor.
-Target Student: ${config.student_name}.
-Current Lesson Context: ${config.lesson_title}.
-
-YOUR PERSONALITY & GOALS:
-1. You are BILINGUAL (English and Portuguese). Your primary goal is to teach English.
-2. Use Portuguese to explain grammar, translate difficult words, and ensure the student feels supported since they are beginners.
-3. Encourage the student to speak/type in English as much as possible, but always respond kindly in a mix of English and Portuguese.
-4. When you provide an English sentence, always include its Portuguese translation in parentheses or on a new line.
-5. Keep your responses interactive and avoid massive walls of text.
-6. Use **bold text** for important English terms and phrases.
-
-Example: "How are you? (**Como você está?**)"`
-        }
-    ];
-    
-    // Clear UI
-    ['callMsgs', 'chatMsgs'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = '';
-    });
-    
-    window.saveSessions();
-    window.saveHistory();
-    window.renderSessionList();
-    
-    // Close sidebar if mobile or optional
-    const sidebar = document.getElementById('historySidebar');
-    if (sidebar && sidebar.classList.contains('open')) window.toggleSidebar();
-
-    // Trigger greeting
-    setTimeout(() => {
-        // Double check if this is still the active session and history is empty
-        if (id === currentSessionId && chatHistory.length <= 1) {
-            const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
-            window.addMsg('assistant', greeting);
-            if (currentMode !== 'chat') window.speak(greeting);
-        }
-    }, 600);
-};
-
-window.switchSession = function (id) {
-    currentSessionId = id;
-    const sess = sessions.find(s => s.id === id);
-    if (sess) {
-        sess.lastPeek = new Date().toISOString();
-        window.saveSessions();
-    }
-    window.loadHistory(id);
-    window.renderSessionList();
-    const sidebar = document.getElementById('historySidebar');
-    if (sidebar && sidebar.classList.contains('open')) window.toggleSidebar();
-};
-
-window.renderSessionList = function () {
-    const list = document.getElementById('sessionList');
-    if (!list) return;
-    
-    list.innerHTML = sessions.map(s => `
-        <div class="sb-item ${s.id === currentSessionId ? 'active' : ''}" onclick="switchSession('${s.id}')">
-            <span class="sb-item-title">${s.title}</span>
-            <span class="sb-item-date">${s.date}</span>
-        </div>
-    `).join('');
-};
-
-window.launchMode = function (mode, isAuto = false, skipGreeting = false) {
-    currentMode = mode;
-    
-    // If manually clicked from selection screen, always start a new session
-    if (!isAuto) {
-        window.createNewSession();
-        window.location.hash = mode;
-    }
-    
-    // Hide selection screen
-    if (elements.modeSelection) elements.modeSelection.style.display = 'none';
-    if (elements.modeSelection) elements.modeSelection.classList.remove('active');
-
-    if (mode === 'chat') {
-        const sChat = document.getElementById('sChat');
-        if (sChat) {
-            sChat.style.display = 'flex';
-            sChat.classList.add('active');
-        }
-    } else {
-        if (elements.sCall) {
-            elements.sCall.style.display = 'flex';
-            elements.sCall.classList.add('active');
-        }
-    }
-
-    // Start simple timer for calls
-    if (mode === 'call') {
-        let sec = 0;
-        const timerEl = document.getElementById('callTimer');
-        const timerInt = setInterval(() => {
-            if (elements.sCall && elements.sCall.style.display !== 'none') {
-                sec++;
-                const m = Math.floor(sec / 60).toString().padStart(2, '0');
-                const s = (sec % 60).toString().padStart(2, '0');
-                if (timerEl) timerEl.textContent = `${m}:${s}`;
-            } else {
-                clearInterval(timerInt);
-            }
-        }, 1000);
-    }
-
-    // Initial Greeting (only if no history exists and NOT a new session we just created)
-    if (!skipGreeting && !(!isAuto)) { 
-        setTimeout(() => {
-            if (chatHistory.length <= 1) {
-                const greeting = `Hello ${config.student_name}! I'm Professora Maria, your English tutor. Ready to start our ${config.lesson_title} lesson?`;
-                window.addMsg('assistant', greeting);
-                
-                // Only speak if not in chat mode
-                if (currentMode !== 'chat') {
-                    window.speak(greeting);
-                }
-            }
-        }, 600);
-    }
-};
-
-/**
- * Auto-resize textarea
- */
-window.ar = function (el) {
-    el.style.height = 'auto';
-    el.style.height = (el.scrollHeight) + 'px';
-};
-
-/**
- * Handle keydown (Enter to send)
- */
-window.hk = function (e, mode) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        window.doSend(mode);
-    }
-};
-
-window.goHome = function () {
-    window.location.hash = '';
-    location.reload();
-};
-
-// Global helper for quick replies
-window.qs = function (btn) {
-    // Definitive input resolution for quick replies
-    const input = elements.inputTxt;
-    if (input) {
-        input.value = btn.innerText;
-        window.doSend(currentMode);
-    }
-};
-
-// Auto-init
-document.addEventListener('DOMContentLoaded', () => {
-    // Inject initial images
-    const avFloat = document.getElementById('avFloat');
+// ─── Boot ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
     const selAvInner = document.getElementById('selAvInner');
-    const chatAvThumb = document.getElementById('chatAvThumb');
-
-    if (avFloat) {
-        avFloat.innerHTML = `<img id="main-tutor-img" src="${ASSETS.idle}" alt="Tutor" style="width:100%; height:100%; object-fit:cover;">`;
-    }
-    if (selAvInner) {
-        selAvInner.innerHTML = `<img src="${ASSETS.idle}" alt="Tutor" style="width:100%; height:100%; object-fit:cover;">`;
-    }
-    if (chatAvThumb) {
-        chatAvThumb.innerHTML = `<img src="${ASSETS.idle}" alt="Tutor" style="width:100%; height:100%; object-fit:cover;">`;
-    }
-
-    window.setAvState('idle');
-
-    // Persistence Check: Load sessions index
-    try {
-        const savedSessions = localStorage.getItem(INDEX_KEY);
-        if (savedSessions) {
-            sessions = JSON.parse(savedSessions);
-            if (sessions.length > 0) {
-                // Get last used session or first one
-                const last = sessions.sort((a,b) => new Date(b.lastPeek) - new Date(a.lastPeek))[0];
-                currentSessionId = last.id;
-                window.loadHistory(currentSessionId);
-            }
-        }
-    } catch(e) { console.error(e); }
-
-    // If no session exists, create one
-    if (!currentSessionId) {
-        window.createNewSession();
-    }
-
-    // Auto-launch based on hash
-    const hash = window.location.hash.replace('#', '');
-    if (hash === 'chat' || hash === 'call') {
-        console.log("Auto-launching mode from hash:", hash);
-        window.launchMode(hash, true, chatHistory.length > 1); 
+    if (selAvInner && window.AI_CONFIG && window.AI_CONFIG.avatar_img_tag) {
+        selAvInner.innerHTML = window.AI_CONFIG.avatar_img_tag;
     }
 });
+
+// ─── CSRF helper ─────────────────────────────────────────────────────────────
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// ─── Mode launch ─────────────────────────────────────────────────────────────
+function launchMode(m) {
+    mode = m;
+    const v = document.getElementById('lessonSel').value.split('|');
+    lesson = { title: v[0], desc: v[1] };
+    showScreen(m === 'call' ? 'sCall' : 'sChat');
+    injectAvatars();
+    conv = [];
+    clearMsgs();
+    if (m === 'call') { startTimer(); chatOpen = false; document.getElementById('speakRing').className = 'speak-ring'; }
+    if (m === 'chat') { document.getElementById('chatLessonPill').textContent = lesson.title.split('—')[0].trim(); }
+    setTimeout(() => welcome(), 400);
+}
+
+function injectAvatars() {
+    const tag = window.AI_CONFIG && window.AI_CONFIG.avatar_img_tag ? window.AI_CONFIG.avatar_img_tag : '👩‍🏫';
+    document.getElementById('avFloat').innerHTML = tag;
+    document.getElementById('chatAvThumb').innerHTML = tag;
+}
+
+function clearMsgs() {
+    document.getElementById('callMsgs').innerHTML = '';
+    document.getElementById('chatMsgs').innerHTML = '';
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+    clearInterval(timerIv); timerSec = 0;
+    document.getElementById('callTimer').textContent = '00:00';
+    chatOpen = false;
+    document.getElementById('chatOverlay').classList.remove('open');
+    showScreen('sSelect');
+}
+
+// ─── Timer ───────────────────────────────────────────────────────────────────
+function startTimer() {
+    clearInterval(timerIv);
+    timerIv = setInterval(() => {
+        timerSec++;
+        const m = String(Math.floor(timerSec / 60)).padStart(2, '0');
+        const s = String(timerSec % 60).padStart(2, '0');
+        document.getElementById('callTimer').textContent = `${m}:${s}`;
+    }, 1000);
+}
+
+// ─── System prompt ───────────────────────────────────────────────────────────
+function sysPrompt() {
+    const studentName = window.AI_CONFIG && window.AI_CONFIG.student_name ? window.AI_CONFIG.student_name : 'Student';
+    return `You are Maria, a warm and encouraging English teacher in a ${mode === 'call' ? 'live video call' : 'text chat'} with a Brazilian student named ${studentName} who is around 12 years old.
+Lesson: "${lesson.title}" — ${lesson.desc}
+Rules:
+1. Your main focus is teaching natural spoken English, showing "connected speech" techniques and natural intonation.
+2. Communicate structurally in Portuguese (Brazilian), but give practical examples from the lesson in English.
+3. Keep responses SHORT — maximum 3 sentences. Like a spoken conversation.
+4. Gently correct grammar and pronunciation errors, give a brief explanation in Portuguese, then continue.
+5. End each response with ONE question to keep the conversation flowing. Stay on the lesson topic. Plain text only — no markdown.`;
+}
+
+// ─── Welcome ─────────────────────────────────────────────────────────────────
+function welcome() {
+    const txt = `Olá! Eu sou a Maria, e hoje vamos praticar "${lesson.title}". Estou muito feliz em ter você aqui! Para começar, me diga, qual é o seu nome?`;
+    addMsg('a', txt);
+    conv.push({ role: 'model', parts: [{ text: txt }] });
+    if (mode === 'call') speak(txt);
+}
+
+// ─── Send ─────────────────────────────────────────────────────────────────────
+async function doSend(ctx) {
+    const inp = document.getElementById(ctx === 'call' ? 'callTxt' : 'chatTxt');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    inp.value = ''; ar(inp);
+    addMsg('u', txt);
+    conv.push({ role: 'user', parts: [{ text: txt }] });
+    setAvState('think');
+
+    try {
+        // Build the full prompt string for Gemini
+        const sys = sysPrompt();
+        const historyText = conv.slice(0, -1).map(m => {
+            const role = m.role === 'model' ? 'Maria' : 'Student';
+            const text = m.parts ? m.parts[0].text : m.content || '';
+            return `${role}: ${text}`;
+        }).join('\n');
+        const fullPrompt = `${sys}\n\n${historyText}\nStudent: ${txt}\nMaria:`;
+
+        const res = await fetch('/ai-tutor/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ prompt: fullPrompt })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+            throw new Error(data.error.message || 'API error');
+        }
+
+        // Parse Gemini response
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || 'Desculpe, não entendi. Pode repetir?';
+        conv.push({ role: 'model', parts: [{ text: reply }] });
+        setAvState('idle');
+        addMsg('a', reply);
+        if (mode === 'call') speak(reply);
+        if (mode === 'call' && !chatOpen) { unreadN++; const u = document.getElementById('unread'); u.textContent = unreadN; u.style.display = 'flex'; }
+
+    } catch (e) {
+        setAvState('idle');
+        showToast('Erro ao conectar com a IA: ' + e.message);
+        console.error(e);
+    }
+}
+
+// ─── Quick send ──────────────────────────────────────────────────────────────
+function qs(btn) {
+    const ctx = mode === 'call' ? 'call' : 'chat';
+    const inp = document.getElementById(ctx === 'call' ? 'callTxt' : 'chatTxt');
+    inp.value = btn.textContent.trim();
+    doSend(ctx);
+}
+
+// ─── Add message bubble ───────────────────────────────────────────────────────
+function addMsg(role, text) {
+    const box = document.getElementById(mode === 'call' ? 'callMsgs' : 'chatMsgs');
+    const name = window.AI_CONFIG && window.AI_CONFIG.student_name ? window.AI_CONFIG.student_name : 'Você';
+    const d = document.createElement('div');
+    d.className = `msg ${role}`;
+    const n = document.createElement('div');
+    n.className = 'msg-name';
+    n.textContent = role === 'a' ? 'Professora Maria' : name;
+    const b = document.createElement('div');
+    b.className = 'msg-bbl';
+    b.textContent = text;
+    d.appendChild(n); d.appendChild(b); box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+}
+
+function showTyping(on) {
+    const box = document.getElementById(mode === 'call' ? 'callMsgs' : 'chatMsgs');
+    let el = box.querySelector('.typing-msg');
+    if (on && !el) { el = document.createElement('div'); el.className = 'typing-msg'; el.innerHTML = '<span></span><span></span><span></span>'; box.appendChild(el); box.scrollTop = box.scrollHeight; }
+    else if (!on && el) el.remove();
+}
+
+// ─── Avatar states ────────────────────────────────────────────────────────────
+function setAvState(s) {
+    const ring = document.getElementById('speakRing');
+    const dot = document.getElementById('ntDot');
+    const stat = document.getElementById('ntStatus');
+    const tb = document.getElementById('typeBadge');
+    const chs = document.getElementById('chatStatus');
+    showTyping(s === 'think');
+    clearInterval(mouthIv); mouthIv = null;
+    setMouth('idle');
+    if (ring) ring.className = 'speak-ring';
+    if (tb) tb.className = 'type-badge';
+    if (s === 'talk') {
+        if (ring) ring.classList.add('on');
+        if (dot) { dot.style.background = '#22c55e'; dot.style.boxShadow = '0 0 10px #22c55e'; }
+        if (stat) stat.textContent = 'Falando…';
+        if (chs) chs.textContent = 'Falando…';
+        setMouth('talk');
+        mouthIv = setInterval(() => setMouth('talk'), 130);
+    } else if (s === 'think') {
+        if (tb) tb.classList.add('on');
+        if (dot) { dot.style.background = '#f59e0b'; dot.style.boxShadow = '0 0 8px #f59e0b'; }
+        if (stat) stat.textContent = 'Pensando…';
+        if (chs) chs.textContent = 'Pensando…';
+    } else {
+        if (dot) { dot.style.background = '#22c55e'; dot.style.boxShadow = '0 0 8px #22c55e'; }
+        if (stat) stat.textContent = 'Professora de Inglês com IA';
+        if (chs) chs.textContent = 'Online';
+    }
+}
+
+function setMouth(s) {
+    const imgElems = document.querySelectorAll('#avFloat img, #chatAvThumb img');
+    if (s === 'talk') {
+        imgElems.forEach(img => {
+            const r = (Math.random() - 0.5) * 2;
+            const sc = 1 + (Math.random() * 0.04);
+            const y = (Math.random() * -4);
+            img.style.transform = `scale(${sc}) rotate(${r}deg) translateY(${y}px)`;
+            img.style.transition = 'transform 0.1s ease-in-out';
+        });
+    } else {
+        imgElems.forEach(img => {
+            img.style.transform = 'scale(1) rotate(0deg) translateY(0px)';
+            img.style.transition = 'transform 0.4s ease-out';
+        });
+    }
+}
+
+// ─── TTS (via Django backend → OpenAI) ────────────────────────────────────────
+async function speak(text) {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    setAvState('think');
+    try {
+        const res = await fetch('/ai-tutor/tts/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ input: text, voice: 'nova' })
+        });
+
+        if (!res.ok) {
+            // TTS failed (likely no OpenAI key) — use browser speech synthesis as fallback
+            fallbackSpeak(text);
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        currentAudio = new Audio(url);
+        currentAudio.onplay = () => setAvState('talk');
+        currentAudio.onended = () => { setAvState('idle'); URL.revokeObjectURL(url); };
+        currentAudio.onerror = () => { setAvState('idle'); fallbackSpeak(text); };
+        currentAudio.play();
+    } catch (e) {
+        setAvState('idle');
+        fallbackSpeak(text);
+        console.warn('TTS backend failed, using browser synthesis:', e.message);
+    }
+}
+
+function fallbackSpeak(text) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    u.pitch = 1.1;
+    u.onstart = () => setAvState('talk');
+    u.onend = () => setAvState('idle');
+    window.speechSynthesis.speak(u);
+}
+
+// ─── Mic / voice ──────────────────────────────────────────────────────────────
+function toggleMic(ctx) {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) { showToast('Reconhecimento de voz requer Chrome.'); return; }
+    if (isRec) { recog?.stop(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recog = new SR(); recog.lang = 'en-US'; recog.interimResults = false; recog.maxAlternatives = 1;
+    const btn = document.getElementById(ctx === 'call' ? 'micBtn' : 'chatMicBtn');
+    const inBtn = document.getElementById(ctx === 'call' ? 'callMicIn' : 'chatMicBtn');
+    recog.onstart = () => { isRec = true; if (btn) btn.classList.add('off'); if (inBtn) inBtn.classList.add('rec'); document.getElementById('selfPip')?.classList.add('speaking'); };
+    recog.onresult = (e) => { const t = e.results[0][0].transcript; const inp = document.getElementById(ctx === 'call' ? 'callTxt' : 'chatTxt'); inp.value = t; };
+    recog.onend = () => { isRec = false; if (btn) btn.classList.remove('off'); if (inBtn) inBtn.classList.remove('rec'); document.getElementById('selfPip')?.classList.remove('speaking'); const t = document.getElementById(ctx === 'call' ? 'callTxt' : 'chatTxt').value.trim(); if (t) doSend(ctx); };
+    recog.onerror = (e) => { isRec = false; if (btn) btn.classList.remove('off'); if (inBtn) inBtn.classList.remove('rec'); document.getElementById('selfPip')?.classList.remove('speaking'); if (e.error !== 'no-speech') showToast('Erro no microfone: ' + e.error); };
+    if (ctx === 'call' && !chatOpen) { toggleChatOverlay(); setTimeout(() => recog.start(), 320); } else recog.start();
+}
+
+// ─── Camera ───────────────────────────────────────────────────────────────────
+async function toggleCam() {
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; const v = document.getElementById('pipVid'); v.style.display = 'none'; document.getElementById('pipPh').style.display = 'flex'; document.getElementById('camBtn').innerHTML = '<i class="fas fa-video"></i>'; return; }
+    try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const v = document.getElementById('pipVid'); v.srcObject = camStream; v.style.display = 'block';
+        document.getElementById('pipPh').style.display = 'none';
+        document.getElementById('camBtn').innerHTML = '<i class="fas fa-video-slash"></i>';
+    } catch { showToast('Câmera bloqueada.'); }
+}
+
+// ─── Chat overlay (call screen) ───────────────────────────────────────────────
+function toggleChatOverlay() {
+    chatOpen = !chatOpen;
+    document.getElementById('chatOverlay').classList.toggle('open', chatOpen);
+    document.getElementById('chatTogBtn').classList.toggle('on', chatOpen);
+    if (chatOpen) { unreadN = 0; const u = document.getElementById('unread'); u.textContent = '0'; u.style.display = 'none'; document.getElementById('callMsgs').scrollTop = 99999; setTimeout(() => document.getElementById('callTxt').focus(), 350); }
+}
+
+// ─── Sidebar (chat screen) ────────────────────────────────────────────────────
+function toggleSidebar() {
+    const sb = document.getElementById('historySidebar');
+    if (sb) sb.classList.toggle('open');
+}
+
+function createNewSession() {
+    conv = [];
+    clearMsgs();
+    setTimeout(() => welcome(), 300);
+    toggleSidebar();
+}
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function ar(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
+function hk(e, ctx) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(ctx); } }
+function showToast(msg) { const t = document.getElementById('toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 4000); }

@@ -1221,7 +1221,8 @@
         window.AI_CONFIG = {
             static_url: "{% static '' %}",
             student_name: "{{ user.username|default:'Student' }}",
-            lesson_title: "General English"
+            lesson_title: "General English",
+            avatar_img_tag: `{{ avatar_img_tag|safe }}`
         };
     </script>
     <script src="{% static 'js/script_0.js' %}"></script>
