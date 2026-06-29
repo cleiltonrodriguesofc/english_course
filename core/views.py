@@ -125,6 +125,12 @@ def lesson_14(request):
 
 
 @login_required
+def lesson_15(request):
+    log_activity(request.user, "Viewed Lesson 15 (Demonstrative Pronouns)")
+    return render(request, "lesson_15.html")
+
+
+@login_required
 def lesson_review_1(request):
     log_activity(request.user, "Viewed Drill 1: Identity & Introductions")
     return render(request, "lesson_review_1.html")

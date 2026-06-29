@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 15: Demonstrative Pronouns - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Magic / Pointing (Purple & Blue) --- */
+    :root {
+        --c15-bg: #4b6cb7;
+        --c15-mid: #182848;
+        --c15-accent: #00d2ff;
+        --c15-text: #ffffff;
+        --c15-card: rgba(255, 255, 255, 0.1);
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c15-bg) 0%, var(--c15-mid) 100%);
+        color: var(--c15-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--c15-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #e0f7fa;
+        max-width: 800px;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    /* --- GRIDS & CARDS --- */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        width: 100%;
+        max-width: 900px;
+        margin-top: 15px;
+    }
+
+    .item-card {
+        background: var(--c15-card);
+        padding: 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-card:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--c15-accent);
+    }
+
+    .item-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+        color: var(--c15-accent);
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .item-subtitle {
+        font-size: 1.1rem;
+        color: #fff;
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .item-icon {
+        font-size: 4rem;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-control:hover {
+        background: var(--c15-accent);
+        color: #000;
+        transform: scale(1.1);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: var(--c15-accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 15</h3>
+                <h1>Demonstrative Pronouns ✨</h1>
+                <div style="font-size: 6rem; margin: 30px;">👉 🍎</div>
+                <p>Learn how to point at things that are near and far!</p>
+                <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;"
+                    onclick="changeSlide(1)">START LEARNING 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: NEAR -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Things that are NEAR 📍 (Perto)</h2>
+                <div class="grid-container" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="item-card" onclick="speak('This')">
+                        <div class="item-icon">👇</div>
+                        <div class="item-title">THIS</div>
+                        <div class="item-subtitle">Este / Esta / Isso<br>(Singular - 1 thing)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('These')">
+                        <div class="item-icon">👐</div>
+                        <div class="item-title">THESE</div>
+                        <div class="item-subtitle">Estes / Estas<br>(Plural - 2+ things)</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; width: 100%; max-width: 800px;">
+                    <p style="margin: 0; color: #fff;"><i>Ex: <b>This</b> is my book. (Este é meu livro)</i></p>
+                    <p style="margin: 0; color: #fff; margin-top: 10px;"><i>Ex: <b>These</b> are my friends. (Estes são meus amigos)</i></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: FAR -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Things that are FAR 🔭 (Longe)</h2>
+                <div class="grid-container" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="item-card" onclick="speak('That')">
+                        <div class="item-icon">👉</div>
+                        <div class="item-title">THAT</div>
+                        <div class="item-subtitle">Aquele / Aquela / Aquilo<br>(Singular - 1 thing)</div>
+                    </div>
+                    <div class="item-card" onclick="speak('Those')">
+                        <div class="item-icon">🌌</div>
+                        <div class="item-title">THOSE</div>
+                        <div class="item-subtitle">Aqueles / Aquelas<br>(Plural - 2+ things)</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; width: 100%; max-width: 800px;">
+                    <p style="margin: 0; color: #fff;"><i>Ex: <b>That</b> is a bird. (Aquele é um pássaro)</i></p>
+                    <p style="margin: 0; color: #fff; margin-top: 10px;"><i>Ex: <b>Those</b> are stars. (Aquelas são estrelas)</i></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Mega Quiz! (15 Questions) 🧠</h2>
+                <div
+                    style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; width: 100%; max-width: 800px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 1.5rem; color:#fff;">
+                        Are you ready?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 1.4rem; font-weight: bold; color: var(--c15-accent);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 10px 30px; border-radius: 30px; margin-top: 10px; background: #000; font-weight: bold;"
+                    onclick="loadQuiz()">Start Quiz 🚀</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1>Class Completed! 🎉</h1>
+                <div style="font-size: 5rem;">🏆✨🌟</div>
+                <p>Amazing! You mastered This, That, These, and Those!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5);"
+                        onclick="location.reload()">REPLAY ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 10px 30px; border-radius: 30px; background:rgba(0,0,0,0.5); text-decoration: none;">HOME
+                        🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()" style="background:rgba(0,0,0,0.5);">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)"
+                style="background:rgba(0,0,0,0.5);">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)"
+                style="background:rgba(0,0,0,0.5);">❯</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') changeSlide(1);
+        if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    function toggleFullScreen() {
+        const elem = document.querySelector('.lesson-wrapper');
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(err => {
+                console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    }
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "1. 'This' significa:", options: ["Aquele / Aquela", "Este / Esta / Isso", "Aqueles / Aquelas"], ans: 1 },
+        { q: "2. Qual pronome usamos para coisas PERTO e no PLURAL?", options: ["These", "This", "Those"], ans: 0 },
+        { q: "3. 'That' significa:", options: ["Aquele / Aquela / Aquilo", "Estes / Estas", "Este / Esta"], ans: 0 },
+        { q: "4. Qual pronome usamos para coisas LONGE e no PLURAL?", options: ["This", "Those", "These"], ans: 1 },
+        { q: "5. Complete: ___ is an apple (perto, singular).", options: ["Those", "That", "This"], ans: 2 },
+        { q: "6. Complete: ___ are birds (longe, plural).", options: ["These", "Those", "This"], ans: 1 },
+        { q: "7. O plural de 'This' é:", options: ["That", "These", "Those"], ans: 1 },
+        { q: "8. O plural de 'That' é:", options: ["Those", "These", "This"], ans: 0 },
+        { q: "9. Para falar de uma PESSOA que está longe, usamos:", options: ["This", "That", "These"], ans: 1 },
+        { q: "10. Para falar de UMA coisa que está na sua mão, usamos:", options: ["That", "This", "Those"], ans: 1 },
+        { q: "11. ___ is my friend (apontando pra alguém ao seu lado).", options: ["This", "These", "Those"], ans: 0 },
+        { q: "12. Look at ___ cars over there! (Longe, plural).", options: ["This", "That", "Those"], ans: 2 },
+        { q: "13. I like ___ shoes (Apontando pros sapatos que você está usando).", options: ["These", "Those", "That"], ans: 0 },
+        { q: "14. ___ star in the sky is beautiful! (Longe, singular).", options: ["These", "This", "That"], ans: 2 },
+        { q: "15. Verdadeiro ou Falso: 'These' é usado para coisas no plural.", options: ["Falso", "Verdadeiro"], ans: 1 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of 15.");
+
+            // Save to database
+            fetch('/api/save-quiz/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    total: quizData.length,
+                    quiz_name: 'Class 15 (Demonstrative Pronouns)'
+                })
+            }).catch(console.error);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = currentQ.q;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 10px; height: auto; padding: 15px; border:1px solid var(--c15-accent); color:#fff; font-size: 1.1rem; background: rgba(0,0,0,0.4);" onclick="checkQuiz(${idx})">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    // Helper to get CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function checkQuiz(selectedIdx) {
+        const currentQ = quizData[quizIdx];
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+        } else {
+            speak("Wrong.");
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score} / ${quizData.length}`;
+        setTimeout(loadQuiz, 1000);
+    }
+</script>
+{% endblock %}
