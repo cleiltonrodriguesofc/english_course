@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 16: Verb To Be (Fun Games!) - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* --- THEME: Fun Park (Yellow & Orange) --- */
+    :root {
+        --c16-bg: #FFD194;
+        --c16-mid: #70E1F5;
+        --c16-accent: #FF512F;
+        --c16-text: #333333;
+        --c16-card: rgba(255, 255, 255, 0.9);
+    }
+
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c16-bg) 0%, var(--c16-mid) 100%);
+        color: var(--c16-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 95%;
+        max-width: 1100px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
+    }
+
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 3.5rem;
+        color: #fff;
+        margin: 0;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+        font-size: 2.2rem;
+        color: #fff;
+        margin-bottom: 20px;
+        border-bottom: 4px dashed var(--c16-accent);
+        padding-bottom: 10px;
+        display: inline-block;
+        text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    p {
+        font-size: 1.4rem;
+        color: #fff;
+        max-width: 800px;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        font-weight: 600;
+    }
+
+    /* --- GAME STYLES --- */
+    .bubble-container {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 30px;
+    }
+
+    .bubble {
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle at 30% 30%, #ff8a00, #e52e71);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+        user-select: none;
+    }
+
+    .bubble:hover {
+        transform: scale(1.1) translateY(-10px);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.4);
+    }
+
+    .bubble.popped {
+        transform: scale(0);
+        opacity: 0;
+        transition: all 0.3s ease-out;
+    }
+
+    .target-box {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: #fff;
+        color: var(--c16-accent);
+        padding: 20px 50px;
+        border-radius: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        margin-bottom: 30px;
+        border: 5px solid var(--c16-accent);
+    }
+
+    /* --- PUZZLE GAME --- */
+    .puzzle-area {
+        background: rgba(255, 255, 255, 0.9);
+        padding: 30px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 800px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .puzzle-sentence {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        min-height: 60px;
+        color: #333;
+        border-bottom: 3px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    .puzzle-pieces {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .piece {
+        background: var(--c16-accent);
+        color: #fff;
+        padding: 15px 30px;
+        font-size: 1.8rem;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        transition: 0.2s;
+    }
+
+    .piece:hover {
+        transform: scale(1.1);
+        background: #ff2a00;
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .btn-control {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--c16-accent);
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-control:hover {
+        background: var(--c16-accent);
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    .progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 6px;
+        background: var(--c16-accent);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    .feedback-emoji {
+        position: absolute;
+        font-size: 5rem;
+        pointer-events: none;
+        opacity: 0;
+        animation: floatUp 1s ease-out forwards;
+        z-index: 1000;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(0.5); opacity: 1; }
+        100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrapper">
+    <div class="slide-container">
+
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 16 (FUN EDITION)</h3>
+                <h1 style="color: var(--c16-accent); text-shadow: 0 4px 15px rgba(255,255,255,0.8); background: #fff; padding: 10px 40px; border-radius: 50px; margin-bottom: 20px;">The Verb "To Be" 🎈</h1>
+                <div style="font-size: 7rem; margin: 20px; animation: pulse 2s infinite;">🤸‍♀️✨</div>
+                <p>Ser ou Estar? Vamos aprender brincando!</p>
+                <button class="btn-control" style="width: auto; padding: 15px 40px; border-radius: 30px; font-size: 1.5rem;"
+                    onclick="changeSlide(1)">LET'S PLAY! 🎮</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 1.5: THE ACADEMY (EXPLANATION) -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>O que é o Verbo To Be? 🤔</h2>
+                <p>O Verbo <b>To Be</b> significa <b>Ser</b> ou <b>Estar</b>. É como um camaleão, ele muda dependendo de quem está falando!</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; max-width: 900px; margin-top: 20px;">
+                    <!-- AM -->
+                    <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🙋‍♀️</div>
+                        <h3 style="color: var(--c16-accent); font-size: 2.5rem; margin: 0;">AM</h3>
+                        <p style="color: #333; font-size: 1.2rem; margin-top: 10px;">Só existe um dono:<br><b>I (Eu)</b><br><i>"I am" (Eu sou/estou)</i></p>
+                    </div>
+
+                    <!-- IS -->
+                    <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">👤🐶</div>
+                        <h3 style="color: #4CAF50; font-size: 2.5rem; margin: 0;">IS</h3>
+                        <p style="color: #333; font-size: 1.2rem; margin-top: 10px;">Para uma pessoa/coisa:<br><b>He / She / It</b><br><i>"She is" (Ela é/está)</i></p>
+                    </div>
+
+                    <!-- ARE -->
+                    <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">👥👨‍👩‍👧‍👦</div>
+                        <h3 style="color: #2196F3; font-size: 2.5rem; margin: 0;">ARE</h3>
+                        <p style="color: #333; font-size: 1.2rem; margin-top: 10px;">Para a galera (Plural) ou Você:<br><b>You / We / They</b><br><i>"They are" (Eles são)</i></p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button class="btn-control" style="width: auto; padding: 15px 40px; border-radius: 30px; font-size: 1.5rem;" onclick="changeSlide(1)">Entendi! Ir para o Desafio 🚀</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: BUBBLE POP GAME -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Bubble Pop: Choose the right verb! 🫧</h2>
+                <p>Estoure a bolha correta para combinar com a palavra no quadro.</p>
+                
+                <div class="target-box" id="bubbleTarget">I</div>
+                
+                <div class="bubble-container" id="bubblesArea">
+                    <div class="bubble" onclick="checkBubble('am', this)">am</div>
+                    <div class="bubble" onclick="checkBubble('is', this)">is</div>
+                    <div class="bubble" onclick="checkBubble('are', this)">are</div>
+                </div>
+
+                <div style="margin-top: 40px; font-size: 2rem; font-weight: bold; color: white; background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 20px;">
+                    Score: <span id="bubbleScore" style="color: yellow;">0</span> / 5
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: PUZZLE BUILDER -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Sentence Builder! 🧩</h2>
+                <p>Clique nas palavras na ordem certa para montar a frase!</p>
+                
+                <div class="puzzle-area">
+                    <div style="color: #666; font-size: 1.2rem; margin-bottom: 10px;" id="puzzleHint">Dica: Ela é feliz.</div>
+                    <div class="puzzle-sentence" id="puzzleSentence">___ ___ ___</div>
+                    <div class="puzzle-pieces" id="puzzlePieces">
+                        <div class="piece" onclick="addPiece('happy')">happy</div>
+                        <div class="piece" onclick="addPiece('She')">She</div>
+                        <div class="piece" onclick="addPiece('is')">is</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button class="btn-control" style="width: auto; padding: 10px 30px; border-radius: 30px;" onclick="resetPuzzle()">Clear / Limpar 🧹</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: MEGA QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Final Boss Quiz! 🐉</h2>
+                <div
+                    style="background: rgba(255,255,255,0.9); padding: 30px; border-radius: 25px; width: 100%; max-width: 800px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    <h3 id="quizQuestion"
+                        style="min-height: 60px; text-align: center; margin-bottom: 20px; font-size: 2rem; color:var(--c16-accent);">
+                        Are you ready?</h3>
+                    <div id="quizOptions"
+                        style="display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore"
+                    style="margin-top: 20px; font-size: 2rem; font-weight: bold; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,0.5);"></p>
+                <button class="btn-control" id="startQuizBtn"
+                    style="width: auto; padding: 15px 40px; border-radius: 30px; margin-top: 10px; font-size: 1.5rem;"
+                    onclick="loadQuiz()">Fight! ⚔️</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1 style="font-size: 4rem;">YOU WIN! 🎉</h1>
+                <div style="font-size: 6rem; margin: 20px;">🏆😎🔥</div>
+                <p>Você é uma Mestre do Verbo To Be!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center; margin-top: 30px;">
+                    <button class="btn-control"
+                        style="width: auto; padding: 15px 40px; border-radius: 30px;"
+                        onclick="location.reload()">PLAY AGAIN ↺</button>
+                    <a href="{% url 'dashboard' %}" class="btn-control"
+                        style="width: auto; padding: 15px 40px; border-radius: 30px; text-decoration: none;">HOME 🏠</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" onclick="toggleFullScreen()">⛶</button>
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+        prevBtn.disabled = currentSlide === 0;
+        if (currentSlide === slides.length - 1) nextBtn.style.display = 'none';
+        else { nextBtn.style.display = 'flex'; nextBtn.disabled = false; }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function showEmojiFeedback(emoji, x, y) {
+        const el = document.createElement('div');
+        el.className = 'feedback-emoji';
+        el.innerText = emoji;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- GAME 1: BUBBLE POP --- */
+    const bubbleLevels = [
+        { target: 'I', ans: 'am' },
+        { target: 'You', ans: 'are' },
+        { target: 'He', ans: 'is' },
+        { target: 'We', ans: 'are' },
+        { target: 'She', ans: 'is' }
+    ];
+    let bubbleIdx = 0;
+    let bScore = 0;
+
+    function loadBubbleLevel() {
+        if (bubbleIdx >= bubbleLevels.length) {
+            document.getElementById('bubbleTarget').innerText = "Perfect!";
+            document.getElementById('bubblesArea').style.display = 'none';
+            setTimeout(() => changeSlide(1), 2000);
+            return;
+        }
+        document.getElementById('bubbleTarget').innerText = bubbleLevels[bubbleIdx].target;
+        // reset bubbles
+        document.querySelectorAll('.bubble').forEach(b => {
+            b.classList.remove('popped');
+            b.style.pointerEvents = 'auto';
+        });
+    }
+
+    function checkBubble(val, el) {
+        const rect = el.getBoundingClientRect();
+        if (val === bubbleLevels[bubbleIdx].ans) {
+            // Correct
+            speak("Correct!");
+            showEmojiFeedback("🌟", rect.left, rect.top);
+            bScore++;
+            document.getElementById('bubbleScore').innerText = bScore;
+            el.classList.add('popped');
+            el.style.pointerEvents = 'none';
+            bubbleIdx++;
+            setTimeout(loadBubbleLevel, 800);
+        } else {
+            // Wrong
+            speak("Oh no!");
+            showEmojiFeedback("❌", rect.left, rect.top);
+            // Spaced repetition style: add it to the end of the array!
+            bubbleLevels.push(bubbleLevels[bubbleIdx]);
+            bubbleIdx++;
+            setTimeout(loadBubbleLevel, 800);
+        }
+    }
+
+    /* --- GAME 2: PUZZLE BUILDER --- */
+    const puzzles = [
+        { hint: 'Ela é feliz.', words: ['She', 'is', 'happy'], ans: 'She is happy' },
+        { hint: 'Eles são meus amigos.', words: ['friends', 'are', 'They', 'my'], ans: 'They are my friends' },
+        { hint: 'Eu sou um estudante.', words: ['student', 'I', 'a', 'am'], ans: 'I am a student' }
+    ];
+    let pIdx = 0;
+    let currentSentenceArr = [];
+
+    function loadPuzzle() {
+        if (pIdx >= puzzles.length) {
+            document.getElementById('puzzleSentence').innerText = "Excellent!";
+            document.getElementById('puzzlePieces').innerHTML = "";
+            document.getElementById('puzzleHint').innerText = "All puzzles completed!";
+            setTimeout(() => changeSlide(1), 2000);
+            return;
+        }
+        currentSentenceArr = [];
+        document.getElementById('puzzleSentence').innerText = "___ ___ ___";
+        document.getElementById('puzzleHint').innerText = "Dica: " + puzzles[pIdx].hint;
+        
+        // Shuffle words
+        let shuffled = [...puzzles[pIdx].words].sort(() => Math.random() - 0.5);
+        let piecesHtml = "";
+        shuffled.forEach(w => {
+            piecesHtml += `<div class="piece" onclick="addPiece('${w}', this)">${w}</div>`;
+        });
+        document.getElementById('puzzlePieces').innerHTML = piecesHtml;
+    }
+
+    function addPiece(word, el) {
+        currentSentenceArr.push(word);
+        el.style.display = 'none';
+        document.getElementById('puzzleSentence').innerText = currentSentenceArr.join(" ");
+        
+        if (currentSentenceArr.length === puzzles[pIdx].words.length) {
+            if (currentSentenceArr.join(" ") === puzzles[pIdx].ans) {
+                speak(currentSentenceArr.join(" "));
+                showEmojiFeedback("✅", window.innerWidth/2, window.innerHeight/2);
+                pIdx++;
+                setTimeout(loadPuzzle, 1500);
+            } else {
+                speak("Try again");
+                showEmojiFeedback("❌", window.innerWidth/2, window.innerHeight/2);
+                setTimeout(resetPuzzle, 1000);
+            }
+        }
+    }
+
+    function resetPuzzle() {
+        loadPuzzle();
+    }
+
+    // Init games
+    loadBubbleLevel();
+    loadPuzzle();
+
+    /* --- MEGA QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "Qual o verbo To Be para 'I'?", options: ["is", "am", "are"], ans: 1 },
+        { q: "Complete: You ___ my best friend.", options: ["are", "am", "is"], ans: 0 },
+        { q: "Qual o verbo correto para 'He, She, It'?", options: ["are", "is", "am"], ans: 1 },
+        { q: "Complete: The dog ___ playing.", options: ["are", "is", "am"], ans: 1 },
+        { q: "Complete: We ___ learning English!", options: ["am", "is", "are"], ans: 2 },
+        { q: "Complete: I ___ 12 years old.", options: ["are", "is", "am"], ans: 2 },
+        { q: "Complete: They ___ playing video games.", options: ["is", "am", "are"], ans: 2 },
+        { q: "Qual é o verbo para 'It'? (Coisas e animais)", options: ["is", "are", "am"], ans: 0 },
+        { q: "Complete: She ___ very smart.", options: ["am", "are", "is"], ans: 2 },
+        { q: "Complete: My mother ___ beautiful.", options: ["are", "is", "am"], ans: 1 },
+        { q: "Complete: You and I ___ friends. (Dica: 'We')", options: ["is", "am", "are"], ans: 2 },
+        { q: "O verbo para 'They' (Eles/Elas) é:", options: ["are", "is", "am"], ans: 0 },
+        { q: "Complete: The cats ___ sleeping.", options: ["are", "is", "am"], ans: 0 },
+        { q: "Complete: It ___ a sunny day.", options: ["is", "are", "am"], ans: 0 },
+        { q: "Qual verbo To Be acompanha 'You'?", options: ["is", "are", "am"], ans: 1 }
+    ];
+
+    let quizIdx = 0;
+    let score = 0;
+    let totalOriginalQuestions = quizData.length;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Mega Quiz Complete! Your score is " + score + " out of " + totalOriginalQuestions + ".");
+            setTimeout(() => changeSlide(1), 2000);
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = currentQ.q;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 15px; height: auto; padding: 20px; border:2px solid var(--c16-accent); color:var(--c16-accent); font-size: 1.5rem; background: #fff;" onclick="checkQuiz(${idx}, this)">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx, btnEl) {
+        const currentQ = quizData[quizIdx];
+        const rect = btnEl.getBoundingClientRect();
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+            showEmojiFeedback("🌟", rect.left + rect.width/2, rect.top);
+            btnEl.style.background = '#4CAF50';
+            btnEl.style.color = '#fff';
+        } else {
+            speak("Wrong.");
+            showEmojiFeedback("💥", rect.left + rect.width/2, rect.top);
+            btnEl.style.background = '#f44336';
+            btnEl.style.color = '#fff';
+            
+            // Spaced Repetition (SRS): Adiciona a mesma pergunta um pouco mais a frente
+            // Se houver mais de 2 perguntas pela frente, insere 2 posicoes a frente. Senao, joga pro final.
+            const remaining = quizData.length - 1 - quizIdx;
+            if (remaining >= 2) {
+                quizData.splice(quizIdx + 3, 0, currentQ);
+            } else {
+                quizData.push(currentQ);
+            }
+        }
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Score: ${score}`;
+        setTimeout(loadQuiz, 1200);
+    }
+</script>
+{% endblock %}
