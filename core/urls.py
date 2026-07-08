@@ -38,6 +38,8 @@ from .views import (
     profile_view,
     game_puzzle,
     game_memory,
+    game_map_view,
+    game_rpg_view,
     staff_dashboard,
     staff_student_detail,
     ai_tutor,
@@ -100,6 +102,8 @@ urlpatterns = [
     path("profile/", profile_view, name="profile"),
     path("game/puzzle/", game_puzzle, name="game_puzzle"),
     path("game/memory/", game_memory, name="game_memory"),
+    path("game/map/", game_map_view, name="game_map"),
+    path("game/rpg/", game_rpg_view, name="game_rpg"),
     path("staff/dashboard/", staff_dashboard, name="staff_dashboard"),
     path(
         "staff/student/<int:user_id>/",

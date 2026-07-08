@@ -346,6 +346,18 @@ def game_memory(request):
     return render(request, "game_memory.html")
 
 
+@login_required
+def game_map_view(request):
+    log_activity(request.user, "Viewed Game Map (Level Up)")
+    return render(request, "game_map.html")
+
+
+@login_required
+def game_rpg_view(request):
+    log_activity(request.user, "Played Game RPG (World 1)")
+    return render(request, "game_rpg.html")
+
+
 @staff_member_required
 def staff_dashboard(request):
     students = User.objects.filter(is_staff=False).annotate(

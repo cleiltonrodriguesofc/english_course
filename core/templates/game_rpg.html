@@ -1,0 +1,520 @@
+{% extends 'base.html' %}
+{% block title %}RPG Battle - World 1 - English Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Fullscreen App Mode */
+    .sidebar, .top-navbar, .mobile-bottom-nav, .page-title-area { display: none !important; }
+    .main-content { padding: 0 !important; max-width: 100vw !important; margin: 0 !important; }
+    .content-area { padding: 0 !important; }
+    .layout-wrapper { min-height: 100vh; }
+
+    /* --- RPG THEME --- */
+    :root {
+        --rpg-hp: #ff4757;
+        --rpg-mp: #1e90ff;
+        --rpg-bg: #2f3542;
+        --rpg-panel: rgba(0, 0, 0, 0.7);
+    }
+
+    body {
+        background-color: var(--rpg-bg);
+    }
+
+    .battle-arena {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        height: 45vh;
+        min-height: 280px;
+        margin: 10px auto;
+        background: url('https://images.unsplash.com/photo-1542204165-65bf26472b9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80') center/cover;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        border: 3px solid #57606f;
+        overflow: hidden;
+    }
+
+    /* Overlay escuro para dar tom de batalha */
+    .battle-arena::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 1;
+    }
+
+    /* Personagens */
+    .character-container {
+        position: absolute;
+        bottom: 20px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .player {
+        left: 10%;
+    }
+
+    .enemy {
+        right: 10%;
+    }
+
+    .sprite {
+        font-size: 5rem;
+        filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+    }
+
+    /* HUD */
+    .hud {
+        position: absolute;
+        top: 10px;
+        z-index: 5;
+        background: var(--rpg-panel);
+        padding: 5px 10px;
+        border-radius: 8px;
+        border: 1px solid #fff;
+        color: #fff;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .hud-player { left: 20px; }
+    .hud-enemy { right: 20px; text-align: right; }
+
+    .health-bar-bg {
+        width: 150px;
+        height: 15px;
+        background: #333;
+        border: 2px solid #fff;
+        border-radius: 10px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+    .health-bar-fill {
+        height: 100%;
+        background: var(--rpg-hp);
+        width: 100%;
+        transition: width 0.3s;
+    }
+
+    /* Enemy Word Bubble */
+    .enemy-word {
+        position: absolute;
+        top: -40px;
+        background: #fff;
+        color: #000;
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.5s;
+    }
+
+    .enemy-word::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: 15px;
+        border-width: 8px 8px 0;
+        border-style: solid;
+        border-color: #fff transparent transparent transparent;
+    }
+
+    .enemy-word.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Painel de Controle (Magias) */
+    .action-panel {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--rpg-panel);
+        border: 3px solid #57606f;
+        border-radius: 15px;
+        padding: 15px;
+        color: #fff;
+    }
+
+    .magic-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .btn-magic {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        border: 2px solid #fff;
+        color: #fff;
+        padding: 10px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 3px 0 #2980b9;
+    }
+
+    .btn-magic:hover {
+        transform: translateY(3px);
+        box-shadow: 0 2px 0 #2980b9;
+        background: linear-gradient(135deg, #34495e, #2980b9);
+    }
+
+    .btn-magic:active {
+        transform: translateY(5px);
+        box-shadow: 0 0 0 #2980b9;
+    }
+
+    /* Animações de Batalha */
+    @keyframes playerAttack {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(100px); }
+        100% { transform: translateX(0); }
+    }
+
+    @keyframes enemyHit {
+        0% { transform: translateX(0); filter: brightness(1); }
+        25% { transform: translateX(10px); filter: brightness(3) hue-rotate(90deg); }
+        50% { transform: translateX(-10px); filter: brightness(3) hue-rotate(90deg); }
+        75% { transform: translateX(10px); filter: brightness(3) hue-rotate(90deg); }
+        100% { transform: translateX(0); filter: brightness(1); }
+    }
+    
+    @keyframes enemyAttack {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(-100px); }
+        100% { transform: translateX(0); }
+    }
+
+    @keyframes playerHit {
+        0% { transform: translateX(0); filter: brightness(1) drop-shadow(0 0 0 red); }
+        25% { transform: translateX(-10px); filter: brightness(0.5) drop-shadow(0 0 20px red); }
+        50% { transform: translateX(10px); filter: brightness(0.5) drop-shadow(0 0 20px red); }
+        75% { transform: translateX(-10px); filter: brightness(0.5) drop-shadow(0 0 20px red); }
+        100% { transform: translateX(0); filter: brightness(1) drop-shadow(0 0 0 red); }
+    }
+
+    .anim-player-attack { animation: playerAttack 0.4s ease-out; }
+    .anim-enemy-hit { animation: enemyHit 0.5s ease-out; }
+    .anim-enemy-attack { animation: enemyAttack 0.4s ease-out; }
+    .anim-player-hit { animation: playerHit 0.5s ease-out; }
+
+    /* Particles */
+    .magic-particle {
+        position: absolute;
+        font-size: 3rem;
+        z-index: 10;
+        pointer-events: none;
+        animation: shoot 0.4s linear forwards;
+    }
+
+    @keyframes shoot {
+        0% { left: 20%; top: 60%; transform: scale(1); }
+        100% { left: 80%; top: 60%; transform: scale(2); opacity: 0; }
+    }
+
+    /* Modal Victory */
+    .victory-modal {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.8);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+
+    /* --- RESPONSIVE MOBILE --- */
+    @media (max-width: 768px) {
+        .battle-arena {
+            height: 35vh;
+            min-height: 200px;
+            margin: 5px auto;
+        }
+        .sprite { font-size: 4rem; }
+        .enemy-word { font-size: 1rem; top: -35px; padding: 3px 10px; }
+        .hud { padding: 3px 6px; font-size: 0.75rem; }
+        .health-bar-bg { width: 80px; height: 8px; margin-top: 3px; }
+        
+        .action-panel { padding: 10px; }
+        .action-panel > div:first-child { font-size: 0.9rem; margin-bottom: 10px; padding-bottom: 5px; }
+
+        .magic-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .btn-magic {
+            padding: 8px;
+            font-size: 1rem;
+        }
+        
+        h1 { font-size: 1.2rem !important; }
+        
+        .victory-modal h1 { font-size: 2rem !important; }
+        .victory-modal div { font-size: 4rem !important; }
+        
+        /* Adjust positions to avoid overlap */
+        .player { left: 2%; bottom: 10px; }
+        .enemy { right: 2%; bottom: 10px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade" style="padding: 10px;">
+    <div style="max-width: 900px; margin: 0 auto 10px auto; display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="color: white; font-family: 'Outfit'; margin: 0;"><a href="{% url 'game_map' %}" style="color:white; text-decoration:none;">❮</a> W1: Monster Words</h1>
+        <div>
+            <button onclick="toggleFullScreen()" class="btn-magic" style="padding: 5px 10px; font-size: 0.9rem;">🔲</button>
+        </div>
+    </div>
+
+    <!-- ARENA -->
+    <div class="battle-arena">
+        
+        <!-- Player HUD -->
+        <div class="hud hud-player">
+            <div>Isabelle (Lv. 1)</div>
+            <div class="health-bar-bg">
+                <div class="health-bar-fill" id="playerHpBar"></div>
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">HP: <span id="playerHpTxt">3</span>/3</div>
+        </div>
+
+        <!-- Enemy HUD -->
+        <div class="hud hud-enemy">
+            <div>Vocabulon 👾</div>
+            <div class="health-bar-bg" style="margin-left: auto;">
+                <div class="health-bar-fill" id="enemyHpBar" style="background: #a55eea;"></div>
+            </div>
+            <div style="font-size: 0.8rem; margin-top: 5px;">HP: <span id="enemyHpTxt">10</span>/10</div>
+        </div>
+
+        <!-- Player Sprite -->
+        <div class="character-container player" id="playerChar">
+            <div class="sprite">🧙‍♀️</div>
+        </div>
+
+        <!-- Enemy Sprite -->
+        <div class="character-container enemy" id="enemyChar">
+            <div class="enemy-word" id="enemyWordBubble">Preparando...</div>
+            <div class="sprite" id="enemySprite">👾</div>
+        </div>
+
+    </div>
+
+    <!-- ACTION PANEL -->
+    <div class="action-panel">
+        <div style="margin-bottom: 15px; font-family: 'Courier New', Courier, monospace; font-size: 1.2rem; border-bottom: 1px solid #555; padding-bottom: 10px;">
+            > Qual magia (em Inglês) você vai usar para bloquear "<span id="currentPtWord" style="color: #ffde00;">...</span>"?
+        </div>
+        
+        <div class="magic-grid" id="magicOptions">
+            <!-- Buttons injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- Victory Modal -->
+<div class="victory-modal" id="victoryModal">
+    <h1 style="font-size: 4rem; color: #ffde00; text-shadow: 0 0 20px rgba(255,222,0,0.8);">VICTORY!</h1>
+    <div style="font-size: 8rem; margin: 20px; animation: playerAttack 2s infinite;">🏅</div>
+    <p style="font-size: 1.5rem;">Você derrotou o Vocabulon e dominou a Base do Inglês!</p>
+    <a href="{% url 'game_map' %}" class="btn-magic" style="margin-top: 30px; text-decoration: none;">Voltar ao Mapa</a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- BATTLE DATA (World 1: Foundations) ---
+    // SRS SYSTEM: We have a set of questions. If answered wrong, pushed ahead.
+    const rawEnemyWords = [
+        { pt: "Olá", en: "Hello", fake1: "Bye", fake2: "Thanks" },
+        { pt: "Azul", en: "Blue", fake1: "Red", fake2: "Yellow" },
+        { pt: "Nome", en: "Name", fake1: "Age", fake2: "Book" },
+        { pt: "Eu", en: "I", fake1: "You", fake2: "He" },
+        { pt: "Professor", en: "Teacher", fake1: "Student", fake2: "Doctor" },
+        { pt: "Livro", en: "Book", fake1: "Pen", fake2: "Desk" },
+        { pt: "Tchau", en: "Goodbye", fake1: "Hello", fake2: "Please" },
+        { pt: "Obrigado", en: "Thank you", fake1: "Sorry", fake2: "Yes" },
+        { pt: "Vermelho", en: "Red", fake1: "Blue", fake2: "Green" },
+        { pt: "Estudante", en: "Student", fake1: "School", fake2: "Teacher" }
+    ];
+
+    let battleQueue = [...rawEnemyWords];
+    
+    // Stats
+    const playerMaxHp = 3;
+    let playerHp = 3;
+    
+    const enemyMaxHp = 10; // 10 hits to kill enemy
+    let enemyHp = 10;
+
+    let currentEnemyWord = null;
+    let isLocked = false;
+
+    // Elements
+    const enemyWordBubble = document.getElementById('enemyWordBubble');
+    const currentPtWordSpan = document.getElementById('currentPtWord');
+    const magicOptions = document.getElementById('magicOptions');
+    const playerChar = document.getElementById('playerChar');
+    const enemyChar = document.getElementById('enemyChar');
+    const arena = document.querySelector('.battle-arena');
+
+    // Init
+    function initBattle() {
+        enemyHp = battleQueue.length; // Sync enemy HP to queue size
+        document.getElementById('enemyHpTxt').innerText = enemyHp;
+        nextTurn();
+    }
+
+    function nextTurn() {
+        if (enemyHp <= 0) {
+            winBattle();
+            return;
+        }
+        if (playerHp <= 0) {
+            loseBattle();
+            return;
+        }
+
+        currentEnemyWord = battleQueue.shift();
+        
+        // Show enemy attacking
+        enemyWordBubble.innerText = currentEnemyWord.pt;
+        currentPtWordSpan.innerText = currentEnemyWord.pt;
+        enemyWordBubble.classList.add('show');
+
+        // Create random buttons
+        const options = [currentEnemyWord.en, currentEnemyWord.fake1, currentEnemyWord.fake2];
+        options.sort(() => Math.random() - 0.5);
+
+        let html = '';
+        options.forEach(opt => {
+            html += `<button class="btn-magic" onclick="castMagic('${opt}')">${opt}</button>`;
+        });
+        magicOptions.innerHTML = html;
+        isLocked = false;
+    }
+
+    function castMagic(chosenSpell) {
+        if (isLocked) return;
+        isLocked = true;
+        
+        if (chosenSpell === currentEnemyWord.en) {
+            // CORRECT: Player Attacks
+            playerAttackAnim();
+        } else {
+            // WRONG: Enemy Attacks (Spaced Repetition)
+            enemyAttackAnim();
+            
+            // SRS LOGIC: Re-insert the failed word back into the queue
+            // Push it 2 positions ahead, or at the end if fewer than 2 left
+            if (battleQueue.length >= 2) {
+                battleQueue.splice(2, 0, currentEnemyWord);
+            } else {
+                battleQueue.push(currentEnemyWord);
+            }
+            // Increase Enemy Max HP or just don't decrease it. 
+            // In our logic, since we added to the queue, the queue size goes up, meaning more hits required.
+            enemyHp++; // Enemy heals/gets stronger because of the mistake
+            updateHUD();
+        }
+    }
+
+    function playerAttackAnim() {
+        // Hide bubble
+        enemyWordBubble.classList.remove('show');
+        
+        // Anim Player
+        playerChar.classList.add('anim-player-attack');
+        
+        // Create Fireball
+        setTimeout(() => {
+            const fireball = document.createElement('div');
+            fireball.className = 'magic-particle';
+            fireball.innerText = '🔥';
+            arena.appendChild(fireball);
+            
+            // Anim Enemy Hit
+            setTimeout(() => {
+                fireball.remove();
+                enemyChar.classList.add('anim-enemy-hit');
+                
+                // Damage
+                enemyHp--;
+                updateHUD();
+                
+                setTimeout(() => {
+                    playerChar.classList.remove('anim-player-attack');
+                    enemyChar.classList.remove('anim-enemy-hit');
+                    nextTurn();
+                }, 500);
+
+            }, 400); // Fireball travel time
+        }, 200);
+    }
+
+    function enemyAttackAnim() {
+        enemyWordBubble.classList.remove('show');
+        
+        // Enemy attacks
+        enemyChar.classList.add('anim-enemy-attack');
+        
+        setTimeout(() => {
+            playerChar.classList.add('anim-player-hit');
+            
+            // Damage Player
+            playerHp--;
+            updateHUD();
+            
+            setTimeout(() => {
+                enemyChar.classList.remove('anim-enemy-attack');
+                playerChar.classList.remove('anim-player-hit');
+                nextTurn();
+            }, 500);
+        }, 200);
+    }
+
+    function updateHUD() {
+        // Player
+        const pPercent = (playerHp / playerMaxHp) * 100;
+        document.getElementById('playerHpBar').style.width = pPercent + '%';
+        document.getElementById('playerHpTxt').innerText = playerHp;
+
+        // Enemy (calculate relative to original 10, but cap visually)
+        const ePercent = (enemyHp / 10) * 100;
+        document.getElementById('enemyHpBar').style.width = Math.min(ePercent, 100) + '%';
+        document.getElementById('enemyHpTxt').innerText = enemyHp;
+    }
+
+    function winBattle() {
+        document.getElementById('victoryModal').style.display = 'flex';
+        // Aqui poderia disparar o fetch() para salvar no BD que ganhou a medalha 1.
+    }
+
+    function loseBattle() {
+        alert('Oh no! Seu HP zerou! A vila do vocabulário foi destruída... 😢 (Aperte OK para recarregar)');
+        location.reload();
+    }
+
+    // Start
+    setTimeout(initBattle, 500);
+
+</script>
+{% endblock %}
