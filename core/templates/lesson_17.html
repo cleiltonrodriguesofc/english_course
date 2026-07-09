@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% block title %}Lesson 17 - The Explorer's Inventory{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lesson-header {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+
+    .lesson-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #a855f7, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .grammar-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .grammar-box h3 {
+        color: var(--accent-primary);
+        font-family: 'Outfit';
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 0.5rem;
+    }
+
+    .vocab-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .vocab-card {
+        background: var(--surface);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+
+    .vocab-en { font-weight: bold; color: white; }
+    .vocab-pt { color: var(--text-secondary); }
+
+    /* Dungeon Mini-Game */
+    .dungeon-container {
+        position: relative;
+        background: url('https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;
+        height: 300px;
+        border-radius: var(--radius-lg);
+        border: 3px solid #555;
+        margin-top: 2rem;
+        overflow: hidden;
+    }
+
+    .dungeon-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .dungeon-hud {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        padding: 15px 30px;
+        border-radius: 10px;
+        border: 2px solid #ffde00;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    .dungeon-question {
+        font-size: 1.3rem;
+        font-family: 'Outfit';
+        color: #fff;
+        margin-bottom: 10px;
+    }
+
+    .dungeon-options {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-dungeon {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-dungeon:hover {
+        background: #2563eb;
+    }
+
+    .dungeon-item {
+        position: absolute;
+        font-size: 3rem;
+        filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+        transition: all 0.3s;
+    }
+
+    .dungeon-item.found {
+        transform: scale(1.5) translateY(-20px);
+        filter: brightness(1.5) drop-shadow(0 0 20px #ffde00);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="animate-fade">
+    
+    <a href="{% url 'dashboard' %}#lessons" class="btn btn-primary" style="margin-bottom: 1.5rem; display: inline-block;">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+
+    <div class="lesson-header">
+        <h1 class="lesson-title">Lesson 17: The Explorer's Inventory</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">
+            Onde estão as suas coisas? Aprenda a descrever **de quem é** e **onde está**!
+        </p>
+    </div>
+
+    <div class="grammar-box">
+        <h3><i class="fas fa-user-tag"></i> 1. Possessive Adjectives (De quem é?)</h3>
+        <p>Usamos para indicar posse. Sempre vem ANTES de um objeto. Ex: <strong>My</strong> sword.</p>
+        <div class="vocab-grid">
+            <div class="vocab-card"><span class="vocab-en">My</span> <span class="vocab-pt">Meu / Minha</span></div>
+            <div class="vocab-card"><span class="vocab-en">Your</span> <span class="vocab-pt">Seu / Sua</span></div>
+            <div class="vocab-card"><span class="vocab-en">His</span> <span class="vocab-pt">Dele</span></div>
+            <div class="vocab-card"><span class="vocab-en">Her</span> <span class="vocab-pt">Dela</span></div>
+            <div class="vocab-card"><span class="vocab-en">Our</span> <span class="vocab-pt">Nosso / Nossa</span></div>
+            <div class="vocab-card"><span class="vocab-en">Their</span> <span class="vocab-pt">Deles / Delas</span></div>
+        </div>
+    </div>
+
+    <div class="grammar-box">
+        <h3><i class="fas fa-box-open"></i> 2. Prepositions of Place (Onde está?)</h3>
+        <p>Ajudam a descrever a localização exata de algo no mapa!</p>
+        <div class="vocab-grid">
+            <div class="vocab-card"><span class="vocab-en">In</span> <span class="vocab-pt">Dentro</span></div>
+            <div class="vocab-card"><span class="vocab-en">On</span> <span class="vocab-pt">Em cima (superfície)</span></div>
+            <div class="vocab-card"><span class="vocab-en">Under</span> <span class="vocab-pt">Embaixo</span></div>
+            <div class="vocab-card"><span class="vocab-en">Behind</span> <span class="vocab-pt">Atrás</span></div>
+            <div class="vocab-card"><span class="vocab-en">Next to</span> <span class="vocab-pt">Ao lado</span></div>
+        </div>
+    </div>
+
+    <div class="grammar-box">
+        <h3><i class="fas fa-gamepad"></i> Mini-Game: Dungeon Escape</h3>
+        <p>Ajude Isabelle a encontrar seus equipamentos perdidos na masmorra!</p>
+        
+        <div class="dungeon-container">
+            <div class="dungeon-overlay"></div>
+            
+            <!-- Items -->
+            <div class="dungeon-item" id="item-sword" style="display: none; top: 40%; left: 30%;">🗡️</div>
+            <div class="dungeon-item" id="item-shield" style="display: none; top: 70%; left: 70%;">🛡️</div>
+            <div class="dungeon-item" id="item-potion" style="display: none; top: 20%; left: 50%;">🧪</div>
+
+            <div class="dungeon-hud">
+                <div class="dungeon-question" id="dungeonQuestion">Where is my sword?</div>
+                <div class="dungeon-options" id="dungeonOptions">
+                    <!-- Buttons inserted via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dungeonStages = [
+        {
+            q: "Where is my sword? (A espada está EM CIMA da mesa)",
+            opts: ["It is on the table", "It is in the table", "It is under the table"],
+            ans: "It is on the table",
+            item: "item-sword",
+            top: "50%", left: "40%"
+        },
+        {
+            q: "Where is her shield? (O escudo está EMBAIXO da cama)",
+            opts: ["It is in the bed", "It is under the bed", "It is on the bed"],
+            ans: "It is under the bed",
+            item: "item-shield",
+            top: "70%", left: "70%"
+        },
+        {
+            q: "Where is our potion? (A poção está DENTRO do baú)",
+            opts: ["It is next to the chest", "It is behind the chest", "It is in the chest"],
+            ans: "It is in the chest",
+            item: "item-potion",
+            top: "20%", left: "50%"
+        }
+    ];
+
+    let currentStage = 0;
+
+    function loadDungeonStage() {
+        if (currentStage >= dungeonStages.length) {
+            document.getElementById('dungeonQuestion').innerHTML = "<span style='color:#00e676;'>🎉 You found everything! Dungeon Cleared!</span>";
+            document.getElementById('dungeonOptions').innerHTML = "<a href='/game/map/' class='btn-dungeon'>Go to World Map</a>";
+            return;
+        }
+
+        const stage = dungeonStages[currentStage];
+        document.getElementById('dungeonQuestion').innerText = stage.q;
+        
+        // Hide all items
+        document.querySelectorAll('.dungeon-item').forEach(el => { el.style.display = 'none'; el.classList.remove('found'); });
+
+        let optsHtml = '';
+        let shuffled = [...stage.opts].sort(() => Math.random() - 0.5);
+        
+        shuffled.forEach(opt => {
+            optsHtml += `<button class="btn-dungeon" onclick="checkDungeonAnswer('${opt}', '${stage.ans}')">${opt}</button>`;
+        });
+        
+        document.getElementById('dungeonOptions').innerHTML = optsHtml;
+    }
+
+    function checkDungeonAnswer(selected, correct) {
+        if (selected === correct) {
+            const stage = dungeonStages[currentStage];
+            const itemEl = document.getElementById(stage.item);
+            itemEl.style.display = 'block';
+            itemEl.style.top = stage.top;
+            itemEl.style.left = stage.left;
+            
+            // Trigger animation
+            setTimeout(() => {
+                itemEl.classList.add('found');
+            }, 50);
+
+            currentStage++;
+            setTimeout(loadDungeonStage, 2000); // load next after 2 seconds
+        } else {
+            // Flash red
+            const hud = document.querySelector('.dungeon-hud');
+            hud.style.borderColor = 'red';
+            setTimeout(() => { hud.style.borderColor = '#ffde00'; }, 300);
+        }
+    }
+
+    loadDungeonStage();
+</script>
+{% endblock %}

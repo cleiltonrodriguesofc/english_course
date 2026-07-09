@@ -7,7 +7,7 @@
 <style>
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 2rem;
         margin-top: 1rem;
     }
@@ -73,6 +73,7 @@
         display: flex;
         align-items: center;
         padding: 1rem;
+        min-height: 56px; /* Touch target */
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
@@ -348,6 +349,10 @@
                 <a href="{% url 'lesson_15' %}" class="lesson-link">
                     <i class="fas fa-hand-pointer"></i>
                     <span>Demonstrative Pronouns</span>
+                </a>
+                <a href="{% url 'lesson_17' %}" class="lesson-link" style="border-left: 3px solid #ffde00; background: rgba(255, 222, 0, 0.05);">
+                    <i class="fas fa-dungeon" style="color: #ffde00;"></i>
+                    <span style="color: #ffde00; font-weight: bold;">Lesson 17: Dungeon Escape</span>
                 </a>
             </div>
         </div>

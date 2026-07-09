@@ -18,6 +18,7 @@ from .views import (
     lesson_14,
     lesson_15,
     lesson_16,
+    lesson_17,
     lesson_review_1,
     lesson_review_2,
     lesson_review_3,
@@ -52,6 +53,7 @@ from .views import (
     activity_review_9,
     activity_review_10,
     activity_conversation_2,
+    update_mastery,
 )
 
 urlpatterns = [
@@ -75,6 +77,7 @@ urlpatterns = [
     path("lesson/14/", lesson_14, name="lesson_14"),
     path("lesson/15/", lesson_15, name="lesson_15"),
     path("lesson/16/", lesson_16, name="lesson_16"),
+    path("lesson/17/", lesson_17, name="lesson_17"),
     path("lesson/review/1/", lesson_review_1, name="lesson_review_1"),
     path("lesson/review/2/", lesson_review_2, name="lesson_review_2"),
     path("lesson/review/3/", lesson_review_3, name="lesson_review_3"),
@@ -99,11 +102,13 @@ urlpatterns = [
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
     path("api/save-quiz/", save_quiz_result, name="save_quiz_result"),
+    path("api/update-mastery/", update_mastery, name="update_mastery"),
     path("profile/", profile_view, name="profile"),
     path("game/puzzle/", game_puzzle, name="game_puzzle"),
     path("game/memory/", game_memory, name="game_memory"),
     path("game/map/", game_map_view, name="game_map"),
     path("game/rpg/", game_rpg_view, name="game_rpg"),
+    path("game/rpg/<int:world_id>/", game_rpg_view, name="game_rpg_level"),
     path("staff/dashboard/", staff_dashboard, name="staff_dashboard"),
     path(
         "staff/student/<int:user_id>/",

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import QuizResult, ActivityLog, Lesson, LessonProgress
+from .models import QuizResult, ActivityLog, Lesson, LessonProgress, StudentMastery
 from django.contrib.auth.models import User
 from django.db.models import Avg, Count
 from django.contrib.admin.views.decorators import staff_member_required
@@ -135,6 +135,10 @@ def lesson_16(request):
     log_activity(request.user, "Viewed Lesson 16 (Verb To Be Fun)")
     return render(request, "lesson_16.html")
 
+@login_required
+def lesson_17(request):
+    log_activity(request.user, "Viewed Lesson 17 (Dungeon Escape / Possessives & Prepositions)")
+    return render(request, "lesson_17.html")
 
 @login_required
 def lesson_review_1(request):
@@ -353,9 +357,84 @@ def game_map_view(request):
 
 
 @login_required
-def game_rpg_view(request):
-    log_activity(request.user, "Played Game RPG (World 1)")
-    return render(request, "game_rpg.html")
+def game_rpg_view(request, world_id=1):
+    log_activity(request.user, f"Played Game RPG (World {world_id})")
+    
+    worlds = {
+        1: {
+            "title": "W1: Monster Words",
+            "boss_name": "Vocabulon 👾",
+            "words": [
+                {"pt": "Olá", "en": "Hello", "fake1": "Bye", "fake2": "Thanks"},
+                {"pt": "Azul", "en": "Blue", "fake1": "Red", "fake2": "Yellow"},
+                {"pt": "Nome", "en": "Name", "fake1": "Age", "fake2": "Book"},
+                {"pt": "Eu", "en": "I", "fake1": "You", "fake2": "He"},
+                {"pt": "Professor", "en": "Teacher", "fake1": "Student", "fake2": "Doctor"},
+                {"pt": "Livro", "en": "Book", "fake1": "Pen", "fake2": "Desk"},
+                {"pt": "Tchau", "en": "Goodbye", "fake1": "Hello", "fake2": "Please"},
+                {"pt": "Obrigado", "en": "Thank you", "fake1": "Sorry", "fake2": "Yes"},
+                {"pt": "Vermelho", "en": "Red", "fake1": "Blue", "fake2": "Green"},
+                {"pt": "Estudante", "en": "Student", "fake1": "School", "fake2": "Teacher"}
+            ]
+        },
+        2: {
+            "title": "W2: Routine Master",
+            "boss_name": "Clockwork ⏱️",
+            "words": [
+                {"pt": "Acordar", "en": "Wake up", "fake1": "Sleep", "fake2": "Eat"},
+                {"pt": "Sempre", "en": "Always", "fake1": "Never", "fake2": "Sometimes"},
+                {"pt": "Café da manhã", "en": "Breakfast", "fake1": "Lunch", "fake2": "Dinner"},
+                {"pt": "Trabalhar", "en": "Work", "fake1": "Play", "fake2": "Rest"},
+                {"pt": "Às vezes", "en": "Sometimes", "fake1": "Always", "fake2": "Never"},
+                {"pt": "Almoço", "en": "Lunch", "fake1": "Breakfast", "fake2": "Dinner"},
+                {"pt": "Dormir", "en": "Sleep", "fake1": "Wake up", "fake2": "Run"},
+                {"pt": "Meio-dia", "en": "Noon", "fake1": "Midnight", "fake2": "Morning"},
+                {"pt": "Noite", "en": "Night", "fake1": "Day", "fake2": "Afternoon"},
+                {"pt": "Nunca", "en": "Never", "fake1": "Always", "fake2": "Sometimes"}
+            ]
+        },
+        3: {
+            "title": "W3: People & Places",
+            "boss_name": "Urbanus 🏙️",
+            "words": [
+                {"pt": "Irmão", "en": "Brother", "fake1": "Sister", "fake2": "Father"},
+                {"pt": "Mãe", "en": "Mother", "fake1": "Father", "fake2": "Aunt"},
+                {"pt": "Rua", "en": "Street", "fake1": "City", "fake2": "House"},
+                {"pt": "Bonito(a)", "en": "Beautiful", "fake1": "Ugly", "fake2": "Tall"},
+                {"pt": "Alto", "en": "Tall", "fake1": "Short", "fake2": "Big"},
+                {"pt": "Restaurante", "en": "Restaurant", "fake1": "Hospital", "fake2": "School"},
+                {"pt": "Amigo", "en": "Friend", "fake1": "Enemy", "fake2": "Brother"},
+                {"pt": "Cidade", "en": "City", "fake1": "Street", "fake2": "Country"},
+                {"pt": "Pequeno", "en": "Small", "fake1": "Big", "fake2": "Tall"},
+                {"pt": "Carro", "en": "Car", "fake1": "Bus", "fake2": "Train"}
+            ]
+        },
+        4: {
+            "title": "W4: The Real World",
+            "boss_name": "Grammatox 🐲",
+            "words": [
+                {"pt": "Em cima", "en": "On", "fake1": "In", "fake2": "Under"},
+                {"pt": "Meu/Minha", "en": "My", "fake1": "Your", "fake2": "His"},
+                {"pt": "Dentro", "en": "In", "fake1": "On", "fake2": "Behind"},
+                {"pt": "Nosso", "en": "Our", "fake1": "Their", "fake2": "My"},
+                {"pt": "Embaixo", "en": "Under", "fake1": "On", "fake2": "Next to"},
+                {"pt": "Dela", "en": "Her", "fake1": "His", "fake2": "Your"},
+                {"pt": "Atrás", "en": "Behind", "fake1": "In front of", "fake2": "Under"},
+                {"pt": "Dele", "en": "His", "fake1": "Her", "fake2": "My"},
+                {"pt": "Ao lado", "en": "Next to", "fake1": "Under", "fake2": "On"},
+                {"pt": "Deles(as)", "en": "Their", "fake1": "Our", "fake2": "Your"}
+            ]
+        }
+    }
+    
+    world = worlds.get(world_id, worlds[1])
+    
+    context = {
+        "world": world,
+        "world_id": world_id,
+        "words_json": json.dumps(world["words"])
+    }
+    return render(request, "game_rpg.html", context)
 
 
 @staff_member_required
@@ -521,3 +600,29 @@ def ai_tutor(request):
 def activity_isabelle_chat(request):
     log_activity(request.user, "Started Activity: Isabelle Conversation Game")
     return render(request, "activity_isabelle_chat.html")
+
+@login_required
+@csrf_exempt
+def update_mastery(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            word = data.get("word")
+            is_correct = data.get("is_correct")
+            
+            if word is not None and is_correct is not None:
+                mastery, created = StudentMastery.objects.get_or_create(
+                    user=request.user,
+                    word_or_topic=word
+                )
+                
+                if is_correct:
+                    mastery.correct_attempts += 1
+                else:
+                    mastery.failed_attempts += 1
+                    
+                mastery.save()
+                return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)

@@ -47,3 +47,18 @@ class ActivityLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.action} - {self.timestamp}"
+
+class StudentMastery(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    word_or_topic = models.CharField(max_length=200) # e.g. "Hello", "Blue", "Grammar: Verb To Be"
+    correct_attempts = models.IntegerField(default=0)
+    failed_attempts = models.IntegerField(default=0)
+    last_practiced = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("user", "word_or_topic")
+
+    def __str__(self):
+        total = self.correct_attempts + self.failed_attempts
+        acc = (self.correct_attempts / total * 100) if total > 0 else 0
+        return f"{self.user.username} - {self.word_or_topic}: {acc:.1f}% ({self.correct_attempts}/{total})"

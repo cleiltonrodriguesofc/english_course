@@ -188,45 +188,47 @@
     <div class="world-path">
         
         <!-- WORLD 1 (Unlocked) -->
-        <div class="world-node" onclick="window.location.href='{% url 'game_rpg' %}'" style="border-color: #ffde00;">
+        <div class="world-node" onclick="window.location.href='{% url 'game_rpg_level' 1 %}'" style="border-color: #ffde00;">
             <div class="world-info">
                 <div class="world-number">World 1</div>
                 <h2 class="world-name">Foundations</h2>
                 <div class="world-desc">Cores e Saudações</div>
             </div>
             <div class="world-medal" style="animation: pulse 2s infinite;">🥉</div>
-            <!-- Botão jogar escondido visualmente, ativado pelo click no card -->
             <div style="position:absolute; right: -10px; background:#ffde00; color:#000; padding:5px 8px; border-radius:50%; font-weight:bold; font-size:0.8rem; border:2px solid #000; box-shadow:0 0 5px rgba(0,0,0,0.5);">PLAY</div>
         </div>
 
-        <!-- WORLD 2 (Locked) -->
-        <div class="world-node locked" onclick="alert('Conclua o Mundo 1 para liberar!')">
+        <!-- WORLD 2 (Unlocked) -->
+        <div class="world-node" onclick="window.location.href='{% url 'game_rpg_level' 2 %}'" style="border-color: #00e5ff;">
             <div class="world-info">
                 <div class="world-number">World 2</div>
                 <h2 class="world-name">My Life & Time</h2>
-                <div class="world-desc">Rotinas, Calendário e Hobbies</div>
+                <div class="world-desc">Rotinas e Tempo</div>
             </div>
-            <div class="world-medal">🔒</div>
+            <div class="world-medal" style="animation: pulse 2.5s infinite;">🥈</div>
+            <div style="position:absolute; right: -10px; background:#00e5ff; color:#000; padding:5px 8px; border-radius:50%; font-weight:bold; font-size:0.8rem; border:2px solid #000; box-shadow:0 0 5px rgba(0,0,0,0.5);">PLAY</div>
         </div>
 
-        <!-- WORLD 3 (Locked) -->
-        <div class="world-node locked" onclick="alert('Conclua o Mundo 2 para liberar!')">
+        <!-- WORLD 3 (Unlocked) -->
+        <div class="world-node" onclick="window.location.href='{% url 'game_rpg_level' 3 %}'" style="border-color: #ff4081;">
             <div class="world-info">
                 <div class="world-number">World 3</div>
                 <h2 class="world-name">People & Places</h2>
-                <div class="world-desc">A Cidade, Família e Likes</div>
+                <div class="world-desc">Cidades e Adjetivos</div>
             </div>
-            <div class="world-medal">🔒</div>
+            <div class="world-medal" style="animation: pulse 2.2s infinite;">🥇</div>
+            <div style="position:absolute; right: -10px; background:#ff4081; color:#fff; padding:5px 8px; border-radius:50%; font-weight:bold; font-size:0.8rem; border:2px solid #000; box-shadow:0 0 5px rgba(0,0,0,0.5);">PLAY</div>
         </div>
 
-        <!-- WORLD 4 (Locked) -->
-        <div class="world-node locked" onclick="alert('Conclua o Mundo 3 para liberar!')">
+        <!-- WORLD 4 (Unlocked) -->
+        <div class="world-node" onclick="window.location.href='{% url 'game_rpg_level' 4 %}'" style="border-color: #00e676;">
             <div class="world-info">
                 <div class="world-number">World 4</div>
                 <h2 class="world-name">The Real World</h2>
-                <div class="world-desc">Comida, Roupas e Pronomes</div>
+                <div class="world-desc">Preposições e Possessivos</div>
             </div>
-            <div class="world-medal">🔒</div>
+            <div class="world-medal" style="animation: pulse 1.8s infinite;">🏆</div>
+            <div style="position:absolute; right: -10px; background:#00e676; color:#000; padding:5px 8px; border-radius:50%; font-weight:bold; font-size:0.8rem; border:2px solid #000; box-shadow:0 0 5px rgba(0,0,0,0.5);">PLAY</div>
         </div>
 
     </div>

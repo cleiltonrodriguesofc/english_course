@@ -155,7 +155,8 @@
         background: linear-gradient(135deg, #2c3e50, #3498db);
         border: 2px solid #fff;
         color: #fff;
-        padding: 10px;
+        padding: 15px; /* Bigger touch target */
+        min-height: 56px;
         font-size: 1.1rem;
         font-weight: bold;
         border-radius: 8px;
@@ -258,7 +259,8 @@
             gap: 8px;
         }
         .btn-magic {
-            padding: 8px;
+            padding: 12px;
+            min-height: 50px;
             font-size: 1rem;
         }
         
@@ -277,7 +279,7 @@
 {% block content %}
 <div class="animate-fade" style="padding: 10px;">
     <div style="max-width: 900px; margin: 0 auto 10px auto; display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="color: white; font-family: 'Outfit'; margin: 0;"><a href="{% url 'game_map' %}" style="color:white; text-decoration:none;">❮</a> W1: Monster Words</h1>
+        <h1 style="color: white; font-family: 'Outfit'; margin: 0;"><a href="{% url 'game_map' %}" style="color:white; text-decoration:none;">❮</a> {{ world.title }}</h1>
         <div>
             <button onclick="toggleFullScreen()" class="btn-magic" style="padding: 5px 10px; font-size: 0.9rem;">🔲</button>
         </div>
@@ -288,7 +290,7 @@
         
         <!-- Player HUD -->
         <div class="hud hud-player">
-            <div>Isabelle (Lv. 1)</div>
+            <div>Isabelle (Lv. {{ world_id }})</div>
             <div class="health-bar-bg">
                 <div class="health-bar-fill" id="playerHpBar"></div>
             </div>
@@ -297,7 +299,7 @@
 
         <!-- Enemy HUD -->
         <div class="hud hud-enemy">
-            <div>Vocabulon 👾</div>
+            <div>{{ world.boss_name }}</div>
             <div class="health-bar-bg" style="margin-left: auto;">
                 <div class="health-bar-fill" id="enemyHpBar" style="background: #a55eea;"></div>
             </div>
@@ -332,8 +334,8 @@
 <!-- Victory Modal -->
 <div class="victory-modal" id="victoryModal">
     <h1 style="font-size: 4rem; color: #ffde00; text-shadow: 0 0 20px rgba(255,222,0,0.8);">VICTORY!</h1>
-    <div style="font-size: 8rem; margin: 20px; animation: playerAttack 2s infinite;">🏅</div>
-    <p style="font-size: 1.5rem;">Você derrotou o Vocabulon e dominou a Base do Inglês!</p>
+    <div style="font-size: 8rem; margin: 20px; animation: pulse 2s infinite;">🏅</div>
+    <p style="font-size: 1.5rem;">Você derrotou {{ world.boss_name }} e limpou {{ world.title }}!</p>
     <a href="{% url 'game_map' %}" class="btn-magic" style="margin-top: 30px; text-decoration: none;">Voltar ao Mapa</a>
 </div>
 
@@ -341,21 +343,8 @@
 
 {% block extra_js %}
 <script>
-    // --- BATTLE DATA (World 1: Foundations) ---
-    // SRS SYSTEM: We have a set of questions. If answered wrong, pushed ahead.
-    const rawEnemyWords = [
-        { pt: "Olá", en: "Hello", fake1: "Bye", fake2: "Thanks" },
-        { pt: "Azul", en: "Blue", fake1: "Red", fake2: "Yellow" },
-        { pt: "Nome", en: "Name", fake1: "Age", fake2: "Book" },
-        { pt: "Eu", en: "I", fake1: "You", fake2: "He" },
-        { pt: "Professor", en: "Teacher", fake1: "Student", fake2: "Doctor" },
-        { pt: "Livro", en: "Book", fake1: "Pen", fake2: "Desk" },
-        { pt: "Tchau", en: "Goodbye", fake1: "Hello", fake2: "Please" },
-        { pt: "Obrigado", en: "Thank you", fake1: "Sorry", fake2: "Yes" },
-        { pt: "Vermelho", en: "Red", fake1: "Blue", fake2: "Green" },
-        { pt: "Estudante", en: "Student", fake1: "School", fake2: "Teacher" }
-    ];
-
+    // --- BATTLE DATA (DYNAMIC FROM BACKEND) ---
+    const rawEnemyWords = {{ words_json|safe }};
     let battleQueue = [...rawEnemyWords];
     
     // Stats
@@ -416,7 +405,22 @@
         if (isLocked) return;
         isLocked = true;
         
-        if (chosenSpell === currentEnemyWord.en) {
+        let isCorrect = (chosenSpell === currentEnemyWord.en);
+        
+        // --- Save to Database ---
+        fetch('/api/update-mastery/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                word: currentEnemyWord.en,
+                is_correct: isCorrect
+            })
+        }).catch(err => console.log('Error saving mastery', err));
+        
+        if (isCorrect) {
             // CORRECT: Player Attacks
             playerAttackAnim();
         } else {
@@ -430,8 +434,6 @@
             } else {
                 battleQueue.push(currentEnemyWord);
             }
-            // Increase Enemy Max HP or just don't decrease it. 
-            // In our logic, since we added to the queue, the queue size goes up, meaning more hits required.
             enemyHp++; // Enemy heals/gets stronger because of the mistake
             updateHUD();
         }
