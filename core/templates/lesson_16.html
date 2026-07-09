@@ -204,15 +204,23 @@
 
     /* --- RESPONSIVE MOBILE --- */
     @media (max-width: 768px) {
-        h1 { font-size: 1.8rem !important; }
-        h2 { font-size: 1.4rem !important; }
-        p { font-size: 1rem; }
+        h1 { font-size: 1.6rem !important; padding: 10px 20px !important; }
+        h2 { font-size: 1.3rem !important; margin-bottom: 10px; }
+        p { font-size: 0.95rem; margin-bottom: 10px; }
         
-        .verb-table th, .verb-table td { padding: 8px; font-size: 0.95rem; }
+        .slide { padding: 10px; }
+        .slide-content-wrapper { padding-bottom: 60px; }
+        
+        .table-container { margin-top: 10px; border-radius: 10px; overflow-x: auto; }
+        .verb-table th, .verb-table td { padding: 8px 5px; font-size: 0.85rem; }
         
         /* Buttons */
-        .btn-control[onclick*="changeSlide"] { width: 45px; height: 45px; }
+        .btn-control { width: 45px; height: 45px; font-size: 1rem; }
+        .btn-large { padding: 10px 20px !important; font-size: 1.1rem !important; }
         .controls { right: 10px; bottom: 10px; gap: 10px; }
+        
+        #quizQuestion { font-size: 1.4rem !important; margin-bottom: 15px; }
+        .btn-control[onclick*="checkQuiz"] { padding: 10px !important; font-size: 1.1rem !important; }
     }
 </style>
 {% endblock %}
