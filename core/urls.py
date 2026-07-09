@@ -52,6 +52,7 @@ from .views import (
     activity_review_8,
     activity_review_9,
     activity_review_10,
+    activity_review_11,
     activity_conversation_2,
     update_mastery,
 )
@@ -95,6 +96,7 @@ urlpatterns = [
     path("activity/review/8/", activity_review_8, name="activity_review_8"),
     path("activity/review/9/", activity_review_9, name="activity_review_9"),
     path("activity/review/10/", activity_review_10, name="activity_review_10"),
+    path("activity/review/11/", activity_review_11, name="activity_review_11"),
     path("activity/conversation-2/", activity_conversation_2, name="activity_conversation_2"),
     path("activity/isabelle-chat/", activity_isabelle_chat, name="activity_isabelle_chat"),
     path("quiz/", quiz_view, name="quiz"),

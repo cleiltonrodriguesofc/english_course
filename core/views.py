@@ -243,6 +243,12 @@ def activity_review_10(request):
 
 
 @login_required
+def activity_review_11(request):
+    log_activity(request.user, "Started Activity Review 11: Verb To Be Mastery Quiz")
+    return render(request, "activity_review_11.html")
+
+
+@login_required
 def activity_conversation_2(request):
     log_activity(request.user, "Started Advanced Conversation 2")
     return render(request, "activity_conversation_2.html")
