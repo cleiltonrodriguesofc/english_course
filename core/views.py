@@ -430,6 +430,38 @@ def game_rpg_view(request, world_id=1):
                 {"pt": "Ao lado", "en": "Next to", "fake1": "Under", "fake2": "On"},
                 {"pt": "Deles(as)", "en": "Their", "fake1": "Our", "fake2": "Your"}
             ]
+        },
+        5: {
+            "title": "W5: Time Walker",
+            "boss_name": "Chronos 🕰️",
+            "words": [
+                {"pt": "Eu era/estava", "en": "I was", "fake1": "I am", "fake2": "I were"},
+                {"pt": "Você era/estava", "en": "You were", "fake1": "You was", "fake2": "You are"},
+                {"pt": "Ele era/estava", "en": "He was", "fake1": "He were", "fake2": "He is"},
+                {"pt": "Ela era/estava", "en": "She was", "fake1": "She were", "fake2": "She is"},
+                {"pt": "Nós éramos/estávamos", "en": "We were", "fake1": "We was", "fake2": "We are"},
+                {"pt": "Eles eram/estavam", "en": "They were", "fake1": "They was", "fake2": "They are"},
+                {"pt": "Eu não era", "en": "I was not", "fake1": "I were not", "fake2": "I am not"},
+                {"pt": "Ele não era", "en": "He was not", "fake1": "He were not", "fake2": "He isn't"},
+                {"pt": "Você era?", "en": "Were you?", "fake1": "Was you?", "fake2": "Are you?"},
+                {"pt": "Ela estava?", "en": "Was she?", "fake1": "Were she?", "fake2": "Is she?"}
+            ]
+        },
+        6: {
+            "title": "W6: Actionator",
+            "boss_name": "Actionator 🏃",
+            "words": [
+                {"pt": "Correndo", "en": "Running", "fake1": "Run", "fake2": "Ran"},
+                {"pt": "Comendo", "en": "Eating", "fake1": "Eat", "fake2": "Ate"},
+                {"pt": "Estudando", "en": "Studying", "fake1": "Study", "fake2": "Studies"},
+                {"pt": "Trabalhando", "en": "Working", "fake1": "Work", "fake2": "Works"},
+                {"pt": "Brincando/Jogando", "en": "Playing", "fake1": "Play", "fake2": "Played"},
+                {"pt": "Falando", "en": "Speaking", "fake1": "Speak", "fake2": "Spoke"},
+                {"pt": "Lendo", "en": "Reading", "fake1": "Read", "fake2": "Reads"},
+                {"pt": "Escrevendo", "en": "Writing", "fake1": "Write", "fake2": "Wrote"},
+                {"pt": "Dormindo", "en": "Sleeping", "fake1": "Sleep", "fake2": "Slept"},
+                {"pt": "Assistindo", "en": "Watching", "fake1": "Watch", "fake2": "Watches"}
+            ]
         }
     }
     
