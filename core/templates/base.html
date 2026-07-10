@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style -->
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
-    {% block extra_css %}{% endblock %}
+
     <style>
         /* Ambient Glow Background */
         body::before {
@@ -280,6 +280,7 @@
 
         .mobile-bottom-nav { display: none; }
     </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="layout-wrapper">
