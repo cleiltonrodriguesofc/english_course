@@ -22,6 +22,9 @@ def log_activity(user, action, details=None):
 @login_required
 def dashboard(request):
     quiz_score = None
+    streak = 0
+    completed_count = 0
+    
     if request.user.is_authenticated:
         # Get best quiz score
         best_result = (
@@ -37,7 +40,42 @@ def dashboard(request):
                     (best_result.score / best_result.total_questions) * 100
                 ),
             }
-    return render(request, "dashboard.html", {"quiz_score": quiz_score})
+            
+        # Calculate Streak
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        logs = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')
+        active_dates = []
+        for log in logs:
+            d = log.timestamp.date()
+            if not active_dates or active_dates[-1] != d:
+                active_dates.append(d)
+                
+        current_date = timezone.now().date()
+        if active_dates:
+            if active_dates[0] == current_date or active_dates[0] == current_date - timedelta(days=1):
+                expected = active_dates[0]
+                for d in active_dates:
+                    if d == expected:
+                        streak += 1
+                        expected -= timedelta(days=1)
+                    else:
+                        break
+                        
+        # Calculate Completed Lessons (unique viewed lessons)
+        lesson_logs = ActivityLog.objects.filter(user=request.user, action__startswith="Viewed Lesson").values_list('action', flat=True).distinct()
+        completed_count = lesson_logs.count()
+        
+        # Recent Activities for Dashboard
+        recent_activities = logs[:5]
+
+    return render(request, "dashboard.html", {
+        "quiz_score": quiz_score,
+        "streak": streak,
+        "completed_count": completed_count,
+        "recent_activities": recent_activities
+    })
 
 
 @login_required

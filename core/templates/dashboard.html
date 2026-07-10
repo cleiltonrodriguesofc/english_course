@@ -121,7 +121,7 @@
         </div>
         <div>
             <div style="font-size: 0.875rem; color: var(--text-secondary);">Ofensiva Diária</div>
-            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">4 Dias</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">{{ streak }} Dias</div>
         </div>
     </div>
 
@@ -143,7 +143,7 @@
         </div>
         <div>
             <div style="font-size: 0.875rem; color: var(--text-secondary);">Aulas Concluídas</div>
-            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">6 / 14</div>
+            <div style="font-size: 1.5rem; font-weight: 800; font-family: 'Outfit';">{{ completed_count }} / 17</div>
         </div>
     </div>
 
@@ -153,6 +153,27 @@
             <h2 style="color: #ffde00; font-family: 'Outfit'; font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">🎮 JOGAR LEVEL UP! 🎮</h2>
             <p style="color: #fff; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;">Revisão Gamificada: Derrote monstros, destrave mundos e ganhe medalhas!</p>
             <a href="{% url 'game_map' %}" class="btn-control" style="background: #ffde00; color: #000; padding: 15px 40px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; text-decoration: none; display: inline-block;">ACESSAR O MAPA 🗺️</a>
+        </div>
+    </div>
+
+    <!-- RECENT ACTIVITY TRACKER -->
+    <div class="module-group" style="margin-top: 1rem; margin-bottom: 2rem;">
+        <div class="glass module-card-premium animate-fade" style="animation-delay: 0.38s; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0; font-family: 'Outfit'; font-size: 1.2rem;"><i class="fas fa-history" style="color: var(--accent-primary);"></i> Atividade Recente</h3>
+            </div>
+            {% if recent_activities %}
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for activity in recent_activities %}
+                <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px dashed var(--border);">
+                    <span style="font-weight: 500; font-size: 0.95rem;"><i class="fas fa-check-circle" style="color: var(--success); margin-right: 8px;"></i>{{ activity.action }}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">{{ activity.timestamp|timesince }} atrás</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="color: var(--text-secondary); font-style: italic; font-size: 0.9rem; text-align: center;">Nenhuma atividade registrada ainda.</p>
+            {% endif %}
         </div>
     </div>
 
