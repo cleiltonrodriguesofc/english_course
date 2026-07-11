@@ -214,7 +214,7 @@
                         </td>
                         <td style="color: var(--text-secondary); font-weight: 600;">{{ item.quiz_count }}</td>
                         <td style="color: var(--text-secondary); font-size: 0.875rem;">
-                            {{ item.last_login|date:"M d, Y"|default:"Never" }}
+                            {{ item.last_active|date:"M d, Y"|default:"Never" }}
                         </td>
                         <td>
                             <a href="{% url 'staff_student_detail' item.user.id %}" class="action-link">

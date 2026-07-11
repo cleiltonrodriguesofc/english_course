@@ -515,6 +515,8 @@ def game_rpg_view(request, world_id=1):
 
 @staff_member_required
 def staff_dashboard(request):
+    from django.utils import timezone
+    
     students = User.objects.filter(is_staff=False).annotate(
         quiz_count=Count("quizresult"), avg_score=Avg("quizresult__score")
     )
@@ -530,6 +532,9 @@ def staff_dashboard(request):
         progress_pct = (
             int((completed_lessons / lessons_count * 100)) if lessons_count > 0 else 0
         )
+        
+        last_log = ActivityLog.objects.filter(user=student).order_by("-timestamp").first()
+        actual_last_active = last_log.timestamp if last_log else student.last_login
 
         student_data.append(
             {
@@ -537,9 +542,12 @@ def staff_dashboard(request):
                 "progress": progress_pct,
                 "avg_score": student.avg_score or 0,
                 "quiz_count": student.quiz_count,
-                "last_login": student.last_login,
+                "last_active": actual_last_active,
             }
         )
+        
+    # Sort students by last active date (most recent first)
+    student_data.sort(key=lambda x: x["last_active"] or timezone.now() - timezone.timedelta(days=3650), reverse=True)
 
     context = {
         "total_students": total_students,
