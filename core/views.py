@@ -175,7 +175,7 @@ def lesson_16(request):
 
 @login_required
 def lesson_17(request):
-    log_activity(request.user, "Viewed Lesson 17 (Dungeon Escape / Possessives & Prepositions)")
+    log_activity(request.user, "Viewed Lesson 17 (Explorer's Inventory / Possessives & Prepositions)")
     return render(request, "lesson_17.html")
 
 @login_required
@@ -284,6 +284,20 @@ def activity_review_10(request):
 def activity_review_11(request):
     log_activity(request.user, "Started Activity Review 11: Verb To Be Mastery Quiz")
     return render(request, "activity_review_11.html")
+
+
+@login_required
+def activity_review_12(request):
+    """Activity 12: Explorer's Inventory Mega Quiz (Lesson 17 — Possessives & Prepositions)."""
+    log_activity(request.user, "Started Activity Review 12: Explorer's Inventory Mega Quiz")
+    return render(request, "activity_review_12.html")
+
+
+@login_required
+def game_wordsearch(request):
+    """Word search game — themed vocabulary from all lessons."""
+    log_activity(request.user, "Played Word Search Game")
+    return render(request, "game_wordsearch.html")
 
 
 @login_required

@@ -152,7 +152,10 @@
         <div class="glass module-card-premium animate-fade" style="animation-delay: 0.35s; background: linear-gradient(135deg, #1a0b2e 0%, #4a1c40 100%); border-color: #ffde00; text-align: center; cursor: pointer;" onclick="window.location.href='{% url 'game_map' %}'">
             <h2 style="color: #ffde00; font-family: 'Outfit'; font-size: 2.5rem; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);">🎮 JOGAR LEVEL UP! 🎮</h2>
             <p style="color: #fff; font-size: 1.2rem; font-weight: bold; margin-bottom: 20px;">Revisão Gamificada: Derrote monstros, destrave mundos e ganhe medalhas!</p>
-            <a href="{% url 'game_map' %}" class="btn-control" style="background: #ffde00; color: #000; padding: 15px 40px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; text-decoration: none; display: inline-block;">ACESSAR O MAPA 🗺️</a>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+                <a href="{% url 'game_map' %}" class="btn-control" style="background: #ffde00; color: #000; padding: 15px 40px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; text-decoration: none; display: inline-block;">ACESSAR O MAPA 🗺️</a>
+                <a href="{% url 'game_wordsearch' %}" class="btn-control" style="background: #00e5ff; color: #000; padding: 15px 40px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; text-decoration: none; display: inline-block;">CAÇA-PALAVRAS 🔍</a>
+            </div>
         </div>
     </div>
 
@@ -375,9 +378,13 @@
                     <i class="fas fa-hand-pointer"></i>
                     <span>Demonstrative Pronouns</span>
                 </a>
-                <a href="{% url 'lesson_17' %}" class="lesson-link" style="border-left: 3px solid #ffde00; background: rgba(255, 222, 0, 0.05);">
-                    <i class="fas fa-dungeon" style="color: #ffde00;"></i>
-                    <span style="color: #ffde00; font-weight: bold;">Lesson 17: Dungeon Escape</span>
+                <a href="{% url 'lesson_17' %}" class="lesson-link" style="border-left: 3px solid #1a5c4a; background: rgba(26, 92, 74, 0.07);">
+                    <i class="fas fa-compass" style="color: #f0c040;"></i>
+                    <span style="color: #f0c040; font-weight: bold;">Lesson 17: The Explorer's Inventory</span>
+                </a>
+                <a href="{% url 'activity_review_12' %}" class="lesson-link" style="border-left: 3px solid #f0c040; background: rgba(240, 192, 64, 0.06);">
+                    <i class="fas fa-map-marked-alt" style="color: #f0c040;"></i>
+                    <span style="color: #f0c040; font-weight: bold;">Missão 12: Explorer's Inventory Quiz</span>
                 </a>
             </div>
         </div>

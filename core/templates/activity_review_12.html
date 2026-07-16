@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% block title %}Activity 12: Explorer's Inventory Mega Quiz{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sidebar, .top-navbar, .mobile-bottom-nav, .page-title-area { display: none !important; }
+    .main-content { padding: 0 !important; max-width: 100vw !important; margin: 0 !important; }
+    .content-area { padding: 0 !important; }
+    .layout-wrapper { min-height: 100vh; }
+
+    :root {
+        --bg-start: #1a2a2a;
+        --bg-end: #1a5c4a;
+        --accent: #f0c040;
+    }
+
+    .quiz-container {
+        background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .quiz-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 25px;
+        width: 90%;
+        max-width: 800px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        z-index: 2;
+    }
+
+    #quizQuestion {
+        font-size: 2rem;
+        color: #1a2a2a;
+        margin-bottom: 30px;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .btn-option {
+        width: 100%;
+        border-radius: 15px;
+        padding: 20px;
+        border: 2px solid var(--accent);
+        color: #1a2a2a;
+        font-size: 1.5rem;
+        background: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-option:hover {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .progress-text {
+        margin-top: 25px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--accent);
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .feedback-emoji {
+        position: absolute;
+        font-size: 5rem;
+        pointer-events: none;
+        opacity: 0;
+        animation: floatUp 1s ease-out forwards;
+        z-index: 1000;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(0.5); opacity: 1; }
+        100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+    }
+
+    .end-screen {
+        display: none;
+        text-align: center;
+        color: white;
+    }
+
+    .btn-action {
+        background: var(--accent);
+        color: #1a2a2a;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px;
+    }
+
+    /* --- RESPONSIVE MOBILE --- */
+    @media (max-width: 768px) {
+        .quiz-card { padding: 20px; width: 95%; border-radius: 15px; }
+        #quizQuestion { font-size: 1.4rem; margin-bottom: 15px; }
+        .btn-option { padding: 12px; font-size: 1.1rem; border-radius: 10px; }
+        .btn-action { padding: 12px 25px; font-size: 1.2rem; }
+        .progress-text { font-size: 1.5rem; }
+        .end-screen h1 { font-size: 2.5rem !important; }
+        .end-screen p { font-size: 1.1rem !important; }
+        .end-screen div[style*="font-size: 6rem"] { font-size: 4rem !important; margin: 10px !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+
+    <div class="quiz-card" id="quizCard">
+        <h2>Explorer's Inventory Mega Quiz 🗺️</h2>
+        <p style="color: #666; margin-bottom: 20px;">Possessive Adjectives & Prepositions of Place — Se errar, a pergunta volta depois!</p>
+
+        <h3 id="quizQuestion">Are you ready?</h3>
+
+        <div class="options-grid" id="quizOptions">
+            <!-- Options injected via JS -->
+        </div>
+
+        <button class="btn-action" id="startQuizBtn" onclick="loadQuiz()" style="margin-top: 20px;">Start Quiz ⚔️</button>
+    </div>
+
+    <div class="progress-text" id="quizScore"></div>
+
+    <div class="end-screen" id="endScreen">
+        <h1 style="font-size: 4rem; color: var(--accent);">YOU WIN! 🎉</h1>
+        <div style="font-size: 6rem; margin: 20px;">🏆🗺️🔥</div>
+        <p style="font-size: 1.5rem; font-weight: bold;">Verdadeiro(a) Explorador(a) do Inventário!</p>
+        <div style="margin-top: 30px;">
+            <button class="btn-action" onclick="location.reload()">PLAY AGAIN ↺</button>
+            <a href="{% url 'dashboard' %}" class="btn-action">HOME 🏠</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showEmojiFeedback(emoji, x, y) {
+        const el = document.createElement('div');
+        el.className = 'feedback-emoji';
+        el.innerText = emoji;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    /* --- MEGA QUIZ DATA (Lesson 17: Possessive Adjectives & Prepositions of Place) --- */
+    const quizData = [
+        // Possessive Adjectives
+        { q: "Qual o Possessive Adjective de 'I' (eu)?", options: ["My", "Your", "His"], ans: 0 },
+        { q: "Qual o Possessive Adjective de 'You' (você)?", options: ["My", "Your", "Her"], ans: 1 },
+        { q: "Qual o Possessive Adjective de 'He' (ele)?", options: ["Her", "Our", "His"], ans: 2 },
+        { q: "Qual o Possessive Adjective de 'She' (ela)?", options: ["His", "Her", "My"], ans: 1 },
+        { q: "Qual o Possessive Adjective de 'We' (nós)?", options: ["Their", "My", "Our"], ans: 2 },
+        { q: "Qual o Possessive Adjective de 'They' (eles/elas)?", options: ["Their", "Our", "Your"], ans: 0 },
+        { q: "Complete: ___ sword is on the table. (A espada DELE)", options: ["Her", "His", "Their"], ans: 1 },
+        { q: "Complete: ___ map is behind the chest. (O mapa DELES)", options: ["Our", "My", "Their"], ans: 2 },
+        { q: "Complete: ___ shield is next to the door. (O escudo NOSSO)", options: ["Their", "Our", "Her"], ans: 1 },
+        { q: "O Possessive Adjective vem ANTES ou DEPOIS do substantivo?", options: ["Depois", "Antes", "Tanto faz"], ans: 1 },
+
+        // Prepositions of Place
+        { q: "A espada está EM CIMA da mesa. Qual preposição?", options: ["In", "On", "Under"], ans: 1 },
+        { q: "A poção está DENTRO do baú. Qual preposição?", options: ["On", "Behind", "In"], ans: 2 },
+        { q: "O escudo está EMBAIXO da cama. Qual preposição?", options: ["Under", "On", "Next to"], ans: 0 },
+        { q: "A chave está ATRÁS da porta. Qual preposição?", options: ["In front of", "Under", "Behind"], ans: 2 },
+        { q: "O mapa está AO LADO da lanterna. Qual preposição?", options: ["Behind", "Next to", "In"], ans: 1 },
+        { q: "O dragão está NA FRENTE do portão. Qual preposição?", options: ["In front of", "Behind", "Under"], ans: 0 },
+        { q: "The shield is ___ the bed. (Embaixo da cama)", options: ["on", "under", "in front of"], ans: 1 },
+        { q: "The potion is ___ the chest. (Dentro do baú)", options: ["on", "behind", "in"], ans: 2 },
+        { q: "The key is ___ the door. (Atrás da porta)", options: ["next to", "behind", "on"], ans: 1 },
+        { q: "The sword is ___ the table. (Em cima da mesa)", options: ["under", "in", "on"], ans: 2 },
+    ];
+
+    // Shuffle
+    quizData.sort(() => Math.random() - 0.5);
+
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizCard').style.display = 'none';
+            document.getElementById('quizScore').style.display = 'none';
+            document.getElementById('endScreen').style.display = 'block';
+            speak("Quiz Complete! Great job, Explorer!");
+            return;
+        }
+
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = currentQ.q;
+
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-option" onclick="checkQuiz(${idx}, this)">${opt}</button>`;
+        });
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
+    }
+
+    function checkQuiz(selectedIdx, btnEl) {
+        const currentQ = quizData[quizIdx];
+        const rect = btnEl.getBoundingClientRect();
+
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+            showEmojiFeedback("🌟", rect.left + rect.width / 2, rect.top);
+            btnEl.style.background = '#27ae60';
+            btnEl.style.color = '#fff';
+
+            fetch('/api/update-mastery/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ word: "PossessivesPrepositions", is_correct: true })
+            });
+        } else {
+            speak("Wrong.");
+            showEmojiFeedback("💥", rect.left + rect.width / 2, rect.top);
+            btnEl.style.background = '#e74c3c';
+            btnEl.style.color = '#fff';
+
+            // SRS Logic: re-queue wrong question
+            const remaining = quizData.length - 1 - quizIdx;
+            if (remaining >= 2) {
+                quizData.splice(quizIdx + 3, 0, currentQ);
+            } else {
+                quizData.push(currentQ);
+            }
+
+            fetch('/api/update-mastery/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ word: "PossessivesPrepositions", is_correct: false })
+            });
+        }
+
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Progress: ${score} Hits`;
+
+        document.getElementById('quizOptions').style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            document.getElementById('quizOptions').style.pointerEvents = 'auto';
+            loadQuiz();
+        }, 1200);
+    }
+</script>
+{% endblock %}

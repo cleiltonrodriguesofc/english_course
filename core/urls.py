@@ -53,8 +53,10 @@ from .views import (
     activity_review_9,
     activity_review_10,
     activity_review_11,
+    activity_review_12,
     activity_conversation_2,
     update_mastery,
+    game_wordsearch,
 )
 
 urlpatterns = [
@@ -97,6 +99,7 @@ urlpatterns = [
     path("activity/review/9/", activity_review_9, name="activity_review_9"),
     path("activity/review/10/", activity_review_10, name="activity_review_10"),
     path("activity/review/11/", activity_review_11, name="activity_review_11"),
+    path("activity/review/12/", activity_review_12, name="activity_review_12"),
     path("activity/conversation-2/", activity_conversation_2, name="activity_conversation_2"),
     path("activity/isabelle-chat/", activity_isabelle_chat, name="activity_isabelle_chat"),
     path("quiz/", quiz_view, name="quiz"),
@@ -110,6 +113,7 @@ urlpatterns = [
     path("game/memory/", game_memory, name="game_memory"),
     path("game/map/", game_map_view, name="game_map"),
     path("game/rpg/", game_rpg_view, name="game_rpg"),
+    path("game/wordsearch/", game_wordsearch, name="game_wordsearch"),
     path("game/rpg/<int:world_id>/", game_rpg_view, name="game_rpg_level"),
     path("staff/dashboard/", staff_dashboard, name="staff_dashboard"),
     path(

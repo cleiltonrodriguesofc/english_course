@@ -1,275 +1,526 @@
 {% extends 'base.html' %}
-{% block title %}Lesson 17 - The Explorer's Inventory{% endblock %}
+{% block title %}Lesson 17: The Explorer's Inventory - English Course{% endblock %}
 
 {% block extra_css %}
 <style>
-    .lesson-header {
-        text-align: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
-        border-radius: var(--radius-lg);
-        margin-bottom: 2rem;
-        border: 1px solid var(--border);
+    /* Fullscreen App Mode */
+    .sidebar, .top-navbar, .mobile-bottom-nav, .page-title-area { display: none !important; }
+    .main-content { padding: 0 !important; max-width: 100vw !important; margin: 0 !important; }
+    .content-area { padding: 0 !important; }
+    .layout-wrapper { min-height: 100vh; }
+
+    /* --- THEME: Explorer (Deep Teal & Gold) --- */
+    :root {
+        --c17-bg: #1a2a2a;
+        --c17-mid: #1a5c4a;
+        --c17-accent: #f0c040;
+        --c17-text: #e8f5f0;
+        --c17-card: rgba(255, 255, 255, 0.95);
     }
 
-    .lesson-title {
-        font-family: 'Outfit', sans-serif;
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #a855f7, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .grammar-box {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .grammar-box h3 {
-        color: var(--accent-primary);
-        font-family: 'Outfit';
-        margin-top: 0;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        padding-bottom: 0.5rem;
-    }
-
-    .vocab-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1rem;
-    }
-
-    .vocab-card {
-        background: var(--surface);
-        padding: 1rem;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border);
+    .lesson-wrapper {
+        background: linear-gradient(135deg, var(--c17-bg) 0%, var(--c17-mid) 100%);
+        color: var(--c17-text);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        height: 100vh;
+        width: 100vw;
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-        font-size: 1.1rem;
+        overflow: hidden;
+        position: relative;
     }
 
-    .vocab-en { font-weight: bold; color: white; }
-    .vocab-pt { color: var(--text-secondary); }
-
-    /* Dungeon Mini-Game */
-    .dungeon-container {
+    /* --- SLIDE CONTAINER --- */
+    .slide-container {
+        width: 100%;
+        max-width: 1000px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(10px);
         position: relative;
-        background: url('https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80') center/cover;
-        height: 300px;
-        border-radius: var(--radius-lg);
-        border: 3px solid #555;
-        margin-top: 2rem;
         overflow: hidden;
     }
 
-    .dungeon-overlay {
+    .slide {
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        pointer-events: none;
+        overflow-y: auto;
     }
 
-    .dungeon-hud {
+    .slide-content-wrapper {
+        margin: auto 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+        padding-bottom: 50px;
+    }
+
+    .slide.active {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: all;
+        z-index: 2;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: var(--c17-accent);
+        margin: 0;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        color: #fff;
+        margin-bottom: 15px;
+        border-bottom: 3px dashed var(--c17-accent);
+        padding-bottom: 5px;
+        display: inline-block;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    p {
+        font-size: 1.2rem;
+        color: #fff;
+        max-width: 800px;
+        margin-bottom: 15px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        font-weight: 600;
+    }
+
+    /* --- DATA TABLES --- */
+    .table-container {
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+        background: var(--c17-card);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .vocab-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .vocab-table th {
+        background: #1a2a2a;
+        color: var(--c17-accent);
+        padding: 15px;
+        font-size: 1.2rem;
+    }
+
+    .vocab-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .vocab-table tr:last-child td { border-bottom: none; }
+    .vocab-table tr:nth-child(even) { background: #f4faf7; }
+
+    /* --- PREPOSITION MAP --- */
+    .prep-map {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        height: 220px;
+        background: rgba(255,255,255,0.08);
+        border: 2px dashed var(--c17-accent);
+        border-radius: 15px;
+        margin: 10px auto;
+        overflow: hidden;
+    }
+
+    .prep-label {
+        position: absolute;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: #fff;
+        background: rgba(26, 92, 74, 0.85);
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid var(--c17-accent);
+        pointer-events: none;
+    }
+
+    .prep-chest {
+        position: absolute;
+        font-size: 4rem;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* --- CONTROLS --- */
+    .controls {
         position: absolute;
         bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        padding: 15px 30px;
-        border-radius: 10px;
-        border: 2px solid #ffde00;
-        text-align: center;
-        width: 90%;
-        max-width: 500px;
-    }
-
-    .dungeon-question {
-        font-size: 1.3rem;
-        font-family: 'Outfit';
-        color: #fff;
-        margin-bottom: 10px;
-    }
-
-    .dungeon-options {
+        right: 30px;
         display: flex;
-        gap: 10px;
-        justify-content: center;
-        flex-wrap: wrap;
+        gap: 15px;
+        z-index: 100;
     }
 
-    .btn-dungeon {
-        background: #3b82f6;
-        color: white;
+    .btn-control {
+        background: var(--c17-accent);
+        color: #1a2a2a;
         border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        font-size: 1.2rem;
         font-weight: bold;
         cursor: pointer;
-        transition: 0.2s;
+        transition: 0.3s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     }
 
-    .btn-dungeon:hover {
-        background: #2563eb;
+    .btn-control:hover {
+        background: #fff;
+        transform: scale(1.1);
     }
 
-    .dungeon-item {
+    .btn-large {
+        width: auto;
+        padding: 15px 40px;
+        border-radius: 30px;
+        font-size: 1.5rem;
+    }
+
+    .progress-bar {
         position: absolute;
-        font-size: 3rem;
-        filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
-        transition: all 0.3s;
+        bottom: 0;
+        left: 0;
+        height: 6px;
+        background: var(--c17-accent);
+        width: 0%;
+        transition: width 0.3s;
     }
 
-    .dungeon-item.found {
-        transform: scale(1.5) translateY(-20px);
-        filter: brightness(1.5) drop-shadow(0 0 20px #ffde00);
+    .feedback-emoji {
+        position: absolute;
+        font-size: 5rem;
+        pointer-events: none;
+        opacity: 0;
+        animation: floatUp 1s ease-out forwards;
+        z-index: 1000;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(0.5); opacity: 1; }
+        100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+    }
+
+    /* --- RESPONSIVE MOBILE --- */
+    @media (max-width: 768px) {
+        h1 { font-size: 1.6rem !important; padding: 10px 20px !important; }
+        h2 { font-size: 1.3rem !important; margin-bottom: 10px; }
+        p { font-size: 0.95rem; margin-bottom: 10px; }
+
+        .slide { padding: 10px; }
+        .slide-content-wrapper { padding-bottom: 60px; }
+
+        .table-container { margin-top: 10px; border-radius: 10px; overflow-x: auto; }
+        .vocab-table th, .vocab-table td { padding: 8px 5px; font-size: 0.85rem; }
+
+        .btn-control { width: 45px; height: 45px; font-size: 1rem; }
+        .btn-large { padding: 10px 20px !important; font-size: 1.1rem !important; }
+        .controls { right: 10px; bottom: 10px; gap: 10px; }
+
+        #quizQuestion { font-size: 1.4rem !important; margin-bottom: 15px; }
+        .prep-map { height: 160px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="animate-fade">
-    
-    <a href="{% url 'dashboard' %}#lessons" class="btn btn-primary" style="margin-bottom: 1.5rem; display: inline-block;">
-        <i class="fas fa-arrow-left"></i> Voltar
-    </a>
+<div style="position: absolute; top: 10px; right: 20px; z-index: 1000;">
+    <button onclick="toggleFullScreen()" class="btn-control btn-large" style="background: rgba(0,0,0,0.5); color: white; padding: 10px 20px; border-radius: 20px; font-size: 1rem;">🔲 Tela Cheia</button>
+</div>
+<div class="lesson-wrapper">
+    <div class="slide-container">
 
-    <div class="lesson-header">
-        <h1 class="lesson-title">Lesson 17: The Explorer's Inventory</h1>
-        <p style="color: var(--text-secondary); font-size: 1.1rem;">
-            Onde estão as suas coisas? Aprenda a descrever **de quem é** e **onde está**!
-        </p>
-    </div>
-
-    <div class="grammar-box">
-        <h3><i class="fas fa-user-tag"></i> 1. Possessive Adjectives (De quem é?)</h3>
-        <p>Usamos para indicar posse. Sempre vem ANTES de um objeto. Ex: <strong>My</strong> sword.</p>
-        <div class="vocab-grid">
-            <div class="vocab-card"><span class="vocab-en">My</span> <span class="vocab-pt">Meu / Minha</span></div>
-            <div class="vocab-card"><span class="vocab-en">Your</span> <span class="vocab-pt">Seu / Sua</span></div>
-            <div class="vocab-card"><span class="vocab-en">His</span> <span class="vocab-pt">Dele</span></div>
-            <div class="vocab-card"><span class="vocab-en">Her</span> <span class="vocab-pt">Dela</span></div>
-            <div class="vocab-card"><span class="vocab-en">Our</span> <span class="vocab-pt">Nosso / Nossa</span></div>
-            <div class="vocab-card"><span class="vocab-en">Their</span> <span class="vocab-pt">Deles / Delas</span></div>
+        <!-- SLIDE 1: INTRO -->
+        <div class="slide active">
+            <div class="slide-content-wrapper">
+                <h3>CLASS 17 (EXPLORER'S EDITION)</h3>
+                <h1 style="background: #1a2a2a; padding: 15px 40px; border-radius: 50px; margin-bottom: 20px; border: 2px solid var(--c17-accent);">The Explorer's Inventory 🗺️</h1>
+                <div style="font-size: 7rem; margin: 20px; animation: pulse 2s infinite;">🧭⚔️</div>
+                <p>Nesta aula, vamos aprender <b>Possessive Adjectives</b> (de quem é?) e <b>Prepositions of Place</b> (onde está?) para descrever os itens do seu inventário!</p>
+                <button class="btn-control btn-large" onclick="changeSlide(1)">START JOURNEY 🚀</button>
+            </div>
         </div>
-    </div>
 
-    <div class="grammar-box">
-        <h3><i class="fas fa-box-open"></i> 2. Prepositions of Place (Onde está?)</h3>
-        <p>Ajudam a descrever a localização exata de algo no mapa!</p>
-        <div class="vocab-grid">
-            <div class="vocab-card"><span class="vocab-en">In</span> <span class="vocab-pt">Dentro</span></div>
-            <div class="vocab-card"><span class="vocab-en">On</span> <span class="vocab-pt">Em cima (superfície)</span></div>
-            <div class="vocab-card"><span class="vocab-en">Under</span> <span class="vocab-pt">Embaixo</span></div>
-            <div class="vocab-card"><span class="vocab-en">Behind</span> <span class="vocab-pt">Atrás</span></div>
-            <div class="vocab-card"><span class="vocab-en">Next to</span> <span class="vocab-pt">Ao lado</span></div>
-        </div>
-    </div>
-
-    <div class="grammar-box">
-        <h3><i class="fas fa-gamepad"></i> Mini-Game: Dungeon Escape</h3>
-        <p>Ajude Isabelle a encontrar seus equipamentos perdidos na masmorra!</p>
-        
-        <div class="dungeon-container">
-            <div class="dungeon-overlay"></div>
-            
-            <!-- Items -->
-            <div class="dungeon-item" id="item-sword" style="display: none; top: 40%; left: 30%;">🗡️</div>
-            <div class="dungeon-item" id="item-shield" style="display: none; top: 70%; left: 70%;">🛡️</div>
-            <div class="dungeon-item" id="item-potion" style="display: none; top: 20%; left: 50%;">🧪</div>
-
-            <div class="dungeon-hud">
-                <div class="dungeon-question" id="dungeonQuestion">Where is my sword?</div>
-                <div class="dungeon-options" id="dungeonOptions">
-                    <!-- Buttons inserted via JS -->
+        <!-- SLIDE 2: POSSESSIVE ADJECTIVES -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>1. Possessive Adjectives 🏷️</h2>
+                <p>Usamos para indicar <b>de quem é</b> o objeto. Sempre vem <b>ANTES</b> do substantivo. Ex: <b>My</b> sword.</p>
+                <div class="table-container">
+                    <table class="vocab-table">
+                        <tr>
+                            <th>Pronome</th>
+                            <th>Possessivo</th>
+                            <th>Em Português</th>
+                            <th>Exemplo</th>
+                        </tr>
+                        <tr><td><b>I</b></td><td>My</td><td>Meu / Minha</td><td>My shield 🛡️</td></tr>
+                        <tr><td><b>You</b></td><td>Your</td><td>Seu / Sua</td><td>Your potion 🧪</td></tr>
+                        <tr><td><b>He</b></td><td>His</td><td>Dele</td><td>His sword 🗡️</td></tr>
+                        <tr><td><b>She</b></td><td>Her</td><td>Dela</td><td>Her map 🗺️</td></tr>
+                        <tr><td><b>We</b></td><td>Our</td><td>Nosso / Nossa</td><td>Our camp 🏕️</td></tr>
+                        <tr><td><b>They</b></td><td>Their</td><td>Deles / Delas</td><td>Their gold 💰</td></tr>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
 
+        <!-- SLIDE 3: PREPOSITIONS OF PLACE -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>2. Prepositions of Place 📍</h2>
+                <p>Ajudam a descrever a <b>localização exata</b> de algo no mapa!</p>
+                <div class="table-container">
+                    <table class="vocab-table">
+                        <tr>
+                            <th>Preposição</th>
+                            <th>Significado</th>
+                            <th>Exemplo</th>
+                        </tr>
+                        <tr><td><b>In</b></td><td>Dentro</td><td>The potion is <b>in</b> the chest. 🧪</td></tr>
+                        <tr><td><b>On</b></td><td>Em cima (superfície)</td><td>The sword is <b>on</b> the table. 🗡️</td></tr>
+                        <tr><td><b>Under</b></td><td>Embaixo</td><td>The shield is <b>under</b> the bed. 🛡️</td></tr>
+                        <tr><td><b>Behind</b></td><td>Atrás</td><td>The key is <b>behind</b> the door. 🔑</td></tr>
+                        <tr><td><b>Next to</b></td><td>Ao lado</td><td>The map is <b>next to</b> the lantern. 🗺️</td></tr>
+                        <tr><td><b>In front of</b></td><td>Na frente</td><td>The dragon is <b>in front of</b> the gate. 🐉</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: VISUAL MAP -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>3. Mapa Visual 🗺️</h2>
+                <p>Observe o baú e identifique onde cada item está!</p>
+                <div class="prep-map">
+                    <span class="prep-label" style="top: 8px; left: 50%; transform: translateX(-50%);">🗡️ ON (em cima)</span>
+                    <span class="prep-chest">🗃️</span>
+                    <span class="prep-label" style="bottom: 8px; left: 50%; transform: translateX(-50%);">🛡️ UNDER (embaixo)</span>
+                    <span class="prep-label" style="top: 50%; left: 5%; transform: translateY(-50%);">🔑 NEXT TO</span>
+                    <span class="prep-label" style="top: 50%; right: 5%; transform: translateY(-50%);">🧪 BEHIND</span>
+                    <span class="prep-label" style="top: 42%; left: 50%; transform: translateX(-50%); font-size: 0.75rem; background: rgba(240,192,64,0.2); border-color: var(--c17-accent);">⚔️ IN (dentro)</span>
+                </div>
+                <p style="font-size: 1rem; color: var(--c17-accent);">The sword is <b>on</b> the chest. The shield is <b>under</b> it. The potion is <b>in</b> the chest!</p>
+                <div style="margin-top: 20px;">
+                    <button class="btn-control btn-large" onclick="changeSlide(1)">Próximo: Mini Quiz ⚔️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MINI QUIZ -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h2>Quiz Rápido 🧠</h2>
+                <div style="background: rgba(255,255,255,0.95); padding: 30px; border-radius: 25px; width: 100%; max-width: 800px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <h3 id="quizQuestion" style="text-align: center; margin-bottom: 20px; font-size: 1.8rem; color: #1a2a2a;">Are you ready?</h3>
+                    <div id="quizOptions" style="display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%;">
+                        <!-- Options injected via JS -->
+                    </div>
+                </div>
+
+                <p id="quizScore" style="margin-top: 20px; font-size: 1.8rem; font-weight: bold; color: var(--c17-accent);"></p>
+                <button class="btn-control btn-large" id="startQuizBtn" style="margin-top: 10px;" onclick="loadQuiz()">Fight! ⚔️</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: END -->
+        <div class="slide">
+            <div class="slide-content-wrapper">
+                <h1 style="font-size: 3.5rem;">AULA CONCLUÍDA! 🎉</h1>
+                <div style="font-size: 6rem; margin: 20px;">🏆🗺️🔥</div>
+                <p>Você provou ser um(a) verdadeiro(a) Explorador(a)! Agora sabe dizer <b>de quem é</b> e <b>onde está</b> qualquer item do inventário!</p>
+                <div class="controls" style="position: relative; right: auto; bottom: auto; justify-content: center; margin-top: 30px;">
+                    <a href="{% url 'activity_review_12' %}" class="btn-control btn-large" style="border-radius: 30px; text-decoration: none;">IR PARA ATIVIDADE ⚔️</a>
+                    <a href="{% url 'dashboard' %}#lessons" class="btn-control btn-large" style="border-radius: 30px; text-decoration: none; background: rgba(255,255,255,0.2); color: white;">VOLTAR AO MAPA 🗺️</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressBar"></div>
+
+        <div class="controls">
+            <button class="btn-control" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-control" id="nextBtn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
 </div>
+
+<style>
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    const dungeonStages = [
-        {
-            q: "Where is my sword? (A espada está EM CIMA da mesa)",
-            opts: ["It is on the table", "It is in the table", "It is under the table"],
-            ans: "It is on the table",
-            item: "item-sword",
-            top: "50%", left: "40%"
-        },
-        {
-            q: "Where is her shield? (O escudo está EMBAIXO da cama)",
-            opts: ["It is in the bed", "It is under the bed", "It is on the bed"],
-            ans: "It is under the bed",
-            item: "item-shield",
-            top: "70%", left: "70%"
-        },
-        {
-            q: "Where is our potion? (A poção está DENTRO do baú)",
-            opts: ["It is next to the chest", "It is behind the chest", "It is in the chest"],
-            ans: "It is in the chest",
-            item: "item-potion",
-            top: "20%", left: "50%"
+    /* --- CORE SYSTEM --- */
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateUI() {
+        slides.forEach((s, i) => {
+            s.classList.remove('active');
+            if (i === currentSlide) s.classList.add('active');
+        });
+        const percent = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = percent + '%';
+        prevBtn.disabled = currentSlide === 0;
+
+        // Hide next button on the last slide
+        if (currentSlide === slides.length - 1) {
+            nextBtn.style.display = 'none';
+        } else {
+            nextBtn.style.display = 'flex';
         }
+    }
+
+    function changeSlide(dir) {
+        const next = currentSlide + dir;
+        if (next >= 0 && next < slides.length) {
+            currentSlide = next;
+            updateUI();
+        }
+    }
+
+    function showEmojiFeedback(emoji, x, y) {
+        const el = document.createElement('div');
+        el.className = 'feedback-emoji';
+        el.innerText = emoji;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    /* --- MINI QUIZ SYSTEM --- */
+    const quizData = [
+        { q: "Qual o Possessive Adjective de 'I' (eu)?", options: ["My", "Your", "His"], ans: 0 },
+        { q: "Complete: ___ sword is on the table. (A espada DELE)", options: ["Her", "His", "Our"], ans: 1 },
+        { q: "A poção está DENTRO do baú. Qual preposição?", options: ["On", "Under", "In"], ans: 2 },
+        { q: "The shield is ___ the bed. (EMBAIXO da cama)", options: ["on", "under", "in front of"], ans: 1 },
+        { q: "Qual o Possessive Adjective de 'We' (nós)?", options: ["Their", "Our", "Your"], ans: 1 },
+        { q: "The map is ___ the lantern. (AO LADO da lanterna)", options: ["behind", "in", "next to"], ans: 2 },
+        { q: "Complete: ___ camp is safe. (O acampamento NOSSO)", options: ["Their", "Our", "Her"], ans: 1 },
+        { q: "The dragon is ___ the gate. (NA FRENTE do portão)", options: ["behind", "in front of", "on"], ans: 1 },
     ];
 
-    let currentStage = 0;
+    quizData.sort(() => Math.random() - 0.5);
 
-    function loadDungeonStage() {
-        if (currentStage >= dungeonStages.length) {
-            document.getElementById('dungeonQuestion').innerHTML = "<span style='color:#00e676;'>🎉 You found everything! Dungeon Cleared!</span>";
-            document.getElementById('dungeonOptions').innerHTML = "<a href='/game/map/' class='btn-dungeon'>Go to World Map</a>";
+    let quizIdx = 0;
+    let score = 0;
+
+    function loadQuiz() {
+        document.getElementById('startQuizBtn').style.display = 'none';
+
+        if (quizIdx >= quizData.length) {
+            document.getElementById('quizQuestion').innerText = "Quiz Complete!";
+            document.getElementById('quizOptions').innerHTML = "";
+            speak("Quiz Complete! Your score is " + score + ".");
+            setTimeout(() => changeSlide(1), 2000); // Move to the end slide
             return;
         }
 
-        const stage = dungeonStages[currentStage];
-        document.getElementById('dungeonQuestion').innerText = stage.q;
-        
-        // Hide all items
-        document.querySelectorAll('.dungeon-item').forEach(el => { el.style.display = 'none'; el.classList.remove('found'); });
+        const currentQ = quizData[quizIdx];
+        document.getElementById('quizQuestion').innerText = currentQ.q;
 
-        let optsHtml = '';
-        let shuffled = [...stage.opts].sort(() => Math.random() - 0.5);
-        
-        shuffled.forEach(opt => {
-            optsHtml += `<button class="btn-dungeon" onclick="checkDungeonAnswer('${opt}', '${stage.ans}')">${opt}</button>`;
+        let optionsHtml = '';
+        currentQ.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="btn-control" style="width: 100%; border-radius: 15px; height: auto; padding: 15px; border:2px solid var(--c17-accent); color:#1a2a2a; font-size: 1.3rem; background: #fff;" onclick="checkQuiz(${idx}, this)">${opt}</button>`;
         });
-        
-        document.getElementById('dungeonOptions').innerHTML = optsHtml;
+        document.getElementById('quizOptions').innerHTML = optionsHtml;
     }
 
-    function checkDungeonAnswer(selected, correct) {
-        if (selected === correct) {
-            const stage = dungeonStages[currentStage];
-            const itemEl = document.getElementById(stage.item);
-            itemEl.style.display = 'block';
-            itemEl.style.top = stage.top;
-            itemEl.style.left = stage.left;
-            
-            // Trigger animation
-            setTimeout(() => {
-                itemEl.classList.add('found');
-            }, 50);
+    function checkQuiz(selectedIdx, btnEl) {
+        const currentQ = quizData[quizIdx];
+        const rect = btnEl.getBoundingClientRect();
 
-            currentStage++;
-            setTimeout(loadDungeonStage, 2000); // load next after 2 seconds
+        if (selectedIdx === currentQ.ans) {
+            score++;
+            speak("Correct!");
+            showEmojiFeedback("🌟", rect.left + rect.width / 2, rect.top);
+            btnEl.style.background = '#27ae60'; // Green
+            btnEl.style.color = '#fff';
         } else {
-            // Flash red
-            const hud = document.querySelector('.dungeon-hud');
-            hud.style.borderColor = 'red';
-            setTimeout(() => { hud.style.borderColor = '#ffde00'; }, 300);
+            speak("Wrong.");
+            showEmojiFeedback("💥", rect.left + rect.width / 2, rect.top);
+            btnEl.style.background = '#e74c3c'; // Red
+            btnEl.style.color = '#fff';
+
+            // SRS Logic: re-queue the wrong question
+            const remaining = quizData.length - 1 - quizIdx;
+            if (remaining >= 2) {
+                quizData.splice(quizIdx + 3, 0, currentQ);
+            } else {
+                quizData.push(currentQ);
+            }
         }
+
+        quizIdx++;
+        document.getElementById('quizScore').innerText = `Progress: ${score} Hits`;
+        document.getElementById('quizOptions').style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            document.getElementById('quizOptions').style.pointerEvents = 'auto';
+            loadQuiz();
+        }, 1200);
     }
 
-    loadDungeonStage();
+    updateUI();
 </script>
 {% endblock %}
