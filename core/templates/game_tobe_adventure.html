@@ -275,7 +275,7 @@
         <p style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;">
             Hi! 👋 Today we have a big mission!<br>Can you master the Verb To Be?
         </p>
-        <button class="game-btn" onclick="startGame()" style="max-width: 300px;">START ADVENTURE 🚀</button>
+        <button id="btnStartAdventure" class="game-btn" onclick="startGame()" style="max-width: 300px;">START ADVENTURE 🚀</button>
     </div>
 
     <!-- MAP SCREEN -->
@@ -435,7 +435,7 @@
         }
     ];
 
-    let state = {
+    const defaultState = {
         currentLevel: 0,
         unlockedLevel: 1,
         questionIndex: 0,
@@ -453,6 +453,20 @@
             "Time Recognition": { correct: 0, total: 0 }
         }
     };
+
+    let state = JSON.parse(localStorage.getItem('tobe_adventure_state')) || JSON.parse(JSON.stringify(defaultState));
+
+    function saveState() {
+        localStorage.setItem('tobe_adventure_state', JSON.stringify(state));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (state.unlockedLevel > 1 || state.totalQuestions > 0) {
+            document.getElementById('btnStartAdventure').innerText = "CONTINUE ADVENTURE 🚀";
+        }
+        // Update visual elements from loaded state
+        document.getElementById('starCount').innerText = state.stars;
+    });
 
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -594,6 +608,7 @@
             feedbackBox.className = 'feedback-box feedback-error show';
         }
         
+        saveState();
         document.getElementById('btnNextQ').style.display = 'block';
     }
 
@@ -621,6 +636,7 @@
         if (state.currentLevel === state.unlockedLevel) {
             state.unlockedLevel++;
         }
+        saveState();
         
         if (state.currentLevel === 8) {
             showResults();
@@ -643,6 +659,7 @@
         
         state.stars += 3;
         document.getElementById('starCount').innerText = state.stars;
+        saveState();
     }
 
     function showResults() {
@@ -714,6 +731,8 @@
         .catch(err => {
             document.getElementById('savingStatus').innerText = "Network error. ❌";
         });
+        
+        localStorage.removeItem('tobe_adventure_state');
     }
 
 </script>

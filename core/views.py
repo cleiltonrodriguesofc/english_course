@@ -760,6 +760,9 @@ def save_tobe_adventure_result(request):
                     mastery.correct_attempts += stats.get("correct", 0)
                     mastery.failed_attempts += (stats.get("total", 0) - stats.get("correct", 0))
                     mastery.save()
+            
+            # Log completion for admin tracking
+            log_activity(request.user, f"Completed To Be Adventure with score {score}%")
                     
             return JsonResponse({"status": "success"})
         except Exception as e:
