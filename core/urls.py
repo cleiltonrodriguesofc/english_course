@@ -57,6 +57,8 @@ from .views import (
     activity_conversation_2,
     update_mastery,
     game_wordsearch,
+    game_tobe_adventure,
+    save_tobe_adventure_result,
 )
 
 urlpatterns = [
@@ -114,6 +116,8 @@ urlpatterns = [
     path("game/map/", game_map_view, name="game_map"),
     path("game/rpg/", game_rpg_view, name="game_rpg"),
     path("game/wordsearch/", game_wordsearch, name="game_wordsearch"),
+    path("game/tobe-adventure/", game_tobe_adventure, name="game_tobe_adventure"),
+    path("api/save-tobe-adventure/", save_tobe_adventure_result, name="save_tobe_adventure_result"),
     path("game/rpg/<int:world_id>/", game_rpg_view, name="game_rpg_level"),
     path("staff/dashboard/", staff_dashboard, name="staff_dashboard"),
     path(

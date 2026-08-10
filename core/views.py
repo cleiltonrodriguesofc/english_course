@@ -724,3 +724,45 @@ def update_mastery(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
+
+@login_required
+def game_tobe_adventure(request):
+    log_activity(request.user, "Started Game: To Be Adventure")
+    return render(request, "game_tobe_adventure.html")
+
+@login_required
+@csrf_exempt
+def save_tobe_adventure_result(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            # data will contain overall score and breakdown: {score: 80, categories: {Present: {correct: 10, total: 10}, ...}}
+            score = data.get("score", 0)
+            total_questions = data.get("total_questions", 0)
+            categories = data.get("categories", {})
+            
+            # Save overall QuizResult
+            QuizResult.objects.create(
+                user=request.user,
+                quiz_name="To Be Adventure",
+                score=score,
+                total_questions=total_questions
+            )
+            
+            # Update mastery for each category
+            for category, stats in categories.items():
+                if stats["total"] > 0:
+                    topic_name = f"To Be Adventure: {category}"
+                    mastery, _ = StudentMastery.objects.get_or_create(
+                        user=request.user,
+                        word_or_topic=topic_name
+                    )
+                    mastery.correct_attempts += stats.get("correct", 0)
+                    mastery.failed_attempts += (stats.get("total", 0) - stats.get("correct", 0))
+                    mastery.save()
+                    
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
+

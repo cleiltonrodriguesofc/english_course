@@ -1,0 +1,720 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}To Be Adventure - English Course{% endblock %}
+{% block page_title %}TO BE ADVENTURE 🚀{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --game-primary: #ff4081;
+        --game-secondary: #7b1fa2;
+        --game-bg: #0f172a;
+        --star-color: #ffca28;
+    }
+
+    body {
+        background-color: var(--game-bg);
+    }
+
+    .game-container {
+        max-width: 800px;
+        margin: 0 auto;
+        min-height: 70vh;
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .screen {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .screen.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top Bar */
+    .game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .stat-badge {
+        background: rgba(0,0,0,0.3);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .level-badge {
+        font-family: 'Outfit';
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ff4081, #7b1fa2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Buttons */
+    .game-btn {
+        background: linear-gradient(135deg, var(--game-primary), var(--game-secondary));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 30px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'Outfit';
+        box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .game-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 64, 129, 0.6);
+    }
+
+    .option-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .option-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--game-primary);
+    }
+
+    .option-btn.correct {
+        background: rgba(76, 175, 80, 0.2);
+        border-color: #4caf50;
+    }
+
+    .option-btn.wrong {
+        background: rgba(244, 67, 54, 0.2);
+        border-color: #f44336;
+    }
+
+    /* Map Elements */
+    .map-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .map-node {
+        background: rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        position: relative;
+    }
+
+    .map-node.unlocked {
+        background: rgba(255, 64, 129, 0.1);
+        border-color: var(--game-primary);
+    }
+
+    .map-node.completed {
+        background: rgba(76, 175, 80, 0.1);
+        border-color: #4caf50;
+    }
+
+    .map-node.locked {
+        opacity: 0.5;
+        cursor: not-allowed;
+        filter: grayscale(100%);
+    }
+
+    .node-icon {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Question Screen */
+    .question-box {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .question-text {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        font-family: 'Outfit';
+    }
+    
+    .question-context {
+        font-size: 1.2rem;
+        color: #a78bfa;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Feedback */
+    .feedback-box {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: bold;
+        display: none;
+    }
+    .feedback-box.show { display: block; animation: fadeIn 0.3s; }
+    .feedback-success { background: rgba(76, 175, 80, 0.2); color: #81c784; }
+    .feedback-error { background: rgba(244, 67, 54, 0.2); color: #e57373; }
+
+    /* Streaks */
+    .streak-banner {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50px);
+        background: linear-gradient(45deg, #ff9800, #ff5722);
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-weight: bold;
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        z-index: 100;
+    }
+    .streak-banner.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
+    /* Background overrides for levels */
+    .bg-forest { background: linear-gradient(to bottom, #1b5e20, #0f172a); }
+    .bg-lab { background: linear-gradient(to bottom, #006064, #0f172a); }
+    .bg-castle { background: linear-gradient(to bottom, #3e2723, #0f172a); }
+    .bg-future { background: linear-gradient(to bottom, #311b92, #0f172a); }
+    .bg-cave { background: linear-gradient(to bottom, #263238, #0f172a); }
+    .bg-time { background: linear-gradient(to bottom, #880e4f, #0f172a); }
+    .bg-challenge { background: linear-gradient(to bottom, #b71c1c, #0f172a); }
+    .bg-boss { background: radial-gradient(circle, #1a0b2e 0%, #000000 100%); }
+
+    /* Results */
+    .result-bar-container {
+        background: rgba(255,255,255,0.1);
+        height: 12px;
+        border-radius: 6px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    .result-bar-fill {
+        height: 100%;
+        background: var(--game-primary);
+        width: 0%;
+        transition: width 1s ease-out;
+    }
+    .pedagogy-item {
+        margin-bottom: 1rem;
+        text-align: left;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="streak-banner" id="streakBanner">🔥 3 ANSWER STREAK!</div>
+
+<div class="game-container" id="gameContainer">
+    
+    <!-- HEADER -->
+    <div class="game-header" id="gameHeader" style="display: none;">
+        <div class="level-badge" id="levelBadge">MAP</div>
+        <div class="stats">
+            <div class="stat-badge"><i class="fas fa-star" style="color: var(--star-color);"></i> <span id="starCount">0</span></div>
+            <div class="stat-badge" id="btnBackToMap" style="cursor: pointer; display: none;" onclick="showMap()">🗺️ Map</div>
+        </div>
+    </div>
+
+    <!-- WELCOME SCREEN -->
+    <div id="screen-welcome" class="screen active" style="text-align: center; padding: 4rem 0;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🚀</div>
+        <h1 style="font-family: 'Outfit'; font-size: 3rem; margin-bottom: 1rem;">TO BE ADVENTURE</h1>
+        <p style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;">
+            Hi! 👋 Today we have a big mission!<br>Can you master the Verb To Be?
+        </p>
+        <button class="game-btn" onclick="startGame()" style="max-width: 300px;">START ADVENTURE 🚀</button>
+    </div>
+
+    <!-- MAP SCREEN -->
+    <div id="screen-map" class="screen">
+        <h2 style="text-align: center; font-family: 'Outfit'; font-size: 2rem;">Adventure Map</h2>
+        <div class="map-grid" id="mapGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- QUESTION SCREEN -->
+    <div id="screen-question" class="screen">
+        <div class="question-box">
+            <div id="qContext" class="question-context"></div>
+            <div id="qText" class="question-text">I ___ happy.</div>
+        </div>
+        <div id="optionsContainer">
+            <!-- Buttons go here -->
+        </div>
+        <div id="qFeedback" class="feedback-box"></div>
+        <button id="btnNextQ" class="game-btn" style="display: none; margin-top: 1.5rem;" onclick="nextQuestion()">Next ➡️</button>
+    </div>
+
+    <!-- REWARD/TREASURE SCREEN -->
+    <div id="screen-reward" class="screen" style="text-align: center; padding: 4rem 0;">
+        <h2 style="font-family: 'Outfit'; font-size: 2.5rem; color: #ffeb3b; margin-bottom: 1rem;">TREASURE UNLOCKED! 🎁</h2>
+        <div style="font-size: 6rem; margin-bottom: 2rem; animation: bounce 2s infinite;">💎</div>
+        <p style="font-size: 1.5rem; margin-bottom: 2rem;" id="rewardText">You got a Time Crystal!</p>
+        <button class="game-btn" onclick="showMap()">Continue 🗺️</button>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="screen-results" class="screen" style="text-align: center; padding: 2rem 0;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🏆</div>
+        <h1 style="font-family: 'Outfit'; font-size: 3rem; margin-bottom: 0.5rem;">YOU DID IT! 🎉</h1>
+        <p style="font-size: 1.2rem; color: #cbd5e1; margin-bottom: 2rem;">Congratulations! You completed the To Be Adventure!</p>
+        
+        <h2 id="finalRank" style="color: var(--star-color); margin-bottom: 2rem; font-family: 'Outfit'; font-size: 2rem;">👑 TO BE MASTER</h2>
+        
+        <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem;">
+            <div class="stat-badge" style="font-size: 1.5rem;"><i class="fas fa-star" style="color: var(--star-color);"></i> <span id="finalStars">0</span></div>
+            <div class="stat-badge" style="font-size: 1.5rem;"><i class="fas fa-check"></i> <span id="finalScore">0%</span></div>
+        </div>
+
+        <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 16px; max-width: 500px; margin: 0 auto; margin-bottom: 2rem;" id="pedagogyReport">
+            <h3 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Skill Report</h3>
+            <!-- Populated by JS -->
+        </div>
+        
+        <div id="savingStatus" style="margin-bottom: 1rem; color: #64ffda; font-weight: bold;"></div>
+
+        <button class="game-btn" onclick="window.location.href='{% url 'dashboard' %}'" style="max-width: 300px;">Back to Dashboard</button>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- GAME DATA & LOGIC ---
+
+    const LEVELS = [
+        {
+            id: 1, name: "Present Forest", icon: "🌳", bgClass: "bg-forest",
+            questions: [
+                { text: "I ___ happy.", options: ["am", "is", "are"], answer: "am", tags: ["Present"], feedback: "I goes with AM." },
+                { text: "She ___ my friend.", options: ["am", "is", "are"], answer: "is", tags: ["Present"], feedback: "She goes with IS." },
+                { text: "They ___ at school.", options: ["am", "is", "are"], answer: "are", tags: ["Present"], feedback: "They goes with ARE." },
+                { text: "My dog ___ very funny.", options: ["am", "is", "are"], answer: "is", tags: ["Present"], feedback: "My dog (it) goes with IS." },
+                { text: "You ___ a great student.", options: ["am", "is", "are"], answer: "are", tags: ["Present"], feedback: "You goes with ARE." },
+                { text: "She is tired. (Make it negative)", options: ["She isn't tired.", "She aren't tired.", "She am not tired."], answer: "She isn't tired.", tags: ["Present", "Negatives"], feedback: "The negative of IS is ISN'T." },
+                { context: "Look at those kids!", text: "They ___ happy.", options: ["am", "is", "are"], answer: "are", tags: ["Present"], feedback: "They goes with ARE." }
+            ]
+        },
+        {
+            id: 2, name: "Robot Lab", icon: "🤖", bgClass: "bg-lab",
+            questions: [
+                { context: "Fix the robot! 🔧", text: "She are my sister.", options: ["She am my sister.", "She is my sister.", "Correct ✅"], answer: "She is my sister.", tags: ["Present"], feedback: "She goes with IS." },
+                { context: "Fix the robot! 🔧", text: "I is happy.", options: ["I am happy.", "I are happy.", "Correct ✅"], answer: "I am happy.", tags: ["Present"], feedback: "I goes with AM." },
+                { context: "Fix the robot! 🔧", text: "We are friends.", options: ["We is friends.", "We am friends.", "Correct ✅"], answer: "Correct ✅", tags: ["Present"], feedback: "This one was already correct!" },
+                { context: "Fix the robot! 🔧", text: "He am tired.", options: ["He is tired.", "He are tired.", "Correct ✅"], answer: "He is tired.", tags: ["Present"], feedback: "He goes with IS." },
+                { context: "Fix the robot! 🔧", text: "They is at home.", options: ["They am at home.", "They are at home.", "Correct ✅"], answer: "They are at home.", tags: ["Present"], feedback: "They goes with ARE." },
+                { context: "Fix the robot! 🔧", text: "She aren't tired.", options: ["She isn't tired.", "She am not tired.", "Correct ✅"], answer: "She isn't tired.", tags: ["Present", "Negatives"], feedback: "The negative for she is ISN'T." }
+            ]
+        },
+        {
+            id: 3, name: "Past Castle", icon: "🏰", bgClass: "bg-castle",
+            questions: [
+                { context: "Yesterday...", text: "I ___ at school.", options: ["was", "were"], answer: "was", tags: ["Past"], feedback: "I goes with WAS." },
+                { context: "Yesterday...", text: "She ___ tired.", options: ["was", "were"], answer: "was", tags: ["Past"], feedback: "She goes with WAS." },
+                { context: "Yesterday...", text: "They ___ at the park.", options: ["was", "were"], answer: "were", tags: ["Past"], feedback: "They goes with WERE." },
+                { context: "Yesterday...", text: "We ___ very happy.", options: ["was", "were"], answer: "were", tags: ["Past"], feedback: "We goes with WERE." },
+                { context: "Yesterday was Anna's birthday.", text: "Anna ___ very happy.", options: ["was", "were"], answer: "was", tags: ["Past"], feedback: "Anna (she) goes with WAS." },
+                { context: "Make it negative:", text: "Tom was at school.", options: ["Tom wasn't at school.", "Tom weren't at school."], answer: "Tom wasn't at school.", tags: ["Past", "Negatives"], feedback: "The negative of WAS is WASN'T." },
+                { context: "Make it negative:", text: "They were tired.", options: ["They wasn't tired.", "They weren't tired."], answer: "They weren't tired.", tags: ["Past", "Negatives"], feedback: "The negative of WERE is WEREN'T." }
+            ]
+        },
+        {
+            id: 4, name: "Future World", icon: "🚀", bgClass: "bg-future",
+            questions: [
+                { text: "Tomorrow I ___ at school.", options: ["am", "was", "will be"], answer: "will be", tags: ["Future", "Time Recognition"], feedback: "Tomorrow indicates FUTURE." },
+                { text: "She ___ a great doctor one day.", options: ["is", "was", "will be"], answer: "will be", tags: ["Future", "Time Recognition"], feedback: "'One day' means FUTURE." },
+                { text: "They ___ here tomorrow.", options: ["are", "were", "will be"], answer: "will be", tags: ["Future"], feedback: "Tomorrow -> will be." },
+                { context: "Make it negative:", text: "He will be at school tomorrow.", options: ["He won't be at school tomorrow.", "He isn't at school tomorrow."], answer: "He won't be at school tomorrow.", tags: ["Future", "Negatives"], feedback: "The negative of will be is WON'T BE." },
+                { context: "Answer the question:", text: "Will she be here tomorrow?", options: ["Yes, she will.", "Yes, she is.", "Yes, she was."], answer: "Yes, she will.", tags: ["Future", "Questions", "Short Answers"], feedback: "Question with WILL -> Answer with WILL." }
+            ]
+        },
+        {
+            id: 5, name: "Question Cave", icon: "❓", bgClass: "bg-cave",
+            questions: [
+                { context: "Look at the happy girl.", text: "Is she happy?", options: ["Yes, she is.", "Yes, she are.", "Yes, she am."], answer: "Yes, she is.", tags: ["Present", "Questions", "Short Answers"] },
+                { context: "Two friends.", text: "Are they friends?", options: ["Yes, they are.", "Yes, they is.", "Yes, they am."], answer: "Yes, they are.", tags: ["Present", "Questions", "Short Answers"] },
+                { context: "He was tired yesterday.", text: "Was he tired yesterday?", options: ["Yes, he was.", "Yes, he is.", "Yes, he were."], answer: "Yes, he was.", tags: ["Past", "Questions", "Short Answers"] },
+                { context: "Yesterday at school.", text: "Were they at school yesterday?", options: ["Yes, they were.", "Yes, they are.", "Yes, they was."], answer: "Yes, they were.", tags: ["Past", "Questions", "Short Answers"] },
+                { text: "Will you be at school tomorrow?", options: ["Yes, I will.", "Yes, I am.", "Yes, I was."], answer: "Yes, I will.", tags: ["Future", "Questions", "Short Answers"] }
+            ]
+        },
+        {
+            id: 6, name: "Time Machine", icon: "🧩", bgClass: "bg-time",
+            questions: [
+                { text: "Yesterday, I was tired.", options: ["PAST", "PRESENT", "FUTURE"], answer: "PAST", tags: ["Time Recognition"] },
+                { text: "Today, I am happy.", options: ["PAST", "PRESENT", "FUTURE"], answer: "PRESENT", tags: ["Time Recognition"] },
+                { text: "Tomorrow, I will be at school.", options: ["PAST", "PRESENT", "FUTURE"], answer: "FUTURE", tags: ["Time Recognition"] },
+                { text: "Last night, they ___ at home.", options: ["are", "were", "will be"], answer: "were", tags: ["Past", "Time Recognition"] },
+                { text: "Today, they ___ at home.", options: ["are", "were", "will be"], answer: "are", tags: ["Present", "Time Recognition"] },
+                { text: "Tomorrow, they ___ at home.", options: ["are", "were", "will be"], answer: "will be", tags: ["Future", "Time Recognition"] }
+            ]
+        },
+        {
+            id: 7, name: "The Great Challenge", icon: "🔥", bgClass: "bg-challenge",
+            questions: [
+                { text: "My mother ___ at work now.", options: ["is", "was", "will be"], answer: "is", tags: ["Present", "Time Recognition"] },
+                { text: "Yesterday, my friends ___ tired.", options: ["are", "were", "will be"], answer: "were", tags: ["Past", "Time Recognition"] },
+                { text: "Tomorrow, we ___ at school.", options: ["are", "were", "will be"], answer: "will be", tags: ["Future", "Time Recognition"] },
+                { text: "She ___ not happy yesterday.", options: ["is", "was", "were"], answer: "was", tags: ["Past", "Negatives"] },
+                { text: "They was happy yesterday.", options: ["CORRECT", "WRONG"], answer: "WRONG", tags: ["Past"], feedback: "They WERE happy." },
+                { text: "She will be here tomorrow.", options: ["CORRECT", "WRONG"], answer: "CORRECT", tags: ["Future"] },
+                { context: "Complete:", text: "A: ___ you tired?\nB: No, I'm not.", options: ["Are", "Is", "Was"], answer: "Are", tags: ["Present", "Questions"] },
+                { context: "Complete:", text: "A: ___ Tom at school yesterday?\nB: Yes, he was.", options: ["Was", "Were", "Is"], answer: "Was", tags: ["Past", "Questions"] }
+            ]
+        },
+        {
+            id: 8, name: "Final Boss", icon: "👑", bgClass: "bg-boss",
+            questions: [
+                { text: "I ___ very happy today.", options: ["am", "is", "was", "will be"], answer: "am", tags: ["Present", "Time Recognition"] },
+                { text: "My parents ___ at home yesterday.", options: ["are", "was", "were", "will be"], answer: "were", tags: ["Past", "Time Recognition"] },
+                { text: "Tomorrow, Sarah ___ at school.", options: ["is", "was", "will be"], answer: "will be", tags: ["Future", "Time Recognition"] },
+                { context: "Find the error:", text: "They was tired yesterday.", options: ["They was", "tired", "yesterday"], answer: "They was", tags: ["Past"] },
+                { context: "Choose the correct question:", text: "___ she happy today?", options: ["Am", "Is", "Are", "Was"], answer: "Is", tags: ["Present", "Questions"] },
+                { text: "___ they at the park yesterday?", options: ["Are", "Was", "Were"], answer: "Were", tags: ["Past", "Questions"] },
+                { context: "A: Is your brother at home?", text: "B: Yes, ___.", options: ["he is", "he are", "he was"], answer: "he is", tags: ["Present", "Short Answers"] },
+                { context: "A: Were your friends at school yesterday?", text: "B: No, ___.", options: ["they weren't", "they aren't", "they wasn't"], answer: "they weren't", tags: ["Past", "Negatives", "Short Answers"] },
+                { context: "Choose the correct phrase for 'Next week...'", text: "We ___ on vacation.", options: ["were", "are", "will be"], answer: "will be", tags: ["Future", "Time Recognition"] },
+                { context: "Yesterday → Today → Tomorrow", text: "Lucy ___ tired, Lucy ___ happy, Lucy ___ at school.", options: ["was / is / will be", "is / was / will be", "were / am / will be"], answer: "was / is / will be", tags: ["Present", "Past", "Future", "Time Recognition"] }
+            ]
+        }
+    ];
+
+    let state = {
+        currentLevel: 0,
+        unlockedLevel: 1,
+        questionIndex: 0,
+        stars: 0,
+        streak: 0,
+        totalCorrect: 0,
+        totalQuestions: 0,
+        mastery: {
+            "Present": { correct: 0, total: 0 },
+            "Past": { correct: 0, total: 0 },
+            "Future": { correct: 0, total: 0 },
+            "Questions": { correct: 0, total: 0 },
+            "Negatives": { correct: 0, total: 0 },
+            "Short Answers": { correct: 0, total: 0 },
+            "Time Recognition": { correct: 0, total: 0 }
+        }
+    };
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        
+        if(screenId !== 'screen-welcome') {
+            document.getElementById('gameHeader').style.display = 'flex';
+        }
+        if(screenId === 'screen-question') {
+            document.getElementById('btnBackToMap').style.display = 'flex';
+        } else {
+            document.getElementById('btnBackToMap').style.display = 'none';
+        }
+    }
+
+    function startGame() {
+        showMap();
+    }
+
+    function showMap() {
+        showScreen('screen-map');
+        document.getElementById('gameContainer').className = 'game-container'; // reset bg
+        document.getElementById('levelBadge').innerText = "MAP";
+        
+        const grid = document.getElementById('mapGrid');
+        grid.innerHTML = '';
+        
+        LEVELS.forEach(lvl => {
+            let statusClass = 'locked';
+            let statusIcon = '🔒';
+            
+            if (lvl.id < state.unlockedLevel) {
+                statusClass = 'completed';
+                statusIcon = '✅';
+            } else if (lvl.id === state.unlockedLevel) {
+                statusClass = 'unlocked';
+                statusIcon = '⭐';
+            }
+            
+            const node = document.createElement('div');
+            node.className = `map-node ${statusClass}`;
+            node.innerHTML = `
+                <div class="node-icon">${lvl.icon}</div>
+                <div style="font-weight: bold; margin-bottom: 0.5rem;">${lvl.name}</div>
+                <div>${statusIcon} Level ${lvl.id}</div>
+            `;
+            
+            if (statusClass !== 'locked') {
+                node.onclick = () => startLevel(lvl.id);
+            }
+            
+            grid.appendChild(node);
+        });
+    }
+
+    function startLevel(levelId) {
+        state.currentLevel = levelId;
+        state.questionIndex = 0;
+        
+        const lvl = LEVELS.find(l => l.id === levelId);
+        document.getElementById('gameContainer').className = `game-container ${lvl.bgClass}`;
+        document.getElementById('levelBadge').innerText = `LEVEL ${lvl.id}`;
+        
+        renderQuestion();
+        showScreen('screen-question');
+    }
+
+    function renderQuestion() {
+        const lvl = LEVELS.find(l => l.id === state.currentLevel);
+        const q = lvl.questions[state.questionIndex];
+        
+        document.getElementById('qContext').innerText = q.context || "";
+        document.getElementById('qText').innerText = q.text;
+        
+        const optsContainer = document.getElementById('optionsContainer');
+        optsContainer.innerHTML = '';
+        
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => handleAnswer(opt, btn);
+            optsContainer.appendChild(btn);
+        });
+        
+        document.getElementById('qFeedback').className = 'feedback-box';
+        document.getElementById('btnNextQ').style.display = 'none';
+    }
+
+    function handleAnswer(selectedOpt, btnElement) {
+        // Disable all buttons
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach(b => b.disabled = true);
+        
+        const lvl = LEVELS.find(l => l.id === state.currentLevel);
+        const q = lvl.questions[state.questionIndex];
+        const isCorrect = selectedOpt === q.answer;
+        
+        // Track overall & mastery
+        state.totalQuestions++;
+        q.tags.forEach(tag => {
+            if(!state.mastery[tag]) state.mastery[tag] = {correct:0, total:0};
+            state.mastery[tag].total++;
+        });
+
+        const feedbackBox = document.getElementById('qFeedback');
+        
+        if (isCorrect) {
+            btnElement.classList.add('correct');
+            state.stars++;
+            state.streak++;
+            state.totalCorrect++;
+            document.getElementById('starCount').innerText = state.stars;
+            
+            q.tags.forEach(tag => {
+                state.mastery[tag].correct++;
+            });
+
+            feedbackBox.innerHTML = `Awesome! 🌟`;
+            feedbackBox.className = 'feedback-box feedback-success show';
+            
+            checkStreak();
+        } else {
+            btnElement.classList.add('wrong');
+            // Highlight correct one if not final boss
+            if(state.currentLevel < 8) {
+                btns.forEach(b => {
+                    if(b.innerText === q.answer) b.classList.add('correct');
+                });
+            }
+            
+            state.streak = 0;
+            
+            let tip = "";
+            if (state.currentLevel <= 3 && q.feedback) tip = `<br>${q.feedback}`;
+            else if (state.currentLevel <= 5) tip = "<br>Keep trying!";
+            
+            feedbackBox.innerHTML = `Almost! 💡${tip}`;
+            feedbackBox.className = 'feedback-box feedback-error show';
+        }
+        
+        document.getElementById('btnNextQ').style.display = 'block';
+    }
+
+    function checkStreak() {
+        if (state.streak === 3 || state.streak === 5 || state.streak === 10) {
+            const banner = document.getElementById('streakBanner');
+            banner.innerText = state.streak === 3 ? "🔥 3 ANSWER STREAK!" : "🔥 AMAZING STREAK!";
+            banner.classList.add('show');
+            setTimeout(() => banner.classList.remove('show'), 2000);
+        }
+    }
+
+    function nextQuestion() {
+        const lvl = LEVELS.find(l => l.id === state.currentLevel);
+        state.questionIndex++;
+        
+        if (state.questionIndex < lvl.questions.length) {
+            renderQuestion();
+        } else {
+            finishLevel();
+        }
+    }
+
+    function finishLevel() {
+        if (state.currentLevel === state.unlockedLevel) {
+            state.unlockedLevel++;
+        }
+        
+        if (state.currentLevel === 8) {
+            showResults();
+        } else if (state.currentLevel === 3 || state.currentLevel === 6) {
+            showReward();
+        } else {
+            showMap();
+        }
+    }
+
+    function showReward() {
+        document.getElementById('gameContainer').className = 'game-container';
+        document.getElementById('gameHeader').style.display = 'none';
+        
+        const rewards = ["Magic Pencil ✏️", "Time Crystal 💎", "English Crown 👑"];
+        const r = rewards[Math.floor(Math.random() * rewards.length)];
+        
+        document.getElementById('rewardText').innerText = `You found a ${r}!`;
+        showScreen('screen-reward');
+        
+        state.stars += 3;
+        document.getElementById('starCount').innerText = state.stars;
+    }
+
+    function showResults() {
+        document.getElementById('gameContainer').className = 'game-container';
+        document.getElementById('gameHeader').style.display = 'none';
+        
+        const percent = Math.round((state.totalCorrect / state.totalQuestions) * 100);
+        document.getElementById('finalStars').innerText = state.stars;
+        document.getElementById('finalScore').innerText = `${percent}%`;
+        
+        let rank = "";
+        if (percent >= 90) rank = "👑 TO BE MASTER\n<small style='font-size:1rem;color:#cbd5e1;'>Amazing! You really know the Verb To Be!</small>";
+        else if (percent >= 80) rank = "🏆 TO BE HERO\n<small style='font-size:1rem;color:#cbd5e1;'>Great job! You're getting really strong!</small>";
+        else if (percent >= 70) rank = "⭐ TO BE EXPLORER\n<small style='font-size:1rem;color:#cbd5e1;'>Good job! A little more practice and you'll become a master!</small>";
+        else rank = "🌱 TO BE ADVENTURER\n<small style='font-size:1rem;color:#cbd5e1;'>Great adventure! Let's practice some parts again!</small>";
+        
+        document.getElementById('finalRank').innerHTML = rank;
+        
+        const reportDiv = document.getElementById('pedagogyReport');
+        reportDiv.innerHTML = '<h3 style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Skill Report</h3>';
+        
+        for (const [key, val] of Object.entries(state.mastery)) {
+            if(val.total > 0) {
+                const p = Math.round((val.correct / val.total) * 100);
+                reportDiv.innerHTML += `
+                    <div class="pedagogy-item">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <span>${key}</span>
+                            <span>${p}%</span>
+                        </div>
+                        <div class="result-bar-container">
+                            <div class="result-bar-fill" style="width: ${p}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        showScreen('screen-results');
+        saveResults(percent);
+    }
+
+    function saveResults(overallScore) {
+        const payload = {
+            score: overallScore,
+            total_questions: state.totalQuestions,
+            categories: state.mastery
+        };
+        
+        document.getElementById('savingStatus').innerText = "Saving progress...";
+        
+        fetch("{% url 'save_tobe_adventure_result' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                document.getElementById('savingStatus').innerText = "Progress saved successfully! ✅";
+            } else {
+                document.getElementById('savingStatus').innerText = "Failed to save progress. ❌";
+                document.getElementById('savingStatus').style.color = '#e57373';
+            }
+        })
+        .catch(err => {
+            document.getElementById('savingStatus').innerText = "Network error. ❌";
+        });
+    }
+
+</script>
+{% endblock %}
